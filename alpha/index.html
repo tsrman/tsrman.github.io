@@ -8,6 +8,15 @@
 <script type="text/javascript" src="qrcode.js"></script>
 </head>
 <body>
+<label for="fname">Банк корреспондент (если не знаете что выбрать - оставляйте Сбер)</label>
+<select id="bank">
+  <option value="0">СБЕРБАНК</option>
+  <option value="1">Альфа-Банк</option>
+  <option value="2">ГАЗПРОМБАНК</option>
+  <option value="3">ТБАНК</option>
+  <option value="4">БАНК ВТБ</option>
+</select>
+<br />
 <label for="fname">Полное ФИО</label>
 <input id="textFIO" type="text" value="" style="width:50%" /><br />
 <label for="fname">Номер счета</label>
@@ -17,9 +26,22 @@
 
 <script type="text/javascript">
 
-text1 = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810900000000504|BankName=ПАО \"СБЕРБАНК\"|BIC=044525225|CorrespAcc=30101810400000000225|Sum=10000|Purpose=Получатель ";
+text1 = [];
+text1[0] = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810900000000504|BankName=ПАО \"СБЕРБАНК\"|BIC=044525225|CorrespAcc=30101810400000000225|Sum=10000|Purpose=Получатель ";
+text1[1] = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810100000000221|BankName=АО \"Альфа-Банк\"|BIC=044525593|CorrespAcc=30101810200000000593|Sum=10000|Purpose=Получатель ";
+text1[2] = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810100000005840|BankName=АО \"ГАЗПРОМБАНК\"|BIC=044525823|CorrespAcc=30101810200000000823|Sum=10000|Purpose=Получатель ";
+text1[3] = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810300000000310|BankName=АО \"ТБАНК\"|BIC=044525974|CorrespAcc=30101810145250000974|Sum=10000|Purpose=Получатель ";
+text1[4] = "ST00012|Name=ЗАО \"Альфа-Банк\"|PersonalAcc=30111810955550000101|BankName=ПАО \"БАНК ВТБ\"|BIC=044525187|CorrespAcc=30101810700000000187|Sum=10000|Purpose=Получатель ";
+
 text2 = " Счет ";
-text3 = " Перевод собственных средств|PayeeINN=7707083893|KPP=540602001";
+
+text3 = [];
+text3[0] = " Перевод собственных средств|PayeeINN=7707083893|KPP=540602001";
+text3[1] = " Перевод собственных средств|PayeeINN=7728168971|KPP=770801001";
+text3[2] = " Перевод собственных средств|PayeeINN=7744001497|KPP=772801001";
+text3[3] = " Перевод собственных средств|PayeeINN=7710140679|KPP=771301001";
+text3[4] = " Перевод собственных средств|PayeeINN=7702070139|KPP=784201001";
+
 
 var qrcode = new QRCode(document.getElementById("qrcode"), {
 	width : 512,
@@ -28,7 +50,7 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 
 function makeCode () {		
 //	var elText = document.getElementById("text");
-	var elText = text1 + document.getElementById("textFIO").value + text2 + document.getElementById("textACC").value + text3;
+	var elText = text1[document.getElementById("bank").value] + document.getElementById("textFIO").value + text2 + document.getElementById("textACC").value + text3[document.getElementById("bank").value];
 	
 	qrcode.makeCode(elText);
 }
