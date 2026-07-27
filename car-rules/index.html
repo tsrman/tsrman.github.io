@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Авто-Правила — инструкция пользователя</title>
+<title>Авто Правила Голос — Car Rules Voice — راهنما</title>
 <style>
   :root { color-scheme: light dark; }
   body {
@@ -11,7 +11,7 @@
     line-height: 1.65;
     max-width: 46rem;
     margin: 0 auto;
-    padding: 2rem 1.2rem 4rem;
+    padding: 1.4rem 1.2rem 4rem;
   }
   h1 { font-size: 1.6rem; border-bottom: 1px solid #8884; padding-bottom: .4rem; }
   h2 { font-size: 1.25rem; margin-top: 2.2rem; }
@@ -21,342 +21,492 @@
     border-left: 4px solid #4f8ef7; background: #4f8ef714;
     border-radius: 0 6px 6px 0;
   }
+  [dir="rtl"] blockquote { border-left: none; border-right: 4px solid #4f8ef7; border-radius: 6px 0 0 6px; }
   code { background: #8882; padding: .1em .35em; border-radius: 4px; font-size: .92em; }
   a { color: #4f8ef7; }
   li { margin: .25rem 0; }
   table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
   th, td { border: 1px solid #8885; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
   th { background: #8882; }
   tbody tr:nth-child(even) { background: #8881; }
+  .langbar { position: sticky; top: 0; background: Canvas; padding: .6rem 0; margin: 0 0 1rem;
+    border-bottom: 1px solid #8884; display: flex; gap: .5rem; flex-wrap: wrap; z-index: 5; }
+  .langbar button {
+    font: inherit; cursor: pointer; padding: .35rem .9rem; border-radius: 999px;
+    border: 1px solid #4f8ef7; background: transparent; color: #4f8ef7;
+  }
+  .langbar button.active { background: #4f8ef7; color: #fff; }
+  .download { margin: 1rem 0 1.5rem; padding: .8rem 1rem; border: 1px solid #8885; border-radius: 8px; }
+  .download a { font-weight: 600; }
+  .lang { display: none; }
+  .lang.active { display: block; }
 </style>
 </head>
 <body>
-<h1>Авто Правила — инструкция пользователя</h1>
-<p>Простое руководство по приложению «Авто Правила» для головного устройства
-<strong>Seres M5 с прошивкой 2510</strong>.</p>
-<p><strong>Поддержать разработку:</strong> <a href="https://pay.cloudtips.ru/p/6e36be30">https://pay.cloudtips.ru/p/6e36be30</a></p>
-<p><strong>Скачать приложение (v0.52):</strong> <a href="CarRules-0.52-release.apk">CarRules-0.52-release.apk</a></p>
+
+<div class="langbar">
+  <button data-go="ru" class="active">Русский</button>
+  <button data-go="en">English</button>
+  <button data-go="fa">فارسی</button>
+</div>
+
+<!-- ================= DOWNLOAD (shared) ================= -->
+<div class="download">
+  <strong>Скачать / Download / دانلود — v0.63</strong>
+  <ul>
+    <li>🇷🇺 <a href="CarRulesVoice-0.63-ru-release.apk">CarRulesVoice-0.63-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.63-en-release.apk">CarRulesVoice-0.63-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.63-fa-release.apk">CarRulesVoice-0.63-fa-release.apk</a> — فارسی / Persian voice</li>
+  </ul>
+  <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres/AITO M5, HM5).</small>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  RU  ========================= -->
+<!-- ======================================================= -->
+<div class="lang active" data-lang="ru" lang="ru">
+<h1>Авто Правила Голос — инструкция</h1>
+<p>Приложение для головного устройства <strong>Seres / AITO M5 (HM5)</strong>: автоматические
+правила для автомобиля <strong>плюс офлайн-голосовое управление</strong>.</p>
+
 <h2>Что это</h2>
-<p>Приложение позволяет создавать автоматические правила для автомобиля по принципу:</p>
-<blockquote>
-<p><strong>КОГДА</strong> что-то произошло → <strong>И ЕСЛИ</strong> выполняются условия → <strong>ТО</strong> выполнить действия.</p>
-</blockquote>
-<p>Пример: «Когда водитель сел на сиденье, и если на улице ниже −5 °C, то включить
-подогрев руля и сиденья на 15 минут».</p>
-<p>Приложение работает в фоне (запускается само после включения головного устройства).</p>
+<p>Правила строятся по принципу:</p>
+<blockquote><p><strong>КОГДА</strong> что-то произошло → <strong>И ЕСЛИ</strong> выполняются условия → <strong>ТО</strong> выполнить действия.</p></blockquote>
+<p>Пример: «Когда водитель сел на сиденье, и если за бортом ниже −5 °C, то включить
+подогрев руля и сиденья на 15 минут». Приложение работает в фоне и запускается само
+после включения головного устройства.</p>
+
+<h2>Голосовое управление (новое)</h2>
+<p>Приложение распознаёт речь <strong>полностью офлайн</strong> (движок Vosk) — интернет не нужен.
+Любому правилу можно назначить фразы, и когда приложение их услышит — правило выполнится.</p>
+<ol>
+<li>На главном экране откройте <strong>«Голосовые команды»</strong>.</li>
+<li>Функция <strong>платная</strong> и активируется под конкретный VIN. Цена: <strong>1000 ₽ или 15 USDT</strong>.
+  На экране активации показан VIN вашей машины — пришлите его разработчику на
+  <a href="mailto:tsrman@gmail.com">tsrman@gmail.com</a>, получите 16-значный код и введите его.</li>
+<li>Включите верхний переключатель <strong>«Голосовые команды»</strong>.</li>
+<li>Выберите <strong>кнопку активации</strong> на руле: двойное нажатие скролла вверх/вниз
+  (PAGE UP/PAGE DOWN) <strong>или одиночное нажатие кастомной кнопки руля</strong>.</li>
+<li>Кнопкой <strong>«Проверить распознавание»</strong> убедитесь, что микрофон работает.</li>
+<li>Задайте фразы: <strong>«+ Голосовая команда»</strong> → выберите правило → введите одну или
+  несколько фраз-синонимов.</li>
+</ol>
+<p>Язык распознавания задаётся установленным APK (русский / английский / фарси). Ставьте
+APK того языка, на котором будете говорить.</p>
+
 <h2>Первый запуск</h2>
 <ol>
-<li>Скачайте и установите <a href="CarRules-0.52-release.apk">APK</a>, затем откройте приложение.</li>
-<li>Разрешите доступ к <strong>геолокации</strong> — он нужен для геозон (см. ниже). Если геозоны
-   не нужны, можно отказать. Если есть правила с геозоной, приложение дополнительно
-   попросит <strong>фоновый доступ к геолокации</strong> — выберите «<strong>Разрешить в любом режиме</strong>»
-   (на Android 11+ это делается на странице настроек, которая откроется по кнопке).
-   Без этого геозоны не сработают, когда приложение закрыто.</li>
-<li>При старте раздаётся короткая мелодия — значит, приложение подключилось к автомобилю.</li>
-<li>Уже созданы 7 готовых правил: подогрев руля и сидений водителя/пассажира при
-   холодной погоде, вентиляция сидений в жару и разблокировка дверей при переходе
-   в «Парковку». Их можно отключить, изменить или удалить.</li>
+<li>Установите APK и откройте приложение.</li>
+<li>Разрешите доступ к <strong>геолокации</strong> (нужен для геозон; можно отказать). Для правил с
+  геозоной выберите «<strong>Разрешить в любом режиме</strong>», иначе геозоны не сработают в фоне.</li>
+<li>Короткая мелодия при старте означает, что приложение подключилось к автомобилю.</li>
+<li>Есть готовые правила (подогрев в холод, вентиляция в жару, разблокировка при «Парковке») —
+  их можно менять, отключать или удалять.</li>
 </ol>
+
 <h2>Главный экран</h2>
 <ul>
-<li><strong>Правила</strong> — список всех правил. У каждого: переключатель вкл/выкл, кнопки
-  <strong>«Проверить»</strong> (запустить вручную), <strong>«Изменить»</strong>, <strong>«Удалить»</strong>.</li>
-<li><strong>Состояние автомобиля</strong> — живые значения параметров авто (температура, скорость,
-  ремни, двери и т.д.).</li>
-<li><strong>Журнал срабатываний</strong> — история: какое правило когда сработало и что сделало,
-  включая ошибки выполнения действий.</li>
+<li><strong>Правила</strong> — список; у каждого переключатель вкл/выкл и кнопки «Проверить»,
+  «Изменить», «Удалить».</li>
+<li><strong>Состояние автомобиля</strong> — живые значения параметров.</li>
+<li><strong>Журнал срабатываний</strong> — что и когда сработало, включая ошибки и нажатия кнопок руля.</li>
 </ul>
+
 <h2>Как создать правило</h2>
 <ol>
-<li>На главном экране нажмите <strong>«Правило»</strong>.</li>
-<li>Введите <strong>название</strong> (например, «Прогрев зимой»).</li>
-<li>Заполните секцию <strong>«Когда (триггер)»</strong>:
-   - <strong>Параметр / событие</strong> — что отслеживать (например, «Датчик сиденья водителя»).
-     Под полем видно <strong>текущее живое значение</strong> этого параметра в авто — удобно
-     сверить коды.
-   - <strong>Переход</strong> — тип события: «Стало равно», «Изменилось», «Возросло», «Уменьшилось».
-   - <strong>Значение</strong> — для «Стало равно»: до какого значения (например, «1 — Занято»).
-   - Кнопка <strong>«Триггер»</strong> добавляет ещё один триггер — правило сработает при
-     <strong>любом</strong> из них (ИЛИ).</li>
-<li>При желании добавьте <strong>условия</strong> («И если»): параметр, знак сравнения, значение.
-   По умолчанию требуются <strong>все</strong> условия (И); переключателем можно выбрать
-   <strong>«Любое из условий»</strong> (ИЛИ).</li>
-<li>Добавьте <strong>действия</strong> («То выполнить»): что включить и на какое значение
-   (например, «Подогрев руля» = «3 уровень»).
-   - Поле <strong>«Минут»</strong> — через сколько минут автоматически выключить обратно
-     (0 — не выключать). Таймеры автовыключения переживают перезагрузку и сон.
-   - Галочка <strong>«Задержка перед выполнением»</strong> — выполнить действие через N секунд
-     после срабатывания правила.
-   - Кнопка <strong>«тест»</strong> у действия — немедленно выполнить его один раз и проверить,
-     что значение верное.</li>
-<li>Нажмите <strong>«Сохранить»</strong>.</li>
+<li>Нажмите <strong>«Правило»</strong>, введите название.</li>
+<li><strong>«Когда (триггер)»</strong>: параметр/событие, переход («Стало равно», «Изменилось»,
+  «Возросло», «Уменьшилось») и значение. Под полем видно живое значение параметра.
+  Кнопка «Триггер» добавляет ещё один (сработает по <strong>любому</strong> — ИЛИ).</li>
+<li><strong>«И если» (условия)</strong>: по умолчанию нужны все (И), переключателем — любое (ИЛИ).</li>
+<li><strong>«То выполнить» (действия)</strong>: что включить и на какое значение. «Минут» — автовыключение
+  (переживает перезагрузку); «Задержка» — выполнить через N секунд; «тест» — выполнить сразу.</li>
+<li><strong>«Сохранить»</strong>.</li>
 </ol>
+
 <h2>Полезные опции</h2>
 <h3>«Срабатывать при старте»</h3>
-<p>Галочка в секции триггера (для перехода «Стало равно»). Без неё правило реагирует
-только на <strong>момент изменения</strong> параметра. С галочкой оно дополнительно сработает
-при запуске приложения, если значение уже нужное — например, авто включилось вместе
-с головным устройством, и перехода «выкл → вкл» приложение не видело.
-Защита от повторов: правило не сработает дважды за одну поездку (перевзводится,
-когда питание отключается, либо по таймауту 4 часа).</p>
+<p>Для перехода «Стало равно»: правило дополнительно сработает при запуске, если значение
+уже нужное. Не срабатывает дважды за поездку (перевзвод — при снятии питания или через 4 часа).</p>
 <h3>Геозоны</h3>
-<p>Галочка <strong>«Также требовать нахождение в зоне»</strong> открывает блок геозоны:
-задайте радиус в метрах, доедьте до нужного места и нажмите <strong>«Сохранить текущие
-координаты»</strong> — точка запомнится.</p>
+<p>«Также требовать нахождение в зоне»: задайте радиус, доедьте до места и сохраните координаты.
+Пустой триггер → срабатывание при <strong>въезде</strong>; заданный триггер → геозона как доп. условие.
+Для работы в фоне нужен фоновый доступ к геолокации.</p>
+
+<h2>Что нового в этой версии</h2>
 <ul>
-<li><strong>Триггер оставлен пустым</strong> → правило срабатывает при <strong>въезде</strong> в зону
-  (например, «приехал домой — открыть лючок зарядки»).</li>
-<li><strong>Триггер задан</strong> (например, «Передача стала P») → геозона работает как
-  дополнительное условие: правило сработает только внутри зоны.</li>
+<li><strong>Офлайн-голосовое управление</strong> правилами (Vosk), активация кнопкой руля.</li>
+<li><strong>Кастомная кнопка руля</strong> — как триггер правил и как одиночная кнопка активации голоса.</li>
+<li><strong>Обогрев заднего стекла</strong> — новое действие и параметр состояния (вкл/выкл).</li>
+<li><strong>Багажник: открыть/закрыть</strong> — умное действие (учитывает текущий статус двери).</li>
+<li><strong>Зеркала: сложить/разложить</strong> — умное действие + параметр «Статус зеркал».</li>
 </ul>
-<p>Координаты берутся с GPS головного устройства, не из шины авто. Чтобы геозоны
-срабатывали, когда приложение закрыто, нужен фоновый доступ к геолокации
-(«Разрешить в любом режиме») — если он не выдан, в журнале появится предупреждение.</p>
-<h3>Особые действия (не из шины авто)</h3>
+
+<h2>Параметры (триггеры и условия)</h2>
+<table><thead><tr><th>Параметр</th><th>Значения</th></tr></thead><tbody>
+<tr><td>Запуск устройства / приложения (событие)</td><td>1 = Событие</td></tr>
+<tr><td>Экран включился (событие)</td><td>1 = Событие</td></tr>
+<tr><td>Разблокировка экрана (событие)</td><td>1 = Событие</td></tr>
+<tr><td>Доступ к интернету (событие)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Температура за бортом</td><td>число, °C</td></tr>
+<tr><td>Скорость</td><td>число, км/ч</td></tr>
+<tr><td>Заряд батареи</td><td>число, %</td></tr>
+<tr><td>Питание автомобиля</td><td>0 = Выкл, 1 = ON / в движении</td></tr>
+<tr><td>Передача (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
+<tr><td>Педаль тормоза</td><td>0 = Отпущена, 1 = Нажата</td></tr>
+<tr><td>Открыта любая дверь</td><td>0 = Все закрыты, 1 = Хотя бы одна открыта</td></tr>
+<tr><td>Руль: скролл вверх / PAGE UP</td><td>0 = Отпущена, 1 = Нажата</td></tr>
+<tr><td>Руль: скролл вниз / PAGE DOWN</td><td>0 = Отпущена, 1 = Нажата</td></tr>
+<tr><td>Руль: двойное нажатие вверх (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
+<tr><td>Руль: двойное нажатие вниз (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
+<tr><td>Руль: кастомная кнопка</td><td>0 = Отпущена, 1 = Нажата</td></tr>
+<tr><td>Ремень водителя / пассажира</td><td>0 = Не пристёгнут, 1 = Пристёгнут</td></tr>
+<tr><td>Датчики сидений (водитель, пассажир, задние Л/С/П)</td><td>0 = Пусто, 1 = Занято</td></tr>
+<tr><td>Статус зеркал</td><td>0 = Разложены, 1 = Сложены</td></tr>
+<tr><td>Статус багажника</td><td>0 = Закрыт, 1 = Открыт, 5 = Не закрыт до конца</td></tr>
+<tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
+</tbody></table>
+
+<h2>Действия (что можно включать)</h2>
+<table><thead><tr><th>Действие</th><th>Значения</th></tr></thead><tbody>
+<tr><td>Климат-контроль (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Подогрев сидений (водитель, пассажир, задние Л/П)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
+<tr><td>Вентиляция сидений (водитель, пассажир)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
+<tr><td>Подогрев руля</td><td>0 = Выкл, 1 = 1, 2 = 2, 3 = 3</td></tr>
+<tr><td>Замок дверей (централизованный)</td><td>1 = Разблокировано, 2 = Заблокировано</td></tr>
+<tr><td>Авторазблокировка при приближении</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Автоблокировка при удалении</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Режим вождения</td><td>1 = Спорт, 2 = Комфорт, 3 = Эконом, 13 = Гоночный</td></tr>
+<tr><td>Дорожный режим</td><td>0 = Обычный, 1 = Скользко/мокро, 2 = Снег</td></tr>
+<tr><td>Режим гибрида</td><td>2 = Сначала электро, 3 = Авто, 4 = Сначала бензин</td></tr>
+<tr><td>Зеркала: сложить / разложить</td><td>Сложить / Разложить</td></tr>
+<tr><td>Багажник: открыть / закрыть</td><td>Открыть / Закрыть</td></tr>
+<tr><td>Запустить приложение</td><td>выбор из установленных</td></tr>
+<tr><td>Управление Яндекс Музыкой</td><td>Играть, Пауза, Играть/Пауза, Следующий, Предыдущий</td></tr>
+</tbody></table>
+
+<blockquote><p><strong>Про кнопки руля.</strong> Одиночное и двойное нажатие скролла разведены: одиночный
+триггер срабатывает с задержкой 0,4 с (ждёт второе нажатие). Так «1 клик = одно действие,
+2 клика = другое» настраивается двумя правилами. Изменения всех кнопок руля пишутся в журнал.</p></blockquote>
+
+<h2>Важно знать</h2>
 <ul>
-<li><strong>Запустить приложение</strong> — открыть любое установленное приложение.</li>
-<li><strong>Управление Яндекс Музыкой</strong> — играть / пауза / следующий / предыдущий трек.</li>
-<li><strong>Голосовой ассистент</strong> — запустить / остановить штатного ассистента (тем же
-  вызовом, что и кнопка на руле).</li>
+<li>Правило срабатывает <strong>один раз на событие</strong>; первое значение после запуска — базовая линия.</li>
+<li>Коды перечислений подобраны по реальным дампам и могут отличаться в другой комплектации —
+  проверяйте кнопкой «тест» и живым значением.</li>
 </ul>
-<h2>Как это работает важно знать</h2>
-<ul>
-<li>Правило срабатывает <strong>один раз на событие</strong>: пока значение держится, повторов нет.</li>
-<li>Первое значение после запуска считается «базовой линией» и не вызывает срабатывание.</li>
-<li>Каждое срабатывание сопровождается короткой мелодией и записью в журнале.</li>
-<li>Коды значений перечислений (уровни подогрева, режимы) подобраны по реальным
-  дампам, но могут отличаться в другой комплектации — проверяйте кнопкой <strong>«тест»</strong>
-  и живым значением в редакторе.</li>
-</ul>
-<h2>Что можно автоматизировать (примеры)</h2>
-<ul>
-<li>Подогрев/вентиляция сидений и руля по температуре и посадке.</li>
-<li>Блокировка дверей при начале движения.</li>
-<li>Открытие лючка зарядки по приезде домой (геозона).</li>
-<li>Режим вождения «Снег» при минусе за бортом.</li>
-<li>Запуск музыки или навигатора при включении авто.</li>
-</ul>
-<h2>Доступные параметры и действия</h2>
-<p>Параметры, доступные в качестве <strong>триггера</strong> («Когда») и <strong>условия</strong> («И если»):</p>
-<table>
-<thead>
-<tr>
-<th>Параметр</th>
-<th>Значения</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Запуск устройства / приложения (событие)</td>
-<td>1 = Событие</td>
-</tr>
-<tr>
-<td>Экран включился (событие)</td>
-<td>1 = Событие</td>
-</tr>
-<tr>
-<td>Разблокировка экрана (событие)</td>
-<td>1 = Событие</td>
-</tr>
-<tr>
-<td>Доступ к интернету (событие)</td>
-<td>0 = Выкл, 1 = Вкл</td>
-</tr>
-<tr>
-<td>Температура за бортом</td>
-<td>число, °C</td>
-</tr>
-<tr>
-<td>Скорость</td>
-<td>число, км/ч</td>
-</tr>
-<tr>
-<td>Заряд батареи</td>
-<td>число, %</td>
-</tr>
-<tr>
-<td>Питание автомобиля</td>
-<td>0 = Выкл, 1 = ON / готов к движению</td>
-</tr>
-<tr>
-<td>Передача (P/R/N/D)</td>
-<td>0 = P, 1 = R, 2 = N, 3 = D</td>
-</tr>
-<tr>
-<td>Педаль тормоза</td>
-<td>0 = Отпущена, 1 = Нажата</td>
-</tr>
-<tr>
-<td>Открыта любая дверь</td>
-<td>0 = Все закрыты, 1 = Хотя бы одна открыта</td>
-</tr>
-<tr>
-<td>Руль: скролл вверх / PAGE UP</td>
-<td>0 = Отпущена, 1 = Нажата (одиночное срабатывает с задержкой 0,4 с — см. примечание)</td>
-</tr>
-<tr>
-<td>Руль: скролл вниз / PAGE DOWN</td>
-<td>0 = Отпущена, 1 = Нажата (одиночное срабатывает с задержкой 0,4 с — см. примечание)</td>
-</tr>
-<tr>
-<td>Руль: двойное нажатие скролла вверх (событие)</td>
-<td>1 = Событие (два нажатия в течение 0,4 с)</td>
-</tr>
-<tr>
-<td>Руль: двойное нажатие скролла вниз (событие)</td>
-<td>1 = Событие (два нажатия в течение 0,4 с)</td>
-</tr>
-<tr>
-<td>Ремень водителя</td>
-<td>0 = Не пристёгнут, 1 = Пристёгнут</td>
-</tr>
-<tr>
-<td>Ремень пассажира</td>
-<td>0 = Не пристёгнут, 1 = Пристёгнут</td>
-</tr>
-<tr>
-<td>Датчик сиденья водителя</td>
-<td>0 = Пусто, 1 = Занято</td>
-</tr>
-<tr>
-<td>Датчик сиденья пассажира</td>
-<td>0 = Пусто, 1 = Занято</td>
-</tr>
-<tr>
-<td>Датчик сиденья зад. левого</td>
-<td>0 = Пусто, 1 = Занято</td>
-</tr>
-<tr>
-<td>Датчик сиденья зад. среднего</td>
-<td>0 = Пусто, 1 = Занято</td>
-</tr>
-<tr>
-<td>Датчик сиденья зад. правого</td>
-<td>0 = Пусто, 1 = Занято</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>Примечание про кнопки руля (скролл вверх/вниз).</strong> Одиночное и двойное нажатие
-разведены: триггер одиночного нажатия срабатывает с задержкой 0,4 с — за это время
-приложение ждёт, не будет ли второго нажатия. Если второе пришло — срабатывает
-только «двойное нажатие», одиночное отменяется. То есть «1 клик = одно действие,
-2 клика = другое действие» настраивается двумя правилами: одно на обычный скролл,
-второе на событие двойного нажатия.</p>
-<p>Изменения <strong>всех</strong> кнопок руля (громкость, треки, звонки, голосовая и т.д.)
-пишутся в <strong>журнал</strong> на главном экране — нажмите кнопку и смотрите запись. Так можно
-проверить, какие кнопки прошивка пересылает в Android (подтверждённые будут
-добавлены триггерами в следующих версиях).</p>
-</blockquote>
-<p>Цели <strong>действий</strong> («То выполнить») — чем можно управлять:</p>
-<table>
-<thead>
-<tr>
-<th>Действие</th>
-<th>Значения</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Климат-контроль (вкл/выкл)</td>
-<td>0 = Выкл, 1 = Вкл</td>
-</tr>
-<tr>
-<td>Подогрев сиденья водителя</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Подогрев сиденья пассажира</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Подогрев сиденья зад. левого</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Подогрев сиденья зад. правого</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Вентиляция сиденья водителя</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Вентиляция сиденья пассажира</td>
-<td>1 = Выкл, 2 = 1 уровень, 3 = 2 уровень, 4 = 3 уровень (макс)</td>
-</tr>
-<tr>
-<td>Подогрев руля</td>
-<td>0 = Выкл, 1 = 1 уровень, 2 = 2 уровень, 3 = 3 уровень</td>
-</tr>
-<tr>
-<td>Лючок зарядки (откр./закр.)</td>
-<td>0 = Выкл, 1 = Вкл</td>
-</tr>
-<tr>
-<td>Замок дверей (централизованный)</td>
-<td>1 = Разблокировано, 2 = Заблокировано</td>
-</tr>
-<tr>
-<td>Авторазблокировка при приближении</td>
-<td>0 = Выкл, 1 = Вкл</td>
-</tr>
-<tr>
-<td>Автоблокировка при удалении</td>
-<td>0 = Выкл, 1 = Вкл</td>
-</tr>
-<tr>
-<td>Режим вождения</td>
-<td>1 = Спорт, 2 = Комфорт, 3 = Экономичный, 13 = Гоночный (Race)</td>
-</tr>
-<tr>
-<td>Дорожный режим (снег/скользко)</td>
-<td>0 = Обычный, 1 = Скользко / мокро, 2 = Снег</td>
-</tr>
-<tr>
-<td>Режим гибрида (приоритет электро/бензин)</td>
-<td>2 = Сначала электро, 3 = Авто, 4 = Сначала бензин</td>
-</tr>
-<tr>
-<td>Запустить приложение</td>
-<td>выбор из установленных приложений</td>
-</tr>
-<tr>
-<td>Управление Яндекс Музыкой</td>
-<td>Играть, Пауза, Играть/Пауза, Следующий трек, Предыдущий трек</td>
-</tr>
-<tr>
-<td>Голосовой ассистент</td>
-<td>Запустить, Возобновить, Остановить, Закрыть</td>
-</tr>
-</tbody>
-</table>
-<h2>Поддержать проект</h2>
-<p>Если приложение оказалось полезным, поддержите разработку:
-кнопка <strong>«Поддержать автора»</strong> на главном экране приложения (QR-код) или по ссылке
-<a href="https://pay.cloudtips.ru/p/6e36be30">https://pay.cloudtips.ru/p/6e36be30</a>.</p>
+
 <h2>История изменений</h2>
 <ul>
-<li><strong>v0.50</strong> — приложение переименовано в «Авто Правила» (без дефиса).</li>
-<li><strong>v0.49</strong> — управление зеркалами: действие «Зеркала: сложить / разложить»
-  (умное — складывает или раскладывает только если они ещё не в нужном положении,
-  так что повторный запуск ничего не ломает) и условие «Статус зеркал
-  (сложены/разложены)».</li>
-<li><strong>v0.47</strong> — геозоны: триггер на <strong>выезд</strong> из зоны (раньше был только въезд) и
-  сглаживание границы (гистерезис), чтобы машина на краю зоны не давала ложных
-  срабатываний из-за скачков GPS.</li>
-<li><strong>v0.46</strong> — три новых готовых правила: разблокировка дверей при переходе в
-  «Парковку» (если водитель на сиденье) и вентиляция сидений водителя/пассажира
-  в жару (выше 25 °C).</li>
-<li><strong>v0.45</strong> — двойное нажатие скролла руля (PAGE UP/DOWN) как триггер; одиночное
-  и двойное нажатие разведены («1 клик = одно действие, 2 клика = другое»).</li>
-<li><strong>v0.44</strong> — триггер «Запуск устройства / приложения» (по загрузке); кнопки
-  «Поддержать автора» и «Проверить».</li>
-<li><strong>v0.43</strong> — исправлены геозоны в фоне (запрос фонового доступа к геолокации);
-  убрано действие «Громкость медиа» (на HM5 заблокировано прошивкой).</li>
-<li><strong>v0.42 и ранее</strong> — визуальный конструктор правил «когда → если → то», геозоны,
-  таймеры автовыключения, задержка действий, запуск приложений, управление
-  Яндекс Музыкой, кнопки руля как триггеры.</li>
+<li><strong>v0.63</strong> — кастомная кнопка руля как активация голоса; убрана кнопка «Поддержать автора».</li>
+<li><strong>v0.62</strong> — обогрев заднего стекла; кастомная кнопка как триггер; чистка сервиса.</li>
+<li><strong>v0.60–0.61</strong> — действие «Багажник: открыть/закрыть».</li>
+<li><strong>v0.5x</strong> — офлайн-голосовое управление (Vosk); действие «Зеркала: сложить/разложить».</li>
 </ul>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  EN  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="en" lang="en">
+<h1>Car Rules Voice — user guide</h1>
+<p>An app for the <strong>Seres / AITO M5 (HM5)</strong> head unit: automated vehicle rules
+<strong>plus offline voice control</strong>.</p>
+
+<h2>What it is</h2>
+<p>Rules follow the pattern:</p>
+<blockquote><p><strong>WHEN</strong> something happens → <strong>AND IF</strong> conditions hold → <strong>THEN</strong> run actions.</p></blockquote>
+<p>Example: “When the driver sits down, and if it is below −5 °C outside, turn on the steering
+wheel and seat heaters for 15 minutes.” The app runs in the background and starts by itself
+after the head unit powers on.</p>
+
+<h2>Voice control (new)</h2>
+<p>The app recognizes speech <strong>fully offline</strong> (Vosk engine) — no internet needed. Assign
+phrases to any rule; when the app hears them, the rule runs.</p>
+<ol>
+<li>Open <strong>“Voice commands”</strong> from the main screen.</li>
+<li>It is a <strong>paid</strong> feature, activated per VIN. Price: <strong>1000 RUB or 15 USDT</strong>. The activation
+  screen shows your car’s VIN — email it to <a href="mailto:tsrman@gmail.com">tsrman@gmail.com</a>,
+  get a 16-digit code and enter it.</li>
+<li>Turn on the top <strong>“Voice commands”</strong> switch.</li>
+<li>Pick the <strong>activation button</strong> on the wheel: double-press the scroll rocker up/down
+  (PAGE UP/PAGE DOWN) <strong>or a single press of the custom wheel button</strong>.</li>
+<li>Use <strong>“Test recognition”</strong> to confirm the microphone works.</li>
+<li>Add phrases: <strong>“+ Voice command”</strong> → pick a rule → enter one or more synonym phrases.</li>
+</ol>
+<p>The recognition language is set by the installed APK (Russian / English / Persian). Install
+the APK for the language you will speak.</p>
+
+<h2>First run</h2>
+<ol>
+<li>Install the APK and open the app.</li>
+<li>Allow <strong>location</strong> access (needed for geofences; you may decline). For geofence rules
+  choose “<strong>Allow all the time</strong>”, otherwise geofences won’t fire in the background.</li>
+<li>A short jingle at startup means the app connected to the car.</li>
+<li>Ready-made rules exist (heating in cold, ventilation in heat, unlock in “Park”) — edit,
+  disable or delete them.</li>
+</ol>
+
+<h2>Main screen</h2>
+<ul>
+<li><strong>Rules</strong> — each with an on/off switch and “Check”, “Edit”, “Delete”.</li>
+<li><strong>Vehicle state</strong> — live parameter values.</li>
+<li><strong>Firing log</strong> — what fired and when, including errors and wheel-button presses.</li>
+</ul>
+
+<h2>Creating a rule</h2>
+<ol>
+<li>Tap <strong>“Rule”</strong>, enter a name.</li>
+<li><strong>“When (trigger)”</strong>: parameter/event, transition (“Became equal”, “Changed”,
+  “Increased”, “Decreased”) and value. The live value is shown under the field. “Trigger”
+  adds another (fires on <strong>any</strong> — OR).</li>
+<li><strong>“And if” (conditions)</strong>: all required by default (AND); a switch makes it any (OR).</li>
+<li><strong>“Then do” (actions)</strong>: what to turn on and to which value. “Minutes” — auto-off (survives
+  reboot); “Delay” — run after N seconds; “test” — run once now.</li>
+<li><strong>“Save”</strong>.</li>
+</ol>
+
+<h2>Useful options</h2>
+<h3>“Fire on start”</h3>
+<p>For the “Became equal” transition: the rule also fires at startup if the value already
+matches. It won’t fire twice per trip (re-armed when power is cut or after 4 hours).</p>
+<h3>Geofences</h3>
+<p>“Also require being in a zone”: set a radius, drive to the spot and save the position.
+Empty trigger → fires on <strong>entering</strong>; a set trigger → the geofence acts as an extra
+condition. Background location access is needed to fire while the app is closed.</p>
+
+<h2>What’s new in this version</h2>
+<ul>
+<li><strong>Offline voice control</strong> of rules (Vosk), activated by a wheel button.</li>
+<li><strong>Custom wheel button</strong> — as a rule trigger and as a single-press voice activator.</li>
+<li><strong>Rear-window heater</strong> — new action and state parameter (on/off).</li>
+<li><strong>Trunk: open/close</strong> — smart action (uses the live tailgate status).</li>
+<li><strong>Mirrors: fold/unfold</strong> — smart action + a “Mirror status” parameter.</li>
+</ul>
+
+<h2>Parameters (triggers &amp; conditions)</h2>
+<table><thead><tr><th>Parameter</th><th>Values</th></tr></thead><tbody>
+<tr><td>Device / app start (event)</td><td>1 = Event</td></tr>
+<tr><td>Screen turned on (event)</td><td>1 = Event</td></tr>
+<tr><td>Screen unlock (event)</td><td>1 = Event</td></tr>
+<tr><td>Internet access (event)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Outside temperature</td><td>number, °C</td></tr>
+<tr><td>Speed</td><td>number, km/h</td></tr>
+<tr><td>Battery charge</td><td>number, %</td></tr>
+<tr><td>Vehicle power</td><td>0 = Off, 1 = ON / driving</td></tr>
+<tr><td>Gear (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
+<tr><td>Brake pedal</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Any door open</td><td>0 = All closed, 1 = At least one open</td></tr>
+<tr><td>Wheel: scroll up / PAGE UP</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Wheel: scroll down / PAGE DOWN</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Wheel: scroll-up double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
+<tr><td>Wheel: scroll-down double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
+<tr><td>Wheel: custom button</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Driver / passenger seatbelt</td><td>0 = Unbuckled, 1 = Buckled</td></tr>
+<tr><td>Seat sensors (driver, passenger, rear L/M/R)</td><td>0 = Empty, 1 = Occupied</td></tr>
+<tr><td>Mirror status</td><td>0 = Unfolded, 1 = Folded</td></tr>
+<tr><td>Trunk status</td><td>0 = Closed, 1 = Open, 5 = Not fully closed</td></tr>
+<tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
+</tbody></table>
+
+<h2>Actions (what you can control)</h2>
+<table><thead><tr><th>Action</th><th>Values</th></tr></thead><tbody>
+<tr><td>Climate control (on/off)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Seat heaters (driver, passenger, rear L/R)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
+<tr><td>Seat ventilation (driver, passenger)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
+<tr><td>Steering-wheel heater</td><td>0 = Off, 1 = 1, 2 = 2, 3 = 3</td></tr>
+<tr><td>Door lock (central)</td><td>1 = Unlocked, 2 = Locked</td></tr>
+<tr><td>Auto-unlock on approach</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Auto-lock on leaving</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Drive mode</td><td>1 = Sport, 2 = Comfort, 3 = Eco, 13 = Race</td></tr>
+<tr><td>Road mode</td><td>0 = Normal, 1 = Wet/slippery, 2 = Snow</td></tr>
+<tr><td>Hybrid mode</td><td>2 = EV first, 3 = Auto, 4 = Fuel first</td></tr>
+<tr><td>Mirrors: fold / unfold</td><td>Fold / Unfold</td></tr>
+<tr><td>Trunk: open / close</td><td>Open / Close</td></tr>
+<tr><td>Launch app</td><td>pick an installed app</td></tr>
+<tr><td>Yandex Music control</td><td>Play, Pause, Play/Pause, Next, Previous</td></tr>
+</tbody></table>
+
+<blockquote><p><strong>About wheel buttons.</strong> Single and double scroll presses are separated: the single
+trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = one action,
+2 clicks = another” is set up with two rules. All wheel-button changes are written to the log.</p></blockquote>
+
+<h2>Good to know</h2>
+<ul>
+<li>A rule fires <strong>once per event</strong>; the first value after startup is a baseline.</li>
+<li>Enum codes were derived from real dumps and may differ on other trims — verify with the
+  “test” button and the live value.</li>
+</ul>
+
+<h2>Changelog</h2>
+<ul>
+<li><strong>v0.63</strong> — custom wheel button as voice activation; removed the “Support the author” button.</li>
+<li><strong>v0.62</strong> — rear-window heater; custom button as a trigger; service cleanup.</li>
+<li><strong>v0.60–0.61</strong> — “Trunk: open/close” action.</li>
+<li><strong>v0.5x</strong> — offline voice control (Vosk); “Mirrors: fold/unfold” action.</li>
+</ul>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  FA  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="fa" lang="fa" dir="rtl">
+<h1>راهنمای Car Rules Voice (کنترل صوتی خودرو)</h1>
+<p>برنامه‌ای برای هد‌یونیت <strong>سرس / آیتو M5 (HM5)</strong>: قوانین خودکار خودرو
+<strong>به‌همراه کنترل صوتی آفلاین</strong>.</p>
+
+<h2>این چیست</h2>
+<p>قوانین بر این الگو ساخته می‌شوند:</p>
+<blockquote><p><strong>وقتی</strong> اتفاقی رخ داد ← <strong>و اگر</strong> شرط‌ها برقرار بود ← <strong>آنگاه</strong> عملیات را اجرا کن.</p></blockquote>
+<p>مثال: «وقتی راننده روی صندلی نشست و اگر دمای بیرون زیر −۵ درجه بود، گرمکن فرمان و صندلی
+را برای ۱۵ دقیقه روشن کن». برنامه در پس‌زمینه کار می‌کند و پس از روشن‌شدن هد‌یونیت خودکار اجرا می‌شود.</p>
+
+<h2>کنترل صوتی (جدید)</h2>
+<p>برنامه گفتار را <strong>کاملاً آفلاین</strong> تشخیص می‌دهد (موتور Vosk) — نیازی به اینترنت نیست. به هر
+قانون می‌توانید عبارت‌هایی اختصاص دهید؛ وقتی برنامه آن‌ها را شنید، قانون اجرا می‌شود.</p>
+<ol>
+<li>از صفحهٔ اصلی <strong>«فرمان‌های صوتی»</strong> را باز کنید.</li>
+<li>این قابلیت <strong>پولی</strong> است و برای هر VIN فعال می‌شود. قیمت: <strong>۱۰۰۰ روبل یا ۱۵ USDT</strong>.
+  در صفحهٔ فعال‌سازی VIN خودرو نمایش داده می‌شود — آن را به
+  <a href="mailto:tsrman@gmail.com">tsrman@gmail.com</a> ایمیل کنید، یک کد ۱۶ رقمی بگیرید و وارد کنید.</li>
+<li>کلید بالای <strong>«فرمان‌های صوتی»</strong> را روشن کنید.</li>
+<li><strong>دکمهٔ فعال‌سازی</strong> روی فرمان را انتخاب کنید: دو بار فشردن دکمهٔ پیمایش بالا/پایین
+  (PAGE UP/PAGE DOWN) <strong>یا یک بار فشردن دکمهٔ سفارشی فرمان</strong>.</li>
+<li>با <strong>«آزمایش تشخیص»</strong> از کارکرد میکروفون مطمئن شوید.</li>
+<li>افزودن عبارت‌ها: <strong>«+ فرمان صوتی»</strong> ← انتخاب قانون ← وارد کردن یک یا چند عبارت هم‌معنا.</li>
+</ol>
+<p>زبان تشخیص با APK نصب‌شده تعیین می‌شود (روسی / انگلیسی / فارسی). APK زبانی را که با آن صحبت
+می‌کنید نصب کنید.</p>
+
+<h2>اجرای نخست</h2>
+<ol>
+<li>APK را نصب و برنامه را باز کنید.</li>
+<li>دسترسی <strong>موقعیت مکانی</strong> را بدهید (برای ژئوفنس لازم است؛ می‌توانید رد کنید). برای قوانین
+  ژئوفنس گزینهٔ «<strong>همیشه مجاز</strong>» را انتخاب کنید، وگرنه در پس‌زمینه کار نمی‌کند.</li>
+<li>یک نوای کوتاه هنگام شروع یعنی برنامه به خودرو متصل شد.</li>
+<li>چند قانون آماده وجود دارد (گرمایش در سرما، تهویه در گرما، باز شدن قفل در حالت «پارک») — قابل
+  ویرایش، غیرفعال‌سازی یا حذف.</li>
+</ol>
+
+<h2>صفحهٔ اصلی</h2>
+<ul>
+<li><strong>قوانین</strong> — هرکدام با کلید روشن/خاموش و دکمه‌های «بررسی»، «ویرایش»، «حذف».</li>
+<li><strong>وضعیت خودرو</strong> — مقادیر زندهٔ پارامترها.</li>
+<li><strong>گزارش اجرا</strong> — چه چیزی و چه زمانی اجرا شد، شامل خطاها و فشردن دکمه‌های فرمان.</li>
+</ul>
+
+<h2>ساخت یک قانون</h2>
+<ol>
+<li>روی <strong>«قانون»</strong> بزنید و نامی وارد کنید.</li>
+<li><strong>«وقتی (محرک)»</strong>: پارامتر/رویداد، نوع گذار («برابر شد»، «تغییر کرد»، «افزایش یافت»،
+  «کاهش یافت») و مقدار. مقدار زنده زیر فیلد نمایش داده می‌شود. دکمهٔ «محرک» یکی دیگر اضافه
+  می‌کند (با <strong>هر کدام</strong> اجرا می‌شود — یا).</li>
+<li><strong>«و اگر» (شرط‌ها)</strong>: به‌طور پیش‌فرض همه لازم‌اند (و)؛ با کلید می‌توان «هر کدام» (یا) کرد.</li>
+<li><strong>«آنگاه انجام بده» (عملیات)</strong>: چه چیزی و با چه مقداری. «دقیقه» — خاموشی خودکار (پس از
+  ری‌استارت هم می‌ماند)؛ «تأخیر» — اجرا پس از N ثانیه؛ «آزمایش» — اجرای فوری یک‌بار.</li>
+<li><strong>«ذخیره»</strong>.</li>
+</ol>
+
+<h2>گزینه‌های مفید</h2>
+<h3>«اجرا هنگام شروع»</h3>
+<p>برای گذار «برابر شد»: اگر مقدار از قبل درست باشد، قانون هنگام شروع هم اجرا می‌شود. در هر سفر
+دوبار اجرا نمی‌شود (با قطع برق یا پس از ۴ ساعت دوباره مسلح می‌شود).</p>
+<h3>ژئوفنس</h3>
+<p>«همچنین حضور در منطقه لازم است»: شعاع را تعیین کنید، به محل بروید و موقعیت را ذخیره کنید.
+محرک خالی ← اجرا هنگام <strong>ورود</strong>؛ محرک تعیین‌شده ← ژئوفنس به‌عنوان شرط اضافی. برای کار در
+پس‌زمینه دسترسی موقعیت در پس‌زمینه لازم است.</p>
+
+<h2>تازه‌ها در این نسخه</h2>
+<ul>
+<li><strong>کنترل صوتی آفلاین</strong> قوانین (Vosk)، با دکمهٔ فرمان فعال می‌شود.</li>
+<li><strong>دکمهٔ سفارشی فرمان</strong> — هم به‌عنوان محرک قانون و هم فعال‌سازی صوتی با یک بار فشردن.</li>
+<li><strong>گرمکن شیشهٔ عقب</strong> — عملیات و پارامتر وضعیت جدید (روشن/خاموش).</li>
+<li><strong>درِ صندوق: باز/بسته</strong> — عملیات هوشمند (بر اساس وضعیت زندهٔ در).</li>
+<li><strong>آینه‌ها: جمع/باز</strong> — عملیات هوشمند + پارامتر «وضعیت آینه‌ها».</li>
+</ul>
+
+<h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
+<table><thead><tr><th>پارامتر</th><th>مقادیر</th></tr></thead><tbody>
+<tr><td>شروع دستگاه / برنامه (رویداد)</td><td>۱ = رویداد</td></tr>
+<tr><td>روشن‌شدن صفحه (رویداد)</td><td>۱ = رویداد</td></tr>
+<tr><td>باز شدن قفل صفحه (رویداد)</td><td>۱ = رویداد</td></tr>
+<tr><td>دسترسی اینترنت (رویداد)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>دمای بیرون</td><td>عدد، °C</td></tr>
+<tr><td>سرعت</td><td>عدد، کیلومتر بر ساعت</td></tr>
+<tr><td>شارژ باتری</td><td>عدد، ٪</td></tr>
+<tr><td>برق خودرو</td><td>۰ = خاموش، ۱ = روشن / در حرکت</td></tr>
+<tr><td>دنده (P/R/N/D)</td><td>۰ = P، ۱ = R، ۲ = N، ۳ = D</td></tr>
+<tr><td>پدال ترمز</td><td>۰ = رها، ۱ = فشرده</td></tr>
+<tr><td>باز بودن هر در</td><td>۰ = همه بسته، ۱ = حداقل یکی باز</td></tr>
+<tr><td>فرمان: پیمایش بالا / PAGE UP</td><td>۰ = رها، ۱ = فشرده</td></tr>
+<tr><td>فرمان: پیمایش پایین / PAGE DOWN</td><td>۰ = رها، ۱ = فشرده</td></tr>
+<tr><td>فرمان: دو بار فشردن بالا (رویداد)</td><td>۱ = رویداد (دو فشار در ۰٫۴ ثانیه)</td></tr>
+<tr><td>فرمان: دو بار فشردن پایین (رویداد)</td><td>۱ = رویداد (دو فشار در ۰٫۴ ثانیه)</td></tr>
+<tr><td>فرمان: دکمهٔ سفارشی</td><td>۰ = رها، ۱ = فشرده</td></tr>
+<tr><td>کمربند راننده / سرنشین</td><td>۰ = نبسته، ۱ = بسته</td></tr>
+<tr><td>حسگر صندلی‌ها (راننده، سرنشین، عقب چ/و/ر)</td><td>۰ = خالی، ۱ = اشغال</td></tr>
+<tr><td>وضعیت آینه‌ها</td><td>۰ = باز، ۱ = جمع‌شده</td></tr>
+<tr><td>وضعیت درِ صندوق</td><td>۰ = بسته، ۱ = باز، ۵ = کاملاً بسته نیست</td></tr>
+<tr><td>گرمکن شیشهٔ عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+</tbody></table>
+
+<h2>عملیات (چه چیزهایی قابل کنترل است)</h2>
+<table><thead><tr><th>عملیات</th><th>مقادیر</th></tr></thead><tbody>
+<tr><td>تهویه مطبوع (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>گرمکن شیشهٔ عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>گرمکن صندلی‌ها (راننده، سرنشین، عقب چ/ر)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
+<tr><td>تهویه صندلی‌ها (راننده، سرنشین)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
+<tr><td>گرمکن فرمان</td><td>۰ = خاموش، ۱ = ۱، ۲ = ۲، ۳ = ۳</td></tr>
+<tr><td>قفل مرکزی درها</td><td>۱ = باز، ۲ = قفل</td></tr>
+<tr><td>باز شدن خودکار هنگام نزدیک‌شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>قفل خودکار هنگام دورشدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>حالت رانندگی</td><td>۱ = اسپرت، ۲ = کامفورت، ۳ = اقتصادی، ۱۳ = مسابقه</td></tr>
+<tr><td>حالت جاده</td><td>۰ = عادی، ۱ = خیس/لغزنده، ۲ = برف</td></tr>
+<tr><td>حالت هیبرید</td><td>۲ = اول برقی، ۳ = خودکار، ۴ = اول بنزین</td></tr>
+<tr><td>آینه‌ها: جمع / باز</td><td>جمع‌کردن / بازکردن</td></tr>
+<tr><td>درِ صندوق: باز / بسته</td><td>بازکردن / بستن</td></tr>
+<tr><td>اجرای برنامه</td><td>انتخاب از برنامه‌های نصب‌شده</td></tr>
+<tr><td>کنترل یاندکس موزیک</td><td>پخش، توقف، پخش/توقف، بعدی، قبلی</td></tr>
+</tbody></table>
+
+<blockquote><p><strong>دربارهٔ دکمه‌های فرمان.</strong> فشار یک‌باره و دوباره جدا هستند: محرک یک‌باره با ۰٫۴ ثانیه
+تأخیر اجرا می‌شود (منتظر فشار دوم). بنابراین «۱ کلیک = یک عمل، ۲ کلیک = عمل دیگر» با دو قانون
+تنظیم می‌شود. تغییر همهٔ دکمه‌های فرمان در گزارش نوشته می‌شود.</p></blockquote>
+
+<h2>خوب است بدانید</h2>
+<ul>
+<li>هر قانون <strong>یک بار برای هر رویداد</strong> اجرا می‌شود؛ نخستین مقدار پس از شروع، خط پایه است.</li>
+<li>کدهای مقادیر از دامپ‌های واقعی به‌دست آمده‌اند و ممکن است در تیپ‌های دیگر متفاوت باشند — با
+  دکمهٔ «آزمایش» و مقدار زنده بررسی کنید.</li>
+</ul>
+
+<h2>تاریخچهٔ تغییرات</h2>
+<ul>
+<li><strong>v0.63</strong> — دکمهٔ سفارشی فرمان به‌عنوان فعال‌سازی صوتی؛ حذف دکمهٔ «حمایت از سازنده».</li>
+<li><strong>v0.62</strong> — گرمکن شیشهٔ عقب؛ دکمهٔ سفارشی به‌عنوان محرک؛ پاک‌سازی سرویس.</li>
+<li><strong>v0.60–0.61</strong> — عملیات «درِ صندوق: باز/بسته».</li>
+<li><strong>v0.5x</strong> — کنترل صوتی آفلاین (Vosk)؛ عملیات «آینه‌ها: جمع/باز».</li>
+</ul>
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.langbar button');
+    var sections = document.querySelectorAll('.lang');
+    function show(lang) {
+      sections.forEach(function (s) { s.classList.toggle('active', s.dataset.lang === lang); });
+      buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.go === lang); });
+      document.documentElement.lang = lang;
+      try { localStorage.setItem('crv_lang', lang); } catch (e) {}
+    }
+    buttons.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.go); }); });
+    var saved;
+    try { saved = localStorage.getItem('crv_lang'); } catch (e) {}
+    if (saved && document.querySelector('.lang[data-lang="' + saved + '"]')) show(saved);
+  })();
+</script>
 </body>
 </html>
