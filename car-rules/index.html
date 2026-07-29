@@ -53,15 +53,15 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.69</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.70</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.69-ru-release.apk">CarRulesVoice-0.69-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.69-en-release.apk">CarRulesVoice-0.69-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.69-fa-release.apk">CarRulesVoice-0.69-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.70-ru-release.apk">CarRulesVoice-0.70-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.70-en-release.apk">CarRulesVoice-0.70-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.70-fa-release.apk">CarRulesVoice-0.70-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
-  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.59</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
-  📦 <a href="CarRules-0.59-release.apk">CarRules-0.59-release.apk</a></p>
+  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.60</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
+  📦 <a href="CarRules-0.60-release.apk">CarRules-0.60-release.apk</a></p>
   <small>Оба приложения подписаны одним ключом — правила из Car Rules можно перенести в Voice при первом запуске или через меню «⋮». · Both apps share one signing key — rules from Car Rules can be imported into Voice on first launch or via the “⋮” menu. · هر دو برنامه با یک کلید امضا شده‌اند — قوانین Car Rules هنگام اولین اجرا یا از منوی «⋮» به Voice منتقل می‌شود.</small>
 </div>
 
@@ -203,6 +203,7 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.70</strong> — экспорт/импорт теперь выполняются в фоновом потоке вместо основного: обращения к MediaStore — это блокирующий межпроцессный вызов плюс дисковый ввод-вывод, и на этой магнитоле провайдер иногда отвечал медленно, из-за чего приложение либо зависало и вылетало, либо показывало «ошибка экспорта», в зависимости от того, сколько времени занимал ответ. То же исправление вошло в Car Rules v0.60.</li>
 <li><strong>v0.69</strong> — исправлен импорт: MediaStore всегда хранит путь папки с завершающим слэшем, а запрос на импорт сравнивал путь без него и поэтому никогда не находил экспортированный файл (хотя экспорт создавал его нормально). То же исправление вошло в Car Rules v0.59.</li>
 <li><strong>v0.68</strong> — экспорт/импорт правил переведён на MediaStore (публичная папка Downloads/CarRulesVoice), потому что разрешение «Доступ ко всем файлам» на этой магнитоле не выдаётся вообще; теперь файл пишется и читается без запроса каких-либо разрешений. То же исправление вошло в Car Rules v0.58.</li>
 <li><strong>v0.67</strong> — импорт/экспорт правил теперь пишет и читает файл Download/car-rules.json напрямую (с запросом нужного разрешения), вместо системного выбора файла, который на этой магнитоле не открывался и приводил к вылету; то же самое исправление вошло в Car Rules v0.57 (версия без голоса), которая теперь тоже умеет импорт/экспорт в файл.</li>
@@ -351,6 +352,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.70</strong> — export/import now run on a background thread instead of the main one: the MediaStore calls are blocking cross-process IPC plus disk I/O, and on this head unit the provider was sometimes slow to respond, which either froze and crashed the app or showed "export error" depending on how long the response took. The same fix landed in Car Rules v0.60.</li>
 <li><strong>v0.69</strong> — fixed import: MediaStore always stores the folder path with a trailing slash, but the import query compared against a path without one and so never found the exported file (even though export created it fine). The same fix landed in Car Rules v0.59.</li>
 <li><strong>v0.68</strong> — export/import now goes through MediaStore (the public Downloads/CarRulesVoice folder) instead of a fixed path plus a permission request, because the "All files access" permission never grants on this head unit at all; the file is now written and read with no permission needed. The same fix landed in Car Rules v0.58.</li>
 <li><strong>v0.67</strong> — file import/export now reads and writes Download/car-rules.json directly (requesting the needed permission), instead of the system file picker, which had nothing to open on this head unit and crashed the app; the same fix landed in Car Rules v0.57 (no-voice edition), which now also supports file import/export.</li>
@@ -498,6 +500,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.70</strong> — برون‌بری/درون‌ریزی اکنون در یک رشتهٔ پس‌زمینه اجرا می‌شود نه در رشتهٔ اصلی: فراخوانی‌های MediaStore یک تماس مسدودکنندهٔ بین‌فرآیندی به‌همراه ورودی/خروجی دیسک هستند، و روی این مانیتور گاهی پاسخ‌دهی کند بود که باعث می‌شد برنامه یا هنگ کند و بسته شود، یا پیام «خطای برون‌بری» نشان دهد. همین اصلاح در Car Rules v0.60 هم اعمال شد.</li>
 <li><strong>v0.69</strong> — اشکال درون‌ریزی رفع شد: MediaStore همیشه مسیر پوشه را با یک اسلش پایانی ذخیره می‌کند، اما پرس‌وجوی درون‌ریزی مسیر را بدون آن اسلش مقایسه می‌کرد و به همین دلیل هرگز فایل برون‌بری‌شده را پیدا نمی‌کرد (با اینکه برون‌بری فایل را درست می‌ساخت). همین اصلاح در Car Rules v0.59 هم اعمال شد.</li>
 <li><strong>v0.68</strong> — درون‌ریزی/برون‌بری قوانین اکنون از طریق MediaStore (پوشهٔ عمومی Downloads/CarRulesVoice) انجام می‌شود، چون دسترسی «All files access» روی این مانیتور اصلاً داده نمی‌شود؛ حالا فایل بدون نیاز به هیچ دسترسی‌ای نوشته و خوانده می‌شود. همین اصلاح در Car Rules v0.58 هم اعمال شد.</li>
 <li><strong>v0.67</strong> — درون‌ریزی/برون‌بری قوانین اکنون مستقیماً فایل Download/car-rules.json را می‌نویسد و می‌خواند (با درخواست دسترسی لازم)، به‌جای انتخابگر فایل سیستم که روی این مانیتور چیزی برای باز کردن نداشت و باعث خرابی برنامه می‌شد؛ همین اصلاح در Car Rules v0.57 (نسخهٔ بدون صدا) هم اعمال شد که اکنون آن هم درون‌ریزی/برون‌بری به فایل را پشتیبانی می‌کند.</li>
