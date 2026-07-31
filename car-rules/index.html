@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.77</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.78</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.77-ru-release.apk">CarRulesVoice-0.77-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.77-en-release.apk">CarRulesVoice-0.77-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.77-fa-release.apk">CarRulesVoice-0.77-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.78-ru-release.apk">CarRulesVoice-0.78-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.78-en-release.apk">CarRulesVoice-0.78-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.78-fa-release.apk">CarRulesVoice-0.78-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.66</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -206,6 +206,12 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.78</strong> — исправлен импорт: после прошлого исправления файл экспорта наконец
+  создавался, но его нельзя было импортировать обратно («В файле нет правил») — сборка для
+  публикации переименовывает поля вспомогательного класса при упаковке, из-за чего файл
+  фактически записывался с ключами <code>"a"</code>/<code>"b"</code> вместо <code>"rules"</code>/
+  <code>"voiceCommands"</code>, а импорт ищет именно "rules". Названия ключей теперь закреплены
+  явно и не зависят от такого переименования. v0.77 снята с сайта как содержащая эту ошибку.</li>
 <li><strong>v0.77</strong> — наконец найдена настоящая причина ошибки экспорта: провайдер MediaStore
   этой магнитолы закрывает файловый дескриптор и тут же оборачивает его заново, поэтому
   запись всегда падала с IllegalStateException «Already closed»; вставка записи с флагом
@@ -370,6 +376,13 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.78</strong> — fixed import: after the previous fix, the export file finally got
+  created, but it could no longer be imported back ("no rules in file") — the release build
+  renames a helper class's fields when packaging, so the file was actually written with
+  <code>"a"</code>/<code>"b"</code> keys instead of <code>"rules"</code>/<code>"voiceCommands"</code>,
+  and import looks specifically for "rules". The key names are now pinned explicitly and no
+  longer affected by that renaming. v0.77 has been pulled from the site since it carried
+  this bug.</li>
 <li><strong>v0.77</strong> — found the real cause of the export error at last: this head unit's
   MediaStore closes the file descriptor and immediately re-wraps it, so every write always
   died with IllegalStateException "Already closed"; inserting the row with the IS_PENDING
@@ -533,6 +546,12 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.78</strong> — درون‌ریزی اصلاح شد: پس از اصلاح قبلی، فایل برون‌بری بالاخره ساخته
+  می‌شد، اما دیگر نمی‌شد آن را درون‌ریزی کرد («در فایل قانونی نیست») — نسخهٔ انتشار هنگام
+  بسته‌بندی نام فیلدهای یک کلاس کمکی را تغییر می‌دهد، بنابراین فایل در واقع با کلیدهای
+  <code>"a"</code>/<code>"b"</code> نوشته می‌شد نه <code>"rules"</code>/<code>"voiceCommands"</code>،
+  و درون‌ریزی دقیقاً به‌دنبال "rules" می‌گردد. نام کلیدها اکنون به‌صراحت ثابت شده و از این
+  تغییر نام تأثیر نمی‌پذیرد. v0.77 به‌دلیل داشتن این باگ از سایت حذف شد.</li>
 <li><strong>v0.77</strong> — بالاخره علت واقعی خطای برون‌بری پیدا شد: MediaStore این هد‌یونیت فایل را
   می‌بندد و بلافاصله دوباره آن را می‌پیچد، به همین دلیل هر نوشتنی با IllegalStateException
   «Already closed» شکست می‌خورد؛ درج ردیف با پرچم IS_PENDING این مسیر را کاملاً دور می‌زند.
