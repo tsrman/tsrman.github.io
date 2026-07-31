@@ -53,15 +53,15 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.74</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.77</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.74-ru-release.apk">CarRulesVoice-0.74-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.74-en-release.apk">CarRulesVoice-0.74-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.74-fa-release.apk">CarRulesVoice-0.74-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.77-ru-release.apk">CarRulesVoice-0.77-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.77-en-release.apk">CarRulesVoice-0.77-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.77-fa-release.apk">CarRulesVoice-0.77-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
-  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.63</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
-  📦 <a href="CarRules-0.63-release.apk">CarRules-0.63-release.apk</a></p>
+  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.66</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
+  📦 <a href="CarRules-0.66-release.apk">CarRules-0.66-release.apk</a></p>
   <small>Оба приложения подписаны одним ключом — правила из Car Rules можно перенести в Voice при первом запуске или через меню «⋮». · Both apps share one signing key — rules from Car Rules can be imported into Voice on first launch or via the “⋮” menu. · هر دو برنامه با یک کلید امضا شده‌اند — قوانین Car Rules هنگام اولین اجرا یا از منوی «⋮» به Voice منتقل می‌شود.</small>
 </div>
 
@@ -144,6 +144,8 @@ APK того языка, на котором будете говорить.</p>
 <li><strong>Обогрев заднего стекла</strong> — новое действие и параметр состояния (вкл/выкл).</li>
 <li><strong>Багажник: открыть/закрыть</strong> — умное действие (учитывает текущий статус двери).</li>
 <li><strong>Зеркала: сложить/разложить</strong> — умное действие + параметр «Статус зеркал».</li>
+<li><strong>Температура климата</strong> — новое действие: задать температуру кондиционера
+  (водитель/пассажир) по заводской шкале головного устройства.</li>
 </ul>
 
 <h2>Параметры (триггеры и условия)</h2>
@@ -174,6 +176,7 @@ APK того языка, на котором будете говорить.</p>
 <h2>Действия (что можно включать)</h2>
 <table><thead><tr><th>Действие</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Климат-контроль (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Температура климата (водитель, пассажир)</td><td>17.5 = Lo, 18.0–32.0 (шаг 0.5 °C), 32.5 = Hi</td></tr>
 <tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Подогрев сидений (водитель, пассажир, задние Л/П)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
 <tr><td>Вентиляция сидений (водитель, пассажир)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
@@ -203,6 +206,14 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.77</strong> — наконец найдена настоящая причина ошибки экспорта: провайдер MediaStore
+  этой магнитолы закрывает файловый дескриптор и тут же оборачивает его заново, поэтому
+  запись всегда падала с IllegalStateException «Already closed»; вставка записи с флагом
+  IS_PENDING обходит эту ветку стороной. Если экспорт всё же не сработает, текст ошибки
+  теперь виден и в журнале приложения (строка с ⚠), и в logcat (тег CarRulesExport) — пришлите
+  его разработчику. Добавлено новое действие «Температура климата» (водитель, пассажир) —
+  шкала 18.0–32.0 °C с шагом 0.5°, плюс Lo/Hi, снятая с заводской настройки климата этой
+  магнитолы. То же самое в Car Rules v0.66.</li>
 <li><strong>v0.74</strong> — экспорт правил теперь включает и голосовые команды: файл экспорта стал объектом {"rules": [...], "voiceCommands": [...]} вместо простого списка правил, поэтому привязки голосовых фраз к правилам теперь тоже переносятся на другое устройство или после переустановки, а не пропадают. Старые файлы экспорта (простой список правил) по-прежнему импортируются нормально — просто не трогают текущие голосовые команды. Только для Car Rules Voice — у обычной Car Rules нет голосовых команд.</li>
 <li><strong>v0.73</strong> — убрано условие «Дворники: авто-режим»: статус на самом деле не приходит с этой магнитолы (несмотря на то, что один прошлый дамп показал значение), поэтому оно удалено из списка условий и из журнала; исправлен экспорт правил — из-за особенностей MediaStore этой магнитолы повторная запись в один и тот же файл car-rules.json всегда сообщала об ошибке экспорта и оставляла файл нулевого размера, теперь каждый экспорт создаёт новый файл с меткой времени, а импорт открывает собственный диалог выбора файла (показывает все найденные экспортированные файлы, включая старые car-rules.json). То же самое в Car Rules v0.63.</li>
 <li><strong>v0.72</strong> — добавлено условие «Дворники: авто-режим» (единственный статус дворников, который реально отдаёт эта магнитола — уровень/режим щёток недоступны), каждое его изменение пишется в журнал; добавлено действие «Дворники: сервисный режим» (тот же способ, которым штатная настройка магнитолы поднимает щётки для замены/очистки) — действие одностороннее, программного выхода из режима нет даже у производителя, только физический рычаг стеклоочистителя, поэтому рекомендуется добавить в правило условие «Передача = P»; в редакторе правила появился чекбокс отключения всплывающего уведомления и звука при срабатывании конкретного правила (журнал и действия правила при этом всё равно выполняются). То же добавлено в Car Rules v0.62.</li>
@@ -297,6 +308,8 @@ condition. Background location access is needed to fire while the app is closed.
 <li><strong>Rear-window heater</strong> — new action and state parameter (on/off).</li>
 <li><strong>Trunk: open/close</strong> — smart action (uses the live tailgate status).</li>
 <li><strong>Mirrors: fold/unfold</strong> — smart action + a “Mirror status” parameter.</li>
+<li><strong>Climate temperature</strong> — new action: set the A/C temperature (driver/passenger)
+  on the head unit's factory scale.</li>
 </ul>
 
 <h2>Parameters (triggers &amp; conditions)</h2>
@@ -327,6 +340,7 @@ condition. Background location access is needed to fire while the app is closed.
 <h2>Actions (what you can control)</h2>
 <table><thead><tr><th>Action</th><th>Values</th></tr></thead><tbody>
 <tr><td>Climate control (on/off)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Climate temperature (driver, passenger)</td><td>17.5 = Lo, 18.0-32.0 (0.5°C steps), 32.5 = Hi</td></tr>
 <tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Seat heaters (driver, passenger, rear L/R)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
 <tr><td>Seat ventilation (driver, passenger)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
@@ -356,6 +370,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.77</strong> — found the real cause of the export error at last: this head unit's
+  MediaStore closes the file descriptor and immediately re-wraps it, so every write always
+  died with IllegalStateException "Already closed"; inserting the row with the IS_PENDING
+  flag sidesteps that path entirely. If export still fails, the error text is now also
+  shown in the app's own log (a ⚠ line) and in logcat (tag CarRulesExport) — send that to
+  the developer. Added a new "Climate temperature" action (driver, passenger) — an
+  18.0-32.0°C scale in 0.5° steps, plus Lo/Hi, taken straight from this head unit's factory
+  climate control. The same landed in Car Rules v0.66.</li>
 <li><strong>v0.74</strong> — rules export now bundles voice commands too: the export file is now an object {"rules": [...], "voiceCommands": [...]} instead of a plain rule list, so voice-phrase bindings travel along when moving to another device or after a reinstall, instead of being lost. Older export files (a plain rule list) still import fine — they just leave the current voice commands untouched. Voice-only — the plain Car Rules app has no voice commands.</li>
 <li><strong>v0.73</strong> — removed the "Wipers: auto mode" condition: the status never actually arrives on this head unit (despite an earlier dump showing a value), so it's gone from both the condition list and the log; fixed rules export — this head unit's MediaStore quirks meant repeatedly overwriting one fixed car-rules.json always reported an export error and left a zero-byte file, so export now writes a fresh timestamped file every time, and import opens its own file picker listing every export found (including older plain car-rules.json backups). The same landed in Car Rules v0.63.</li>
 <li><strong>v0.72</strong> — added a "Wipers: auto mode" condition (the only wiper status this head unit actually exposes — blade level/mode aren't readable), logging every state change; added a "Wipers: service mode" action (the same write the factory setting uses to lift the blades for replacement/cleaning) — one-way, since even the manufacturer has no software exit, only the physical wiper stalk, so add a "Gear = P" condition to any rule using it; the rule editor also gained a checkbox to silence the "rule fired" toast + sound for a specific rule (its log entry and actions still run either way). The same additions landed in Car Rules v0.62.</li>
@@ -449,6 +471,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li><strong>گرمکن شیشهٔ عقب</strong> — عملیات و پارامتر وضعیت جدید (روشن/خاموش).</li>
 <li><strong>درِ صندوق: باز/بسته</strong> — عملیات هوشمند (بر اساس وضعیت زندهٔ در).</li>
 <li><strong>آینه‌ها: جمع/باز</strong> — عملیات هوشمند + پارامتر «وضعیت آینه‌ها».</li>
+<li><strong>دمای تهویه مطبوع</strong> — عملیات جدید: تنظیم دمای کولر (راننده/سرنشین) بر اساس
+  مقیاس کارخانه‌ای هد‌یونیت.</li>
 </ul>
 
 <h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
@@ -479,6 +503,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <h2>عملیات (چه چیزهایی قابل کنترل است)</h2>
 <table><thead><tr><th>عملیات</th><th>مقادیر</th></tr></thead><tbody>
 <tr><td>تهویه مطبوع (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>دمای تهویه مطبوع (راننده، سرنشین)</td><td>۱۷٫۵ = Lo، ۱۸٫۰ تا ۳۲٫۰ (گام ۰٫۵ درجه)، ۳۲٫۵ = Hi</td></tr>
 <tr><td>گرمکن شیشهٔ عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>گرمکن صندلی‌ها (راننده، سرنشین، عقب چ/ر)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
 <tr><td>تهویه صندلی‌ها (راننده، سرنشین)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
@@ -508,6 +533,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.77</strong> — بالاخره علت واقعی خطای برون‌بری پیدا شد: MediaStore این هد‌یونیت فایل را
+  می‌بندد و بلافاصله دوباره آن را می‌پیچد، به همین دلیل هر نوشتنی با IllegalStateException
+  «Already closed» شکست می‌خورد؛ درج ردیف با پرچم IS_PENDING این مسیر را کاملاً دور می‌زند.
+  اگر برون‌بری باز هم کار نکرد، اکنون متن خطا هم در گزارش برنامه (خط ⚠) و هم در logcat
+  (برچسب CarRulesExport) نمایش داده می‌شود — آن را برای توسعه‌دهنده ارسال کنید. عملیات جدید
+  «دمای تهویه مطبوع» (راننده، سرنشین) اضافه شد — بازهٔ ۱۸٫۰ تا ۳۲٫۰ درجه با گام ۰٫۵، به‌همراه
+  Lo/Hi، دقیقاً برگرفته از تنظیم کارخانه‌ای تهویهٔ این هد‌یونیت. همین مورد در Car Rules v0.66
+  هم اعمال شد.</li>
 <li><strong>v0.74</strong> — برون‌بری قوانین اکنون فرمان‌های صوتی را هم شامل می‌شود: فایل برون‌بری اکنون یک شیء {"rules": [...], "voiceCommands": [...]} است نه یک فهرست ساده از قوانین، پس اتصال عبارت‌های صوتی به قوانین هم هنگام انتقال به دستگاه دیگر یا پس از نصب مجدد منتقل می‌شود و از بین نمی‌رود. فایل‌های برون‌بری قدیمی (فهرست ساده قوانین) هنوز هم درون‌ریزی می‌شوند — فقط فرمان‌های صوتی فعلی را دست‌نخورده باقی می‌گذارند. فقط مخصوص Car Rules Voice — نسخهٔ ساده Car Rules فرمان صوتی ندارد.</li>
 <li><strong>v0.73</strong> — شرط «برف‌پاک‌کن: حالت خودکار» حذف شد: این وضعیت در عمل هرگز از این مانیتور دریافت نمی‌شود (با وجود یک دامپ قدیمی که مقداری نشان داده بود)، بنابراین از فهرست شرط‌ها و از گزارش حذف شد؛ برون‌بری قوانین هم اصلاح شد — به‌دلیل رفتار MediaStore این مانیتور، بازنویسی مکرر روی یک فایل ثابت car-rules.json همیشه خطای برون‌بری نشان می‌داد و فایلی با حجم صفر باقی می‌گذاشت، اکنون هر برون‌بری فایلی جدید با برچسب زمان می‌سازد و درون‌ریزی دیالوگ انتخاب فایل خودش را نشان می‌دهد (همهٔ فایل‌های برون‌بری‌شده از جمله car-rules.json قدیمی را فهرست می‌کند). همین مورد در Car Rules v0.63 هم اعمال شد.</li>
 <li><strong>v0.72</strong> — شرط «برف‌پاک‌کن: حالت خودکار» اضافه شد (تنها وضعیت برف‌پاک‌کن که این مانیتور واقعاً ارائه می‌دهد — سطح/حالت تیغه‌ها قابل خواندن نیست) و هر تغییر وضعیت آن در گزارش ثبت می‌شود؛ عملیات «برف‌پاک‌کن: حالت سرویس» هم اضافه شد (همان دستوری که تنظیمات کارخانه برای بالا بردن تیغه‌ها جهت تعویض/تمیزکاری استفاده می‌کند) — این عملیات یک‌طرفه است، چون حتی سازنده هم راه نرم‌افزاری برای خروج ندارد و فقط با اهرم فیزیکی برف‌پاک‌کن بازمی‌گردد، پس بهتر است شرط «دنده = P» را به این قانون اضافه کنید؛ همچنین در ویرایشگر قانون گزینه‌ای اضافه شد که پیام و صدای «قانون اجرا شد» را برای یک قانون خاص خاموش می‌کند (گزارش و عملیات آن قانون در هر صورت اجرا می‌شود). همین موارد در Car Rules v0.62 هم اضافه شد.</li>
