@@ -60,8 +60,8 @@
     <li>🇮🇷 <a href="CarRulesVoice-0.78-fa-release.apk">CarRulesVoice-0.78-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
-  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.66</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
-  📦 <a href="CarRules-0.66-release.apk">CarRules-0.66-release.apk</a></p>
+  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.67</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
+  📦 <a href="CarRules-0.67-release.apk">CarRules-0.67-release.apk</a></p>
   <small>Оба приложения подписаны одним ключом — правила из Car Rules можно перенести в Voice при первом запуске или через меню «⋮». · Both apps share one signing key — rules from Car Rules can be imported into Voice on first launch or via the “⋮” menu. · هر دو برنامه با یک کلید امضا شده‌اند — قوانین Car Rules هنگام اولین اجرا یا از منوی «⋮» به Voice منتقل می‌شود.</small>
 </div>
 
@@ -206,6 +206,11 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>Car Rules v0.67</strong> — добавлены три функции, которые раньше были только в Car
+  Rules Voice: действие «Багажник: открыть/закрыть» (учитывает текущий статус двери багажника,
+  поэтому не подаёт команду на уже движущуюся дверь), действие «Обогрев заднего стекла» и
+  кастомная кнопка руля как условие/триггер (раньше только записывалась в журнал). Только для
+  обычной Car Rules — в Voice эти функции уже были.</li>
 <li><strong>v0.78</strong> — исправлен импорт: после прошлого исправления файл экспорта наконец
   создавался, но его нельзя было импортировать обратно («В файле нет правил») — сборка для
   публикации переименовывает поля вспомогательного класса при упаковке, из-за чего файл
@@ -376,6 +381,11 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>Car Rules v0.67</strong> — added three features that previously existed only in Car
+  Rules Voice: a "Trunk: open/close" action (status-aware, so it never sends a command to an
+  already-moving tailgate), a "Rear-window heater" action, and the custom steering-wheel button
+  as a trigger/condition source (previously only logged). No-voice edition only — Voice already
+  had these.</li>
 <li><strong>v0.78</strong> — fixed import: after the previous fix, the export file finally got
   created, but it could no longer be imported back ("no rules in file") — the release build
   renames a helper class's fields when packaging, so the file was actually written with
@@ -546,6 +556,10 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>Car Rules v0.67</strong> — سه قابلیت که پیش‌تر فقط در Car Rules Voice بود اضافه شد:
+  عملیات «صندوق عقب: باز/بسته» (آگاه از وضعیت فعلی درِ صندوق، پس هرگز به دری که در حال حرکت
+  است دستور نمی‌فرستد)، عملیات «گرمکن شیشهٔ عقب»، و دکمهٔ سفارشی فرمان به‌عنوان شرط/محرک
+  (پیش‌تر فقط در گزارش ثبت می‌شد). فقط نسخهٔ بدون صدا — این قابلیت‌ها از قبل در Voice بود.</li>
 <li><strong>v0.78</strong> — درون‌ریزی اصلاح شد: پس از اصلاح قبلی، فایل برون‌بری بالاخره ساخته
   می‌شد، اما دیگر نمی‌شد آن را درون‌ریزی کرد («در فایل قانونی نیست») — نسخهٔ انتشار هنگام
   بسته‌بندی نام فیلدهای یک کلاس کمکی را تغییر می‌دهد، بنابراین فایل در واقع با کلیدهای
