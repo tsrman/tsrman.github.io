@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.78</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.82</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.78-ru-release.apk">CarRulesVoice-0.78-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.78-en-release.apk">CarRulesVoice-0.78-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.78-fa-release.apk">CarRulesVoice-0.78-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.82-ru-release.apk">CarRulesVoice-0.82-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.82-en-release.apk">CarRulesVoice-0.82-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.82-fa-release.apk">CarRulesVoice-0.82-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.67</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -109,6 +109,32 @@
 <p>Язык распознавания задаётся установленным APK (русский / английский / фарси). Ставьте
 APK того языка, на котором будете говорить.</p>
 
+<h2>Плавающая панель (новое)</h2>
+<p>Окно поверх всех приложений с крупными кнопками — по одному нажатию запускает выбранное правило
+без переключения на само приложение. Та же платная лицензия, что и у голосового управления — один
+и тот же код активирует обе функции.</p>
+<ol>
+<li>На главном экране откройте <strong>«Панель»</strong>.</li>
+<li>Сначала нужно разрешение <strong>«Отображение поверх других окон»</strong> — см. ниже, как его получить.</li>
+<li>После получения разрешения появится тот же экран активации (VIN + 16-значный код), что и для голоса.</li>
+<li>Выберите <strong>количество кнопок</strong> (4, 6 или 8) и <strong>форму панели</strong>
+  (вертикальная или горизонтальная), назначьте правило на каждую кнопку.</li>
+<li>Панель можно перетащить за верхнюю полоску в удобное место — позиция запоминается.</li>
+</ol>
+<h3>Как получить разрешение «Отображение поверх других окон»</h3>
+<p>На этой магнитоле системная кнопка «Открыть системные настройки» может не сработать (нужный
+экран недоступен). Два рабочих способа, без переключения на компьютер:</p>
+<ol>
+<li><strong>Через саму панель настроек</strong>, если у вас уже есть adb-доступ к этой магнитоле
+  (по Wi-Fi или USB): в экране «Панель» есть раздел «Подключение и выдача» — введите IP и порт adb
+  прямо в приложении и нажмите кнопку, оно само подключится и выдаст себе разрешение. При первом
+  подключении на экране магнитолы может появиться запрос «Разрешить отладку?» — подтвердите и
+  нажмите кнопку ещё раз.</li>
+<li><strong>Вручную с компьютера</strong>, если у вас есть adb:<br>
+  <code>adb connect &lt;IP магнитолы&gt;:5555</code><br>
+  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+</ol>
+
 <h2>Первый запуск</h2>
 <ol>
 <li>Установите APK и откройте приложение.</li>
@@ -150,13 +176,14 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>Что нового в этой версии</h2>
 <ul>
-<li><strong>Офлайн-голосовое управление</strong> правилами (Vosk), активация кнопкой руля.</li>
-<li><strong>Кастомная кнопка руля</strong> — как триггер правил и как одиночная кнопка активации голоса.</li>
-<li><strong>Обогрев заднего стекла</strong> — новое действие и параметр состояния (вкл/выкл).</li>
-<li><strong>Багажник: открыть/закрыть</strong> — умное действие (учитывает текущий статус двери).</li>
-<li><strong>Зеркала: сложить/разложить</strong> — умное действие + параметр «Статус зеркал».</li>
-<li><strong>Температура климата</strong> — новое действие: задать температуру кондиционера
-  (водитель/пассажир) по заводской шкале головного устройства.</li>
+<li><strong>Плавающая панель быстрого запуска</strong> — окно поверх всех приложений с 4/6/8 крупными
+  кнопками (вертикально или горизонтально), каждая запускает своё правило. Та же лицензия, что и у
+  голоса.</li>
+<li><strong>Самостоятельная выдача разрешения через беспроводной adb</strong> — панель может сама
+  подключиться к adb этой магнитолы и выдать себе разрешение «Отображение поверх других окон», без
+  компьютера.</li>
+<li>Исправлен экспорт правил, ронявший файл с ключами <code>"a"</code>/<code>"b"</code> вместо
+  <code>"rules"</code>/<code>"voiceCommands"</code> на релизных сборках.</li>
 </ul>
 
 <h2>Параметры (триггеры и условия)</h2>
@@ -217,6 +244,14 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.79–v0.82</strong> — новая <strong>плавающая панель быстрого запуска</strong>: окно
+  поверх всех приложений с 4/6/8 крупными кнопками (вертикально или горизонтально), каждая
+  запускает своё правило одним нажатием. Требует системное разрешение «Отображение поверх других
+  окон» — у него нет диалога запроса, а на этой магнитоле экран настройки может быть недоступен,
+  поэтому добавлена самостоятельная выдача через беспроводной adb прямо из приложения (панель
+  подключается к adb этой магнитолы и выдаёт себе разрешение без компьютера) — либо тот же
+  результат можно получить вручную командой adb (см. раздел «Плавающая панель» выше). Панель
+  защищена той же лицензией, что и голосовое управление: один код активирует обе функции.</li>
 <li><strong>Car Rules v0.67</strong> — добавлены три функции, которые раньше были только в Car
   Rules Voice: действие «Багажник: открыть/закрыть» (учитывает текущий статус двери багажника,
   поэтому не подаёт команду на уже движущуюся дверь), действие «Обогрев заднего стекла» и
@@ -285,6 +320,31 @@ phrases to any rule; when the app hears them, the rule runs.</p>
 <p>The recognition language is set by the installed APK (Russian / English / Persian). Install
 the APK for the language you will speak.</p>
 
+<h2>Floating panel (new)</h2>
+<p>A window on top of every other app with large buttons — one tap runs the chosen rule without
+switching to the app itself. Same paid license as voice control — one code activates both.</p>
+<ol>
+<li>Open <strong>“Panel”</strong> from the main screen.</li>
+<li>It needs the <strong>“Display over other apps”</strong> permission first — see below for how to get it.</li>
+<li>Once granted, the same activation screen (VIN + 16-digit code) as voice control appears.</li>
+<li>Choose the <strong>number of buttons</strong> (4, 6, or 8) and the <strong>panel shape</strong>
+  (vertical or horizontal), then assign a rule to each button.</li>
+<li>Drag the panel by its top strip to reposition it — the position is remembered.</li>
+</ol>
+<h3>How to get the “Display over other apps” permission</h3>
+<p>On this head unit the built-in “Open system settings” button may not work (the screen it needs
+isn’t reachable). Two ways that do work, with no computer needed:</p>
+<ol>
+<li><strong>From the Panel screen itself</strong>, if you already have adb access to this head unit
+  (over Wi-Fi or USB): the “Connect &amp; grant” section lets you type the head unit’s adb IP and port
+  right into the app and tap a button — it connects and grants the permission to itself. The first
+  connection may show an “Allow debugging?” prompt on the head unit’s own screen — confirm it, then
+  tap the button again.</li>
+<li><strong>Manually from a computer</strong>, if you have adb:<br>
+  <code>adb connect &lt;head unit IP&gt;:5555</code><br>
+  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+</ol>
+
 <h2>First run</h2>
 <ol>
 <li>Install the APK and open the app.</li>
@@ -325,13 +385,12 @@ condition. Background location access is needed to fire while the app is closed.
 
 <h2>What’s new in this version</h2>
 <ul>
-<li><strong>Offline voice control</strong> of rules (Vosk), activated by a wheel button.</li>
-<li><strong>Custom wheel button</strong> — as a rule trigger and as a single-press voice activator.</li>
-<li><strong>Rear-window heater</strong> — new action and state parameter (on/off).</li>
-<li><strong>Trunk: open/close</strong> — smart action (uses the live tailgate status).</li>
-<li><strong>Mirrors: fold/unfold</strong> — smart action + a “Mirror status” parameter.</li>
-<li><strong>Climate temperature</strong> — new action: set the A/C temperature (driver/passenger)
-  on the head unit's factory scale.</li>
+<li><strong>Floating quick-launch panel</strong> — a window on top of every app with 4/6/8 large
+  buttons (vertical or horizontal), each running its own rule. Same license as voice control.</li>
+<li><strong>Self-grant the permission over wireless adb</strong> — the panel can connect to this
+  head unit's own adb and grant itself the "Display over other apps" permission, no computer needed.</li>
+<li>Fixed rules export dropping a file with <code>"a"</code>/<code>"b"</code> keys instead of
+  <code>"rules"</code>/<code>"voiceCommands"</code> on release builds.</li>
 </ul>
 
 <h2>Parameters (triggers &amp; conditions)</h2>
@@ -392,6 +451,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.79–v0.82</strong> — new <strong>floating quick-launch panel</strong>: a window on top
+  of every app with 4/6/8 large buttons (vertical or horizontal), each running its own rule with
+  one tap. Needs the "Display over other apps" system permission — it has no request dialog of its
+  own, and on this head unit the settings screen for it may not be reachable, so the app can now
+  self-grant it over wireless adb (the panel connects to this head unit's own adb and grants itself
+  the permission, no computer needed) — or the same result can be reached manually with an adb
+  command (see the "Floating panel" section above). The panel is protected by the same license as
+  voice control: one code activates both.</li>
 <li><strong>Car Rules v0.67</strong> — added three features that previously existed only in Car
   Rules Voice: a "Trunk: open/close" action (status-aware, so it never sends a command to an
   already-moving tailgate), a "Rear-window heater" action, and the custom steering-wheel button
@@ -460,6 +527,30 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <p>زبان تشخیص با APK نصب‌شده تعیین می‌شود (روسی / انگلیسی / فارسی). APK زبانی را که با آن صحبت
 می‌کنید نصب کنید.</p>
 
+<h2>پنل شناور (جدید)</h2>
+<p>پنجره‌ای روی همهٔ برنامه‌های دیگر با دکمه‌های بزرگ — با یک ضربه قانون انتخاب‌شده را اجرا می‌کند،
+بدون نیاز به رفتن به خود برنامه. همان مجوز پولی کنترل صوتی — یک کد هر دو را فعال می‌کند.</p>
+<ol>
+<li>از صفحهٔ اصلی <strong>«پنل»</strong> را باز کنید.</li>
+<li>ابتدا به مجوز <strong>«نمایش روی سایر برنامه‌ها»</strong> نیاز دارد — نحوهٔ دریافت آن را در ادامه ببینید.</li>
+<li>پس از دریافت مجوز، همان صفحهٔ فعال‌سازی (VIN + کد ۱۶ رقمی) کنترل صوتی ظاهر می‌شود.</li>
+<li><strong>تعداد دکمه‌ها</strong> (۴، ۶ یا ۸) و <strong>شکل پنل</strong> (عمودی یا افقی) را انتخاب کنید و
+  یک قانون به هر دکمه اختصاص دهید.</li>
+<li>پنل را از نوار بالایی‌اش می‌توانید به هر جای دلخواه بکشید — موقعیت آن ذخیره می‌شود.</li>
+</ol>
+<h3>چگونه مجوز «نمایش روی سایر برنامه‌ها» را بگیریم</h3>
+<p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست). دو
+روش دیگر که کار می‌کنند، بدون نیاز به کامپیوتر:</p>
+<ol>
+<li><strong>از همان صفحهٔ پنل</strong>، اگر از قبل به این هد‌یونیت دسترسی adb دارید (از طریق Wi-Fi یا
+  USB): بخش «اتصال و اعطا» به شما اجازه می‌دهد آدرس IP و پورت adb هد‌یونیت را مستقیماً در برنامه وارد
+  کنید و روی دکمه بزنید — خودش وصل می‌شود و مجوز را به خودش می‌دهد. اولین اتصال ممکن است پیام «اجازهٔ
+  اشکال‌زدایی؟» را روی صفحهٔ خود هد‌یونیت نشان دهد — آن را تأیید کنید و دوباره دکمه را بزنید.</li>
+<li><strong>به‌صورت دستی از یک کامپیوتر</strong>، اگر adb دارید:<br>
+  <code>adb connect &lt;آدرس IP هد‌یونیت&gt;:5555</code><br>
+  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+</ol>
+
 <h2>اجرای نخست</h2>
 <ol>
 <li>APK را نصب و برنامه را باز کنید.</li>
@@ -500,13 +591,12 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تازه‌ها در این نسخه</h2>
 <ul>
-<li><strong>کنترل صوتی آفلاین</strong> قوانین (Vosk)، با دکمهٔ فرمان فعال می‌شود.</li>
-<li><strong>دکمهٔ سفارشی فرمان</strong> — هم به‌عنوان محرک قانون و هم فعال‌سازی صوتی با یک بار فشردن.</li>
-<li><strong>گرمکن شیشهٔ عقب</strong> — عملیات و پارامتر وضعیت جدید (روشن/خاموش).</li>
-<li><strong>درِ صندوق: باز/بسته</strong> — عملیات هوشمند (بر اساس وضعیت زندهٔ در).</li>
-<li><strong>آینه‌ها: جمع/باز</strong> — عملیات هوشمند + پارامتر «وضعیت آینه‌ها».</li>
-<li><strong>دمای تهویه مطبوع</strong> — عملیات جدید: تنظیم دمای کولر (راننده/سرنشین) بر اساس
-  مقیاس کارخانه‌ای هد‌یونیت.</li>
+<li><strong>پنل شناور اجرای سریع</strong> — پنجره‌ای روی همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا
+  افقی)، هرکدام قانون خودش را اجرا می‌کند. همان مجوز کنترل صوتی.</li>
+<li><strong>اعطای خودکار مجوز از طریق adb بی‌سیم</strong> — پنل می‌تواند به adb خود هد‌یونیت وصل شود و
+  مجوز «نمایش روی سایر برنامه‌ها» را بدون کامپیوتر به خودش بدهد.</li>
+<li>رفع اشکال برون‌بری قوانین که در نسخه‌های release فایلی با کلیدهای <code>"a"</code>/<code>"b"</code>
+  به‌جای <code>"rules"</code>/<code>"voiceCommands"</code> می‌ساخت.</li>
 </ul>
 
 <h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
@@ -567,6 +657,13 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.79–v0.82</strong> — <strong>پنل شناور اجرای سریع</strong> جدید: پنجره‌ای روی همهٔ
+  برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا افقی)، هرکدام با یک ضربه قانون خودش را اجرا می‌کند. به
+  مجوز سیستمی «نمایش روی سایر برنامه‌ها» نیاز دارد — این مجوز دیالوگ درخواست خودش را ندارد، و روی
+  این هد‌یونیت صفحهٔ تنظیمات آن ممکن است در دسترس نباشد، بنابراین برنامه اکنون می‌تواند از طریق adb
+  بی‌سیم آن را به خودش بدهد (پنل به adb خود هد‌یونیت وصل می‌شود و مجوز را بدون کامپیوتر به خودش
+  اعطا می‌کند) — یا همین نتیجه را می‌توان با یک دستور adb به‌صورت دستی گرفت (بخش «پنل شناور» در
+  بالا را ببینید). پنل با همان مجوزی که کنترل صوتی دارد محافظت می‌شود: یک کد هر دو را فعال می‌کند.</li>
 <li><strong>Car Rules v0.67</strong> — سه قابلیت که پیش‌تر فقط در Car Rules Voice بود اضافه شد:
   عملیات «صندوق عقب: باز/بسته» (آگاه از وضعیت فعلی درِ صندوق، پس هرگز به دری که در حال حرکت
   است دستور نمی‌فرستد)، عملیات «گرمکن شیشهٔ عقب»، و دکمهٔ سفارشی فرمان به‌عنوان شرط/محرک
