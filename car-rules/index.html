@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.84</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.88</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.84-ru-release.apk">CarRulesVoice-0.84-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.84-en-release.apk">CarRulesVoice-0.84-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.84-fa-release.apk">CarRulesVoice-0.84-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.88-ru-release.apk">CarRulesVoice-0.88-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.88-en-release.apk">CarRulesVoice-0.88-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.88-fa-release.apk">CarRulesVoice-0.88-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -244,6 +244,20 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.88</strong> — поднятие окна приложения перед прослушиванием (опция из v0.87) на практике
+  не срабатывало в фоне: Android молча блокировал прямой запуск activity, не показывая никакой
+  ошибки. Теперь поднятие идёт через тот же системный сервис, что использует автозапуск при старте
+  магнитолы, — он не подчиняется этому ограничению и срабатывает независимо от того, видно ли
+  приложение на экране в момент нажатия кнопки.</li>
+<li><strong>v0.87</strong> — если микрофон на мгновение занят другим приложением, теперь делается до
+  3 повторных попыток открыть его вместо немедленной ошибки «микрофон недоступен». Добавлена
+  экспериментальная опция «поднимать приложение на экран перед прослушиванием» (экран настроек
+  голоса, по умолчанию выключена).</li>
+<li><strong>v0.86</strong> — сообщение «Микрофон недоступен» теперь показывает причину ошибки (а не
+  только сам факт), и эта причина попадает в журнал приложения — это упростило разбор жалоб
+  пользователей на недоступный микрофон в фоне.</li>
+<li><strong>v0.85</strong> — исправлена самостоятельная выдача разрешения через беспроводной adb,
+  падавшая с ошибкой NoSuchMethodException на некоторых версиях Android.</li>
 <li><strong>v0.84 / Car Rules v0.68</strong> — списки свойств для триггеров/условий и целей действия
   в редакторе правил теперь отсортированы по алфавиту, а не идут в порядке добавления в код —
   проще найти нужное свойство по мере роста списка.</li>
@@ -457,6 +471,20 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.88</strong> — raising the app to the foreground before listening (the v0.87 option) did
+  not actually work in the background: Android was silently blocking the direct activity launch with
+  no error at all. Raising now goes through the same system service used for auto-start at head-unit
+  boot, which is not subject to that restriction and works regardless of whether the app is visible
+  at the moment the button is pressed.</li>
+<li><strong>v0.87</strong> — if the microphone is briefly held by another app, up to 3 retries are now
+  made before reporting "microphone unavailable" instead of failing immediately. Added an
+  experimental "raise app to foreground before listening" option (Voice settings screen, off by
+  default).</li>
+<li><strong>v0.86</strong> — the "Microphone unavailable" message now shows the underlying reason (not
+  just the bare fact of failure), and that reason is written to the app's log — this made it much
+  easier to diagnose user reports of the mic being unavailable in the background.</li>
+<li><strong>v0.85</strong> — fixed the wireless-adb self-grant failing with a NoSuchMethodException on
+  some Android versions.</li>
 <li><strong>v0.84 / Car Rules v0.68</strong> — the rule editor's trigger/condition and action-target
   property lists are now sorted alphabetically instead of following code declaration order, making
   it easier to find a property as the list grows.</li>
@@ -669,6 +697,19 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.88</strong> — بالا آوردن برنامه پیش از شنیدن (گزینهٔ v0.87) در عمل در پس‌زمینه کار
+  نمی‌کرد: اندروید اجرای مستقیم activity را بی‌سروصدا مسدود می‌کرد، بدون هیچ خطایی. اکنون بالا
+  آوردن از طریق همان سرویس سیستمی‌ای انجام می‌شود که برای اجرای خودکار هنگام روشن شدن هد‌یونیت
+  استفاده می‌شود — این سرویس مشمول آن محدودیت نیست و صرف‌نظر از اینکه برنامه در لحظهٔ فشردن دکمه
+  روی صفحه دیده می‌شود یا نه، کار می‌کند.</li>
+<li><strong>v0.87</strong> — اگر میکروفون برای لحظه‌ای در اختیار برنامهٔ دیگری باشد، اکنون پیش از
+  گزارش «میکروفون در دسترس نیست» تا ۳ بار دوباره تلاش می‌شود. گزینهٔ آزمایشی «بالا آوردن برنامه به
+  صفحه پیش از شنیدن» اضافه شد (صفحهٔ تنظیمات صدا، به‌طور پیش‌فرض خاموش).</li>
+<li><strong>v0.86</strong> — پیام «میکروفون در دسترس نیست» اکنون دلیل واقعی خطا را نیز نشان می‌دهد
+  (نه فقط اصل خطا)، و این دلیل در گزارش برنامه هم ثبت می‌شود — این کار بررسی گزارش‌های کاربران
+  دربارهٔ در دسترس نبودن میکروفون در پس‌زمینه را ساده‌تر کرد.</li>
+<li><strong>v0.85</strong> — اعطای خودکار مجوز از طریق adb بی‌سیم که در برخی نسخه‌های اندروید با خطای
+  NoSuchMethodException شکست می‌خورد، رفع شد.</li>
 <li><strong>v0.84 / Car Rules v0.68</strong> — فهرست ویژگی‌های محرک/شرط و هدف عملیات در ویرایشگر
   قانون اکنون به‌ترتیب الفبا مرتب شده‌اند، نه به ترتیب افزودن در کد — پیدا کردن ویژگی موردنظر با
   رشد فهرست ساده‌تر شده است.</li>
