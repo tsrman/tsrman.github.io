@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.88</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.93</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.88-ru-release.apk">CarRulesVoice-0.88-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.88-en-release.apk">CarRulesVoice-0.88-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.88-fa-release.apk">CarRulesVoice-0.88-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.93-ru-release.apk">CarRulesVoice-0.93-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.93-en-release.apk">CarRulesVoice-0.93-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.93-fa-release.apk">CarRulesVoice-0.93-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -244,6 +244,15 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.89–v0.93</strong> — самостоятельная выдача разрешения «Отображение поверх других
+  окон» через беспроводной adb (раздел «Плавающая панель») на деле никогда не работала:
+  библиотека, которая формирует команду для shell, склеивала её аргументы без пробелов
+  между ними, и магнитола получала один нечитаемый набор символов вместо команды
+  <code>appops set --user 0 … allow</code>. Также случалась ложная ошибка «Stream
+  closed», даже когда разрешение уже было выдано успешно. Обе проблемы исправлены;
+  дополнительно IP-адрес и порт для подключения теперь подставляются автоматически
+  (можно изменить), а если разрешение всё же не выдаётся — экран показывает точный
+  ответ shell-команды, а не просто «не получилось».</li>
 <li><strong>v0.88</strong> — поднятие окна приложения перед прослушиванием (опция из v0.87) на практике
   не срабатывало в фоне: Android молча блокировал прямой запуск activity, не показывая никакой
   ошибки. Теперь поднятие идёт через тот же системный сервис, что использует автозапуск при старте
@@ -471,6 +480,15 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.89–v0.93</strong> — the wireless-adb self-grant for "Display over other apps"
+  (Floating panel section) never actually worked: the library building the shell
+  command was gluing its arguments together with no spaces between them, so the head
+  unit received one unreadable blob instead of an <code>appops set --user 0 …
+  allow</code> command. A spurious "Stream closed" error could also show up even when
+  the permission had already been granted successfully. Both are fixed now; the
+  connect IP and port also auto-fill (still editable), and if the grant still doesn't
+  land, the screen now shows the shell command's exact response instead of just
+  "didn't work".</li>
 <li><strong>v0.88</strong> — raising the app to the foreground before listening (the v0.87 option) did
   not actually work in the background: Android was silently blocking the direct activity launch with
   no error at all. Raising now goes through the same system service used for auto-start at head-unit
@@ -697,6 +715,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.89–v0.93</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
+  بی‌سیم (بخش «پنل شناور») در واقع هرگز کار نمی‌کرد: کتابخانه‌ای که دستور shell را
+  می‌ساخت، آرگومان‌ها را بدون فاصله به هم می‌چسباند و هد‌یونیت به‌جای دستور
+  <code>appops set --user 0 … allow</code> یک رشتهٔ نامفهوم دریافت می‌کرد. همچنین
+  گاهی خطای کاذب «Stream closed» نمایش داده می‌شد، حتی زمانی که مجوز با موفقیت اعطا
+  شده بود. هر دو مشکل اکنون رفع شده‌اند؛ آدرس IP و پورت اتصال هم اکنون به‌طور خودکار
+  پر می‌شوند (قابل تغییر)، و اگر مجوز باز هم اعطا نشود، صفحه اکنون پاسخ دقیق دستور
+  shell را نشان می‌دهد، نه فقط «انجام نشد».</li>
 <li><strong>v0.88</strong> — بالا آوردن برنامه پیش از شنیدن (گزینهٔ v0.87) در عمل در پس‌زمینه کار
   نمی‌کرد: اندروید اجرای مستقیم activity را بی‌سروصدا مسدود می‌کرد، بدون هیچ خطایی. اکنون بالا
   آوردن از طریق همان سرویس سیستمی‌ای انجام می‌شود که برای اجرای خودکار هنگام روشن شدن هد‌یونیت
