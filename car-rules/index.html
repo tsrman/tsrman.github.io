@@ -63,6 +63,9 @@
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
   📦 <a href="CarRules-0.68-release.apk">CarRules-0.68-release.apk</a></p>
   <small>Оба приложения подписаны одним ключом — правила из Car Rules можно перенести в Voice при первом запуске или через меню «⋮». · Both apps share one signing key — rules from Car Rules can be imported into Voice on first launch or via the “⋮” menu. · هر دو برنامه با یک کلید امضا شده‌اند — قوانین Car Rules هنگام اولین اجرا یا از منوی «⋮» به Voice منتقل می‌شود.</small>
+  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules ADB Grant</strong> — отдельное маленькое приложение для телефона: выдаёт магнитоле разрешение «Отображение поверх других окон» по Wi-Fi adb, без компьютера (инструкция — в разделе своего языка ниже) / a small standalone phone app that grants the head unit's "Display over other apps" permission over Wi-Fi adb, no computer needed (instructions in the language section below) / برنامه‌ای کوچک و جداگانه برای گوشی: مجوز «نمایش روی سایر برنامه‌ها» را از طریق adb بی‌سیم و بدون کامپیوتر به هد‌یونیت اعطا می‌کند (دستورالعمل در بخش زبان خودتان در پایین صفحه):<br>
+  📱 <a href="CarRulesAdbGrant-1.0-debug.apk">CarRulesAdbGrant-1.0-debug.apk</a></p>
+  <small>Устанавливается на обычный телефон (Android), не на магнитолу — не требует Android Automotive. · Installs on an ordinary phone (Android), not the head unit — no Android Automotive required. · روی یک گوشی معمولی اندروید نصب می‌شود، نه هد‌یونیت — نیازی به Android Automotive نیست.</small>
 </div>
 
 <!-- ================= VIDEO DEMO (shared) ================= -->
@@ -123,17 +126,22 @@ APK того языка, на котором будете говорить.</p>
 </ol>
 <h3>Как получить разрешение «Отображение поверх других окон»</h3>
 <p>На этой магнитоле системная кнопка «Открыть системные настройки» может не сработать (нужный
-экран недоступен). Два рабочих способа, без переключения на компьютер:</p>
+экран недоступен), а само приложение больше не пытается выдать себе это разрешение — самоподключение
+к своему же adb на этой магнитоле стабильно не работает (см. историю изменений ниже). Разрешение
+выдаётся с обычного телефона, без компьютера, отдельным маленьким приложением
+<strong>Car Rules ADB Grant</strong> (ссылка — в разделе загрузки в начале страницы):</p>
 <ol>
-<li><strong>Через саму панель настроек</strong>, если у вас уже есть adb-доступ к этой магнитоле
-  (по Wi-Fi или USB): в экране «Панель» есть раздел «Подключение и выдача» — введите IP и порт adb
-  прямо в приложении и нажмите кнопку, оно само подключится и выдаст себе разрешение. При первом
-  подключении на экране магнитолы может появиться запрос «Разрешить отладку?» — подтвердите и
-  нажмите кнопку ещё раз.</li>
-<li><strong>Вручную с компьютера</strong>, если у вас есть adb:<br>
-  <code>adb connect &lt;IP магнитолы&gt;:5555</code><br>
-  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+<li>На магнитоле должен уже быть включён adb по TCP (обычно так и есть — порт 5555, без паринга).</li>
+<li>Установите Car Rules ADB Grant на телефон и откройте его.</li>
+<li>Введите IP-адрес магнитолы (порт по умолчанию 5555) и нажмите <strong>«Выдать права»</strong>.</li>
+<li>При первом подключении на экране магнитолы может появиться запрос «Разрешить отладку?» —
+  подтвердите его и нажмите кнопку в приложении на телефоне ещё раз.</li>
+<li>Раздел «Журнал ADB» в приложении показывает каждый шаг подключения (подключение, отправка
+  команды, чтение ответа) — полезно, если что-то не сработает.</li>
 </ol>
+<p>Тот же результат можно получить вручную с компьютера, если у вас есть adb:<br>
+<code>adb connect &lt;IP магнитолы&gt;:5555</code><br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 
 <h2>Первый запуск</h2>
 <ol>
@@ -179,9 +187,8 @@ APK того языка, на котором будете говорить.</p>
 <li><strong>Плавающая панель быстрого запуска</strong> — окно поверх всех приложений с 4/6/8 крупными
   кнопками (вертикально или горизонтально), каждая запускает своё правило. Та же лицензия, что и у
   голоса.</li>
-<li><strong>Самостоятельная выдача разрешения через беспроводной adb</strong> — панель может сама
-  подключиться к adb этой магнитолы и выдать себе разрешение «Отображение поверх других окон», без
-  компьютера.</li>
+<li><strong>Car Rules ADB Grant</strong> — отдельное приложение для телефона, выдающее это
+  разрешение по Wi-Fi adb без компьютера (см. «Как получить разрешение…» выше).</li>
 <li>Исправлен экспорт правил, ронявший файл с ключами <code>"a"</code>/<code>"b"</code> вместо
   <code>"rules"</code>/<code>"voiceCommands"</code> на релизных сборках.</li>
 </ul>
@@ -252,8 +259,8 @@ APK того языка, на котором будете говорить.</p>
   самой магнитоле блокирует именно её собственным приложениям доступ к этому порту.
   Вместо повторных попыток чинить самоподключение кнопка «Открыть системные настройки»
   снова прячется, как только разрешение выдано, а сама выдача теперь делается отдельным
-  маленьким Android-приложением для обычного телефона (не публикуется здесь, по
-  запросу).</li>
+  маленьким Android-приложением для обычного телефона — <strong>Car Rules ADB Grant</strong>
+  (скачать в разделе загрузки выше; инструкция — в разделе «Как получить разрешение…»).</li>
 <li><strong>v0.89–v0.93</strong> — самостоятельная выдача разрешения «Отображение поверх других
   окон» через беспроводной adb (раздел «Плавающая панель») на деле никогда не работала:
   библиотека, которая формирует команду для shell, склеивала её аргументы без пробелов
@@ -372,17 +379,22 @@ switching to the app itself. Same paid license as voice control — one code act
 </ol>
 <h3>How to get the “Display over other apps” permission</h3>
 <p>On this head unit the built-in “Open system settings” button may not work (the screen it needs
-isn’t reachable). Two ways that do work, with no computer needed:</p>
+isn’t reachable), and the app no longer tries to grant itself this permission — connecting to its
+own adb on this head unit consistently fails (see the changelog below). The permission is granted
+from an ordinary phone instead, no computer needed, using a separate small companion app called
+<strong>Car Rules ADB Grant</strong> (link in the download section at the top of the page):</p>
 <ol>
-<li><strong>From the Panel screen itself</strong>, if you already have adb access to this head unit
-  (over Wi-Fi or USB): the “Connect &amp; grant” section lets you type the head unit’s adb IP and port
-  right into the app and tap a button — it connects and grants the permission to itself. The first
-  connection may show an “Allow debugging?” prompt on the head unit’s own screen — confirm it, then
-  tap the button again.</li>
-<li><strong>Manually from a computer</strong>, if you have adb:<br>
-  <code>adb connect &lt;head unit IP&gt;:5555</code><br>
-  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+<li>The head unit needs TCP adb already enabled (usually already the case — port 5555, no pairing).</li>
+<li>Install Car Rules ADB Grant on your phone and open it.</li>
+<li>Enter the head unit's IP address (port defaults to 5555) and tap <strong>“Grant”</strong>.</li>
+<li>The first connection may show an “Allow debugging?” prompt on the head unit’s own screen —
+  confirm it, then tap the button in the phone app again.</li>
+<li>The “ADB log” section in the app shows every step of the connection (connect, send command,
+  read response) — useful if something doesn't work.</li>
 </ol>
+<p>The same result can also be reached manually from a computer, if you have adb:<br>
+<code>adb connect &lt;head unit IP&gt;:5555</code><br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 
 <h2>First run</h2>
 <ol>
@@ -426,8 +438,8 @@ condition. Background location access is needed to fire while the app is closed.
 <ul>
 <li><strong>Floating quick-launch panel</strong> — a window on top of every app with 4/6/8 large
   buttons (vertical or horizontal), each running its own rule. Same license as voice control.</li>
-<li><strong>Self-grant the permission over wireless adb</strong> — the panel can connect to this
-  head unit's own adb and grant itself the "Display over other apps" permission, no computer needed.</li>
+<li><strong>Car Rules ADB Grant</strong> — a separate phone app that grants this permission over
+  Wi-Fi adb, no computer needed (see "How to get the ... permission" above).</li>
 <li>Fixed rules export dropping a file with <code>"a"</code>/<code>"b"</code> keys instead of
   <code>"rules"</code>/<code>"voiceCommands"</code> on release builds.</li>
 </ul>
@@ -498,7 +510,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
   appears to block its own apps from reaching that port. Instead of chasing the
   self-connect further, the "Open system settings" button goes back to hiding once
   the permission is granted, and granting it is now done by a separate, small
-  companion Android app for an ordinary phone (not published here, on request).</li>
+  companion Android app for an ordinary phone — <strong>Car Rules ADB Grant</strong>
+  (download in the section above; instructions in "How to get the ... permission").</li>
 <li><strong>v0.89–v0.93</strong> — the wireless-adb self-grant for "Display over other apps"
   (Floating panel section) never actually worked: the library building the shell
   command was gluing its arguments together with no spaces between them, so the head
@@ -616,17 +629,23 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li>پنل را از نوار بالایی‌اش می‌توانید به هر جای دلخواه بکشید — موقعیت آن ذخیره می‌شود.</li>
 </ol>
 <h3>چگونه مجوز «نمایش روی سایر برنامه‌ها» را بگیریم</h3>
-<p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست). دو
-روش دیگر که کار می‌کنند، بدون نیاز به کامپیوتر:</p>
+<p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست)، و
+خود برنامه هم دیگر تلاش نمی‌کند این مجوز را به خودش بدهد — اتصال به adb خود هد‌یونیت روی همین دستگاه
+پیوسته شکست می‌خورد (به تاریخچهٔ تغییرات در پایین نگاه کنید). اکنون این مجوز از طریق یک گوشی معمولی
+و بدون کامپیوتر، با برنامهٔ کوچک و جداگانه‌ای به‌نام <strong>Car Rules ADB Grant</strong> اعطا می‌شود
+(لینک در بخش دانلود بالای صفحه):</p>
 <ol>
-<li><strong>از همان صفحهٔ پنل</strong>، اگر از قبل به این هد‌یونیت دسترسی adb دارید (از طریق Wi-Fi یا
-  USB): بخش «اتصال و اعطا» به شما اجازه می‌دهد آدرس IP و پورت adb هد‌یونیت را مستقیماً در برنامه وارد
-  کنید و روی دکمه بزنید — خودش وصل می‌شود و مجوز را به خودش می‌دهد. اولین اتصال ممکن است پیام «اجازهٔ
-  اشکال‌زدایی؟» را روی صفحهٔ خود هد‌یونیت نشان دهد — آن را تأیید کنید و دوباره دکمه را بزنید.</li>
-<li><strong>به‌صورت دستی از یک کامپیوتر</strong>، اگر adb دارید:<br>
-  <code>adb connect &lt;آدرس IP هد‌یونیت&gt;:5555</code><br>
-  <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></li>
+<li>روی هد‌یونیت باید از قبل adb روی TCP فعال باشد (معمولاً همین‌طور است — پورت ۵۵۵۵، بدون جفت‌سازی).</li>
+<li>Car Rules ADB Grant را روی گوشی نصب کنید و آن را باز کنید.</li>
+<li>آدرس IP هد‌یونیت را وارد کنید (پورت پیش‌فرض ۵۵۵۵) و روی <strong>«اعطای مجوز»</strong> بزنید.</li>
+<li>اولین اتصال ممکن است پیام «اجازهٔ اشکال‌زدایی؟» را روی صفحهٔ خود هد‌یونیت نشان دهد — آن را تأیید
+  کنید و دوباره دکمه را در برنامهٔ گوشی بزنید.</li>
+<li>بخش «گزارش ADB» در برنامه هر مرحلهٔ اتصال (اتصال، ارسال دستور، خواندن پاسخ) را نشان می‌دهد — اگر
+  چیزی کار نکرد مفید است.</li>
 </ol>
+<p>همین نتیجه را می‌توان به‌صورت دستی از یک کامپیوتر هم گرفت، اگر adb دارید:<br>
+<code>adb connect &lt;آدرس IP هد‌یونیت&gt;:5555</code><br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 
 <h2>اجرای نخست</h2>
 <ol>
@@ -670,8 +689,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <ul>
 <li><strong>پنل شناور اجرای سریع</strong> — پنجره‌ای روی همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا
   افقی)، هرکدام قانون خودش را اجرا می‌کند. همان مجوز کنترل صوتی.</li>
-<li><strong>اعطای خودکار مجوز از طریق adb بی‌سیم</strong> — پنل می‌تواند به adb خود هد‌یونیت وصل شود و
-  مجوز «نمایش روی سایر برنامه‌ها» را بدون کامپیوتر به خودش بدهد.</li>
+<li><strong>Car Rules ADB Grant</strong> — برنامه‌ای جداگانه برای گوشی که این مجوز را از طریق adb
+  بی‌سیم و بدون کامپیوتر اعطا می‌کند (به «چگونه مجوز را بگیریم» در بالا نگاه کنید).</li>
 <li>رفع اشکال برون‌بری قوانین که در نسخه‌های release فایلی با کلیدهای <code>"a"</code>/<code>"b"</code>
   به‌جای <code>"rules"</code>/<code>"voiceCommands"</code> می‌ساخت.</li>
 </ul>
@@ -741,7 +760,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
   وصل می‌شود — به نظر می‌رسد چیزی روی خود هد‌یونیت مانع دسترسی برنامه‌های خودش به آن
   پورت می‌شود. به‌جای ادامهٔ تلاش برای رفع این اتصال، دکمهٔ «باز کردن تنظیمات سیستم»
   دوباره پس از اعطای مجوز پنهان می‌شود، و اعطای مجوز اکنون توسط یک برنامهٔ همراه کوچک
-  و جداگانه برای گوشی معمولی انجام می‌شود (اینجا منتشر نشده، فقط در صورت درخواست).</li>
+  و جداگانه برای گوشی معمولی انجام می‌شود — <strong>Car Rules ADB Grant</strong>
+  (دانلود در بخش بالای صفحه؛ دستورالعمل در بخش «چگونه مجوز را بگیریم»).</li>
 <li><strong>v0.89–v0.93</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
   بی‌سیم (بخش «پنل شناور») در واقع هرگز کار نمی‌کرد: کتابخانه‌ای که دستور shell را
   می‌ساخت، آرگومان‌ها را بدون فاصله به هم می‌چسباند و هد‌یونیت به‌جای دستور
