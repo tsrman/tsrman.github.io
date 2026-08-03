@@ -258,102 +258,60 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
-<li><strong>v0.99</strong> — подтверждена кодировка режима массажа (программы) передних сидений:
-  на экране выбора режима автомобиля программы идут слева направо как 1 = Волны, 2 = Кошка,
-  3 = Растяжка, 4 = Змея, 5 = Бабочка — раньше это поле было доступно только как ввод числа.
-  Также добавлено новое действие «Подогрев форсунок омывателя» (включить/выключить).</li>
-<li><strong>v0.98</strong> — плавающая панель игнорировала выбранную в приложении светлую тему:
-  панель создаётся фоновым сервисом, а не экраном приложения, и системный механизм, применяющий
-  тему (переопределение «Тема → Светлая»), патчит только контексты экранов — сервис как был,
-  так и оставался привязан к «сырой» теме системы независимо от выбора пользователя. Теперь
-  панель сама выставляет нужный режим темы, если выбрана «Светлая» или «Тёмная» (для «Как в
-  системе» ничего менять не нужно — это и так уже совпадало). Также добавлено действие «Массаж
-  передних сидений» (режим + интенсивность, водитель/пассажир) — подтверждённая на живой машине
-  кодировка интенсивности: 0 = выкл, 2 = уровень 1, 3 = уровень 2, 4 = уровень 3 (макс);
-  кодировка режима (программы массажа) пока не подтверждена и оставлена как ввод числа.</li>
-<li><strong>v0.95</strong> — добавлена настройка темы приложения («Как в системе» / «Светлая» /
-  «Тёмная», экран «Настройки»): переопределение полезно на этой магнитоле, потому что системная
-  настройка тёмной/светлой темы не всегда доступна или что-то значит на данной прошивке.</li>
+<li><strong>v0.99</strong> — подтверждены названия режимов массажа передних сидений: «Волны /
+  Кошка / Растяжка / Змея / Бабочка» вместо номера. Добавлено действие «Подогрев форсунок
+  омывателя».</li>
+<li><strong>v0.98</strong> — исправлена плавающая панель: она всегда рисовалась в тёмной теме,
+  даже если в приложении выбрана светлая. Добавлено действие «Массаж передних сидений» (режим
+  и интенсивность, водитель/пассажир).</li>
+<li><strong>v0.95</strong> — добавлена настройка темы приложения: «Как в системе» / «Светлая» /
+  «Тёмная» (экран «Настройки») — полезно, если системная тема на этой магнитоле ведёт себя
+  непредсказуемо.</li>
 <li><strong>v0.94–v0.96</strong> — самостоятельная выдача разрешения «Отображение поверх других
-  окон» через беспроводной adb удалена из приложения совсем: даже подключение к
-  <code>127.0.0.1</code> (не только к собственному Wi-Fi IP магнитолы) стабильно
-  падало с пустой ошибкой IOException прямо на устройстве, хотя обычный <code>adb
-  connect</code> с ноутбука к тому же порту подключается мгновенно — похоже, что-то на
-  самой магнитоле блокирует именно её собственным приложениям доступ к этому порту.
-  Вместо повторных попыток чинить самоподключение кнопка «Открыть системные настройки»
-  снова прячется, как только разрешение выдано, а сама выдача теперь делается отдельным
-  маленьким Android-приложением для обычного телефона — <strong>Car Rules ADB Grant</strong>
-  (скачать в разделе загрузки выше; инструкция — в разделе «Как получить разрешение…»).</li>
-<li><strong>v0.89–v0.93</strong> — самостоятельная выдача разрешения «Отображение поверх других
-  окон» через беспроводной adb (раздел «Плавающая панель») на деле никогда не работала:
-  библиотека, которая формирует команду для shell, склеивала её аргументы без пробелов
-  между ними, и магнитола получала один нечитаемый набор символов вместо команды
-  <code>appops set --user 0 … allow</code>. Также случалась ложная ошибка «Stream
-  closed», даже когда разрешение уже было выдано успешно. Обе проблемы исправлены;
-  дополнительно IP-адрес и порт для подключения теперь подставляются автоматически
-  (можно изменить), а если разрешение всё же не выдаётся — экран показывает точный
-  ответ shell-команды, а не просто «не получилось».</li>
-<li><strong>v0.88</strong> — поднятие окна приложения перед прослушиванием (опция из v0.87) на практике
-  не срабатывало в фоне: Android молча блокировал прямой запуск activity, не показывая никакой
-  ошибки. Теперь поднятие идёт через тот же системный сервис, что использует автозапуск при старте
-  магнитолы, — он не подчиняется этому ограничению и срабатывает независимо от того, видно ли
-  приложение на экране в момент нажатия кнопки.</li>
-<li><strong>v0.87</strong> — если микрофон на мгновение занят другим приложением, теперь делается до
-  3 повторных попыток открыть его вместо немедленной ошибки «микрофон недоступен». Добавлена
-  экспериментальная опция «поднимать приложение на экран перед прослушиванием» (экран настроек
-  голоса, по умолчанию выключена).</li>
-<li><strong>v0.86</strong> — сообщение «Микрофон недоступен» теперь показывает причину ошибки (а не
-  только сам факт), и эта причина попадает в журнал приложения — это упростило разбор жалоб
-  пользователей на недоступный микрофон в фоне.</li>
-<li><strong>v0.85</strong> — исправлена самостоятельная выдача разрешения через беспроводной adb,
-  падавшая с ошибкой NoSuchMethodException на некоторых версиях Android.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — списки свойств для триггеров/условий и целей действия
-  в редакторе правил теперь отсортированы по алфавиту, а не идут в порядке добавления в код —
-  проще найти нужное свойство по мере роста списка.</li>
-<li><strong>v0.83</strong> — экран «Панель» теперь скрывает кнопку выдачи разрешения, подсказку с
-  adb-командой и весь раздел самостоятельной выдачи через беспроводной adb, если разрешение уже
-  выдано — раньше они оставались на экране и без надобности.</li>
-<li><strong>v0.79–v0.82</strong> — новая <strong>плавающая панель быстрого запуска</strong>: окно
-  поверх всех приложений с 4/6/8 крупными кнопками (вертикально или горизонтально), каждая
-  запускает своё правило одним нажатием. Требует системное разрешение «Отображение поверх других
-  окон» — у него нет диалога запроса, а на этой магнитоле экран настройки может быть недоступен,
-  поэтому добавлена самостоятельная выдача через беспроводной adb прямо из приложения (панель
-  подключается к adb этой магнитолы и выдаёт себе разрешение без компьютера) — либо тот же
-  результат можно получить вручную командой adb (см. раздел «Плавающая панель» выше). Панель
-  защищена той же лицензией, что и голосовое управление: один код активирует обе функции.</li>
-<li><strong>Car Rules v0.67</strong> — добавлены три функции, которые раньше были только в Car
-  Rules Voice: действие «Багажник: открыть/закрыть» (учитывает текущий статус двери багажника,
-  поэтому не подаёт команду на уже движущуюся дверь), действие «Обогрев заднего стекла» и
-  кастомная кнопка руля как условие/триггер (раньше только записывалась в журнал). Только для
-  обычной Car Rules — в Voice эти функции уже были.</li>
-<li><strong>v0.78</strong> — исправлен импорт: после прошлого исправления файл экспорта наконец
-  создавался, но его нельзя было импортировать обратно («В файле нет правил») — сборка для
-  публикации переименовывает поля вспомогательного класса при упаковке, из-за чего файл
-  фактически записывался с ключами <code>"a"</code>/<code>"b"</code> вместо <code>"rules"</code>/
-  <code>"voiceCommands"</code>, а импорт ищет именно "rules". Названия ключей теперь закреплены
-  явно и не зависят от такого переименования. v0.77 снята с сайта как содержащая эту ошибку.</li>
-<li><strong>v0.77</strong> — наконец найдена настоящая причина ошибки экспорта: провайдер MediaStore
-  этой магнитолы закрывает файловый дескриптор и тут же оборачивает его заново, поэтому
-  запись всегда падала с IllegalStateException «Already closed»; вставка записи с флагом
-  IS_PENDING обходит эту ветку стороной. Если экспорт всё же не сработает, текст ошибки
-  теперь виден и в журнале приложения (строка с ⚠), и в logcat (тег CarRulesExport) — пришлите
-  его разработчику. Добавлено новое действие «Температура климата» (водитель, пассажир) —
-  шкала 18.0–32.0 °C с шагом 0.5°, плюс Lo/Hi, снятая с заводской настройки климата этой
-  магнитолы. То же самое в Car Rules v0.66.</li>
-<li><strong>v0.74</strong> — экспорт правил теперь включает и голосовые команды: файл экспорта стал объектом {"rules": [...], "voiceCommands": [...]} вместо простого списка правил, поэтому привязки голосовых фраз к правилам теперь тоже переносятся на другое устройство или после переустановки, а не пропадают. Старые файлы экспорта (простой список правил) по-прежнему импортируются нормально — просто не трогают текущие голосовые команды. Только для Car Rules Voice — у обычной Car Rules нет голосовых команд.</li>
-<li><strong>v0.73</strong> — убрано условие «Дворники: авто-режим»: статус на самом деле не приходит с этой магнитолы (несмотря на то, что один прошлый дамп показал значение), поэтому оно удалено из списка условий и из журнала; исправлен экспорт правил — из-за особенностей MediaStore этой магнитолы повторная запись в один и тот же файл car-rules.json всегда сообщала об ошибке экспорта и оставляла файл нулевого размера, теперь каждый экспорт создаёт новый файл с меткой времени, а импорт открывает собственный диалог выбора файла (показывает все найденные экспортированные файлы, включая старые car-rules.json). То же самое в Car Rules v0.63.</li>
-<li><strong>v0.72</strong> — добавлено условие «Дворники: авто-режим» (единственный статус дворников, который реально отдаёт эта магнитола — уровень/режим щёток недоступны), каждое его изменение пишется в журнал; добавлено действие «Дворники: сервисный режим» (тот же способ, которым штатная настройка магнитолы поднимает щётки для замены/очистки) — действие одностороннее, программного выхода из режима нет даже у производителя, только физический рычаг стеклоочистителя, поэтому рекомендуется добавить в правило условие «Передача = P»; в редакторе правила появился чекбокс отключения всплывающего уведомления и звука при срабатывании конкретного правила (журнал и действия правила при этом всё равно выполняются). То же добавлено в Car Rules v0.62.</li>
-<li><strong>v0.71</strong> — исправлены два бага: (1) повторный экспорт мог уронить приложение и оставить папку экспорта пустой — файл теперь перезаписывается в существующей записи MediaStore вместо удаления и повторной вставки, которые гонялись друг с другом на этой магнитоле; (2) импорт файла при уже существующих правилах дублировал их — теперь импорт файла всегда полностью заменяет текущий набор правил (с подтверждением, если правила не дефолтные), а не добавляет поверх. То же исправление вошло в Car Rules v0.61.</li>
-<li><strong>v0.70</strong> — экспорт/импорт теперь выполняются в фоновом потоке вместо основного: обращения к MediaStore — это блокирующий межпроцессный вызов плюс дисковый ввод-вывод, и на этой магнитоле провайдер иногда отвечал медленно, из-за чего приложение либо зависало и вылетало, либо показывало «ошибка экспорта», в зависимости от того, сколько времени занимал ответ. То же исправление вошло в Car Rules v0.60.</li>
-<li><strong>v0.69</strong> — исправлен импорт: MediaStore всегда хранит путь папки с завершающим слэшем, а запрос на импорт сравнивал путь без него и поэтому никогда не находил экспортированный файл (хотя экспорт создавал его нормально). То же исправление вошло в Car Rules v0.59.</li>
-<li><strong>v0.68</strong> — экспорт/импорт правил переведён на MediaStore (публичная папка Downloads/CarRulesVoice), потому что разрешение «Доступ ко всем файлам» на этой магнитоле не выдаётся вообще; теперь файл пишется и читается без запроса каких-либо разрешений. То же исправление вошло в Car Rules v0.58.</li>
-<li><strong>v0.67</strong> — импорт/экспорт правил теперь пишет и читает файл Download/car-rules.json напрямую (с запросом нужного разрешения), вместо системного выбора файла, который на этой магнитоле не открывался и приводил к вылету; то же самое исправление вошло в Car Rules v0.57 (версия без голоса), которая теперь тоже умеет импорт/экспорт в файл.</li>
-<li><strong>v0.65</strong> — из журнала убраны записи о каждом нажатии кастомной кнопки руля; запуск правила голосовой командой теперь пишется в журнал как обычное срабатывание, а не как «тестовый запуск».</li>
-<li><strong>v0.64</strong> — импорт правил из приложения Car Rules (при первом запуске или через меню «⋮») и импорт/экспорт правил в файл; на сайт добавлена версия Car Rules 0.56 без голоса.</li>
-<li><strong>v0.63</strong> — кастомная кнопка руля как активация голоса; убрана кнопка «Поддержать автора».</li>
-<li><strong>v0.62</strong> — обогрев заднего стекла; кастомная кнопка как триггер; чистка сервиса.</li>
+  окон» убрана из приложения — на этой магнитоле она стабильно не срабатывала. Теперь разрешение
+  выдаётся отдельным приложением для телефона — <strong>Car Rules ADB Grant</strong> (см. раздел
+  загрузки выше и «Как получить разрешение…»).</li>
+<li><strong>v0.89–v0.93</strong> — исправлена самостоятельная выдача разрешения через adb (команда
+  собиралась неправильно и почти никогда не срабатывала), убрана ложная ошибка при уже выданном
+  разрешении, IP-адрес и порт стали подставляться автоматически.</li>
+<li><strong>v0.88</strong> — исправлена опция «поднимать приложение на экран перед прослушиванием»
+  (из v0.87) — раньше она не работала в фоне.</li>
+<li><strong>v0.87</strong> — при занятом на миг микрофоне теперь делается несколько повторных
+  попыток вместо мгновенной ошибки. Добавлена опция «поднимать приложение на экран перед
+  прослушиванием» (по умолчанию выключена).</li>
+<li><strong>v0.86</strong> — сообщение «Микрофон недоступен» теперь показывает причину ошибки, что
+  упростило разбор жалоб пользователей.</li>
+<li><strong>v0.85</strong> — исправлен сбой самостоятельной выдачи разрешения на некоторых версиях
+  Android.</li>
+<li><strong>v0.84 / Car Rules v0.68</strong> — списки параметров в редакторе правил теперь
+  отсортированы по алфавиту.</li>
+<li><strong>v0.83</strong> — экран «Панель» больше не показывает кнопку выдачи разрешения и
+  инструкцию по adb, если разрешение уже выдано.</li>
+<li><strong>v0.79–v0.82</strong> — добавлена <strong>плавающая панель быстрого запуска</strong>:
+  окно поверх всех приложений с 4/6/8 крупными кнопками, каждая запускает своё правило одним
+  нажатием. Та же лицензия, что и у голосового управления — один код активирует обе функции.</li>
+<li><strong>Car Rules v0.67</strong> — в обычную Car Rules добавлены три функции, которые раньше
+  были только в Voice: «Багажник: открыть/закрыть», «Обогрев заднего стекла» и кастомная кнопка
+  руля как триггер/условие.</li>
+<li><strong>v0.67–v0.78</strong> — несколько версий подряд ушло на то, чтобы довести экспорт/импорт
+  правил в файл до стабильной работы: сохранение файлов на этой магнитоле устроено не так, как на
+  обычном Android, и потребовало нескольких обходных решений — начиная с v0.78 работает надёжно.
+  Заодно добавлены: экспорт вместе с голосовыми командами (v0.74), действие «Температура климата»
+  водитель/пассажир (v0.77), действие «Дворники: сервисный режим» и чекбокс «без уведомления» для
+  отдельного правила (v0.72). Условие «Дворники: авто-режим» было ненадолго добавлено и снова
+  убрано (v0.72–v0.73) — этот статус на деле недоступен на этой машине.</li>
+<li><strong>v0.65</strong> — журнал стал компактнее: убраны записи о каждом нажатии кастомной кнопки
+  руля, а запуск правила голосовой командой теперь пишется как обычное срабатывание, а не
+  «тестовый запуск».</li>
+<li><strong>v0.64</strong> — импорт правил из приложения Car Rules; импорт/экспорт правил в файл.
+  На сайт добавлена версия Car Rules 0.56 без голоса.</li>
+<li><strong>v0.63</strong> — кастомная кнопка руля как активация голоса; убрана кнопка «Поддержать
+  автора».</li>
+<li><strong>v0.62</strong> — обогрев заднего стекла; кастомная кнопка руля как триггер; чистка
+  сервиса.</li>
 <li><strong>v0.60–0.61</strong> — действие «Багажник: открыть/закрыть».</li>
-<li><strong>v0.5x</strong> — офлайн-голосовое управление (Vosk); действие «Зеркала: сложить/разложить».</li>
+<li><strong>v0.5x</strong> — офлайн-голосовое управление (Vosk); действие «Зеркала:
+  сложить/разложить».</li>
 </ul>
 </div>
 
@@ -530,103 +488,55 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
-<li><strong>v0.99</strong> — confirmed the front-seat massage mode (program) encoding: on the car's
-  own mode picker screen, the programs run left to right as 1 = Waves, 2 = Cat, 3 = Stretch,
-  4 = Snake, 5 = Butterfly — previously this field was only exposed as a raw number. Also added a
-  new "Washer nozzle heater" on/off action.</li>
-<li><strong>v0.98</strong> — the floating panel ignored the in-app Light theme choice: the panel is
-  built by a background service, not an app screen, and the system mechanism that applies the
-  in-app theme override ("Theme → Light") only patches screen contexts — the service kept
-  following the raw system theme regardless of what the user picked. The panel now sets the
-  correct theme mode itself when "Light" or "Dark" is chosen (nothing changes for "Follow
-  system", which already matched). Also added a "Front-seat massage" action (mode + intensity,
-  driver/passenger) — the intensity encoding was confirmed on a real car: 0 = off, 2 = level 1,
-  3 = level 2, 4 = level 3 (max); the mode (massage program) encoding isn't confirmed yet and is
-  still exposed as a raw number.</li>
+<li><strong>v0.99</strong> — confirmed the front-seat massage mode names: "Waves / Cat / Stretch /
+  Snake / Butterfly" instead of a raw number. Added a "Washer nozzle heater" action.</li>
+<li><strong>v0.98</strong> — fixed the floating panel always rendering in dark theme, even when
+  Light was chosen in the app. Added a "Front-seat massage" action (mode and intensity,
+  driver/passenger).</li>
 <li><strong>v0.95</strong> — added an in-app theme setting ("Follow system" / "Light" / "Dark",
-  Settings screen): useful on this head unit because the platform's own light/dark setting isn't
-  always reachable or meaningful on this firmware.</li>
-<li><strong>v0.94–v0.96</strong> — the wireless-adb self-grant for "Display over other apps"
-  has been removed from the app entirely: even connecting to <code>127.0.0.1</code>
-  (not just the head unit's own Wi-Fi IP) still consistently failed with a bare,
-  message-less IOException from on-device, while a plain <code>adb connect</code> from
-  a laptop to the same port works instantly — something on the head unit itself
-  appears to block its own apps from reaching that port. Instead of chasing the
-  self-connect further, the "Open system settings" button goes back to hiding once
-  the permission is granted, and granting it is now done by a separate, small
-  companion Android app for an ordinary phone — <strong>Car Rules ADB Grant</strong>
-  (download in the section above; instructions in "How to get the ... permission").</li>
-<li><strong>v0.89–v0.93</strong> — the wireless-adb self-grant for "Display over other apps"
-  (Floating panel section) never actually worked: the library building the shell
-  command was gluing its arguments together with no spaces between them, so the head
-  unit received one unreadable blob instead of an <code>appops set --user 0 …
-  allow</code> command. A spurious "Stream closed" error could also show up even when
-  the permission had already been granted successfully. Both are fixed now; the
-  connect IP and port also auto-fill (still editable), and if the grant still doesn't
-  land, the screen now shows the shell command's exact response instead of just
-  "didn't work".</li>
-<li><strong>v0.88</strong> — raising the app to the foreground before listening (the v0.87 option) did
-  not actually work in the background: Android was silently blocking the direct activity launch with
-  no error at all. Raising now goes through the same system service used for auto-start at head-unit
-  boot, which is not subject to that restriction and works regardless of whether the app is visible
-  at the moment the button is pressed.</li>
-<li><strong>v0.87</strong> — if the microphone is briefly held by another app, up to 3 retries are now
-  made before reporting "microphone unavailable" instead of failing immediately. Added an
-  experimental "raise app to foreground before listening" option (Voice settings screen, off by
-  default).</li>
-<li><strong>v0.86</strong> — the "Microphone unavailable" message now shows the underlying reason (not
-  just the bare fact of failure), and that reason is written to the app's log — this made it much
-  easier to diagnose user reports of the mic being unavailable in the background.</li>
-<li><strong>v0.85</strong> — fixed the wireless-adb self-grant failing with a NoSuchMethodException on
-  some Android versions.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — the rule editor's trigger/condition and action-target
-  property lists are now sorted alphabetically instead of following code declaration order, making
-  it easier to find a property as the list grows.</li>
-<li><strong>v0.83</strong> — the "Panel" screen now hides the grant-permission button, the adb-command
-  hint, and the whole wireless-ADB self-grant section once the permission is already granted —
-  previously they stayed on screen unnecessarily.</li>
-<li><strong>v0.79–v0.82</strong> — new <strong>floating quick-launch panel</strong>: a window on top
-  of every app with 4/6/8 large buttons (vertical or horizontal), each running its own rule with
-  one tap. Needs the "Display over other apps" system permission — it has no request dialog of its
-  own, and on this head unit the settings screen for it may not be reachable, so the app can now
-  self-grant it over wireless adb (the panel connects to this head unit's own adb and grants itself
-  the permission, no computer needed) — or the same result can be reached manually with an adb
-  command (see the "Floating panel" section above). The panel is protected by the same license as
-  voice control: one code activates both.</li>
-<li><strong>Car Rules v0.67</strong> — added three features that previously existed only in Car
-  Rules Voice: a "Trunk: open/close" action (status-aware, so it never sends a command to an
-  already-moving tailgate), a "Rear-window heater" action, and the custom steering-wheel button
-  as a trigger/condition source (previously only logged). No-voice edition only — Voice already
-  had these.</li>
-<li><strong>v0.78</strong> — fixed import: after the previous fix, the export file finally got
-  created, but it could no longer be imported back ("no rules in file") — the release build
-  renames a helper class's fields when packaging, so the file was actually written with
-  <code>"a"</code>/<code>"b"</code> keys instead of <code>"rules"</code>/<code>"voiceCommands"</code>,
-  and import looks specifically for "rules". The key names are now pinned explicitly and no
-  longer affected by that renaming. v0.77 has been pulled from the site since it carried
-  this bug.</li>
-<li><strong>v0.77</strong> — found the real cause of the export error at last: this head unit's
-  MediaStore closes the file descriptor and immediately re-wraps it, so every write always
-  died with IllegalStateException "Already closed"; inserting the row with the IS_PENDING
-  flag sidesteps that path entirely. If export still fails, the error text is now also
-  shown in the app's own log (a ⚠ line) and in logcat (tag CarRulesExport) — send that to
-  the developer. Added a new "Climate temperature" action (driver, passenger) — an
-  18.0-32.0°C scale in 0.5° steps, plus Lo/Hi, taken straight from this head unit's factory
-  climate control. The same landed in Car Rules v0.66.</li>
-<li><strong>v0.74</strong> — rules export now bundles voice commands too: the export file is now an object {"rules": [...], "voiceCommands": [...]} instead of a plain rule list, so voice-phrase bindings travel along when moving to another device or after a reinstall, instead of being lost. Older export files (a plain rule list) still import fine — they just leave the current voice commands untouched. Voice-only — the plain Car Rules app has no voice commands.</li>
-<li><strong>v0.73</strong> — removed the "Wipers: auto mode" condition: the status never actually arrives on this head unit (despite an earlier dump showing a value), so it's gone from both the condition list and the log; fixed rules export — this head unit's MediaStore quirks meant repeatedly overwriting one fixed car-rules.json always reported an export error and left a zero-byte file, so export now writes a fresh timestamped file every time, and import opens its own file picker listing every export found (including older plain car-rules.json backups). The same landed in Car Rules v0.63.</li>
-<li><strong>v0.72</strong> — added a "Wipers: auto mode" condition (the only wiper status this head unit actually exposes — blade level/mode aren't readable), logging every state change; added a "Wipers: service mode" action (the same write the factory setting uses to lift the blades for replacement/cleaning) — one-way, since even the manufacturer has no software exit, only the physical wiper stalk, so add a "Gear = P" condition to any rule using it; the rule editor also gained a checkbox to silence the "rule fired" toast + sound for a specific rule (its log entry and actions still run either way). The same additions landed in Car Rules v0.62.</li>
-<li><strong>v0.71</strong> — fixed two bugs: (1) a repeat export could crash the app and leave the export folder empty — the file is now overwritten in place on its existing MediaStore row instead of being deleted and re-inserted, which raced against this head unit's provider; (2) importing a file while rules already existed duplicated them — a file import now always replaces the whole current rule set outright (with a confirmation once the rules aren't the defaults) instead of appending on top. The same fix landed in Car Rules v0.61.</li>
-<li><strong>v0.70</strong> — export/import now run on a background thread instead of the main one: the MediaStore calls are blocking cross-process IPC plus disk I/O, and on this head unit the provider was sometimes slow to respond, which either froze and crashed the app or showed "export error" depending on how long the response took. The same fix landed in Car Rules v0.60.</li>
-<li><strong>v0.69</strong> — fixed import: MediaStore always stores the folder path with a trailing slash, but the import query compared against a path without one and so never found the exported file (even though export created it fine). The same fix landed in Car Rules v0.59.</li>
-<li><strong>v0.68</strong> — export/import now goes through MediaStore (the public Downloads/CarRulesVoice folder) instead of a fixed path plus a permission request, because the "All files access" permission never grants on this head unit at all; the file is now written and read with no permission needed. The same fix landed in Car Rules v0.58.</li>
-<li><strong>v0.67</strong> — file import/export now reads and writes Download/car-rules.json directly (requesting the needed permission), instead of the system file picker, which had nothing to open on this head unit and crashed the app; the same fix landed in Car Rules v0.57 (no-voice edition), which now also supports file import/export.</li>
-<li><strong>v0.65</strong> — stopped logging every custom wheel button press; a rule run by a voice command is now logged as a normal fired event instead of a “test run”.</li>
-<li><strong>v0.64</strong> — import rules from the Car Rules app (on first launch or via the “⋮” menu) and import/export rules to a file; added the no-voice Car Rules 0.56 build to the site.</li>
-<li><strong>v0.63</strong> — custom wheel button as voice activation; removed the “Support the author” button.</li>
+  Settings screen) — useful since the platform's own theme setting isn't always reliable on this
+  head unit.</li>
+<li><strong>v0.94–v0.96</strong> — removed the wireless-adb self-grant for "Display over other
+  apps" — it never worked reliably on this head unit. The permission is now granted by a separate
+  phone app, <strong>Car Rules ADB Grant</strong> (see the download section above and "How to get
+  the ... permission").</li>
+<li><strong>v0.89–v0.93</strong> — fixed the wireless-adb self-grant (the command was built
+  incorrectly and almost never worked), removed a false error shown even when the permission was
+  already granted, and the IP/port now auto-fill.</li>
+<li><strong>v0.88</strong> — fixed the "raise app to foreground before listening" option (from
+  v0.87) — it didn't actually work in the background before.</li>
+<li><strong>v0.87</strong> — if the microphone is briefly busy, the app now retries a few times
+  instead of failing immediately. Added an experimental "raise app to foreground before listening"
+  option (off by default).</li>
+<li><strong>v0.86</strong> — the "Microphone unavailable" message now shows the underlying reason,
+  which made user reports much easier to diagnose.</li>
+<li><strong>v0.85</strong> — fixed the wireless-adb self-grant crashing on some Android versions.</li>
+<li><strong>v0.84 / Car Rules v0.68</strong> — the rule editor's property lists are now sorted
+  alphabetically.</li>
+<li><strong>v0.83</strong> — the "Panel" screen no longer shows the grant-permission button and
+  adb instructions once the permission is already granted.</li>
+<li><strong>v0.79–v0.82</strong> — added the <strong>floating quick-launch panel</strong>: a window
+  on top of every app with 4/6/8 large buttons, each running its own rule with one tap. Same
+  license as voice control — one code activates both.</li>
+<li><strong>Car Rules v0.67</strong> — added three features to the plain Car Rules app that
+  previously existed only in Voice: "Trunk: open/close", "Rear-window heater", and the custom
+  wheel button as a trigger/condition.</li>
+<li><strong>v0.67–v0.78</strong> — several versions in a row went into making file export/import
+  reliable: this head unit handles file saving differently from stock Android and needed a number
+  of workarounds — solid since v0.78. Along the way: export started bundling voice commands too
+  (v0.74), a "Climate temperature" action was added (driver/passenger, v0.77), and a "Wipers:
+  service mode" action plus a per-rule "no notification" checkbox were added (v0.72). A "Wipers:
+  auto mode" condition was briefly added and removed again (v0.72–v0.73) — that status turns out
+  not to be available on this car.</li>
+<li><strong>v0.65</strong> — cleaned up the log: stopped logging every custom wheel button press,
+  and a rule fired by voice is now logged as a normal event instead of a "test run".</li>
+<li><strong>v0.64</strong> — import rules from the Car Rules app; import/export rules to a file.
+  Added the no-voice Car Rules 0.56 build to the site.</li>
+<li><strong>v0.63</strong> — custom wheel button as voice activation; removed the "Support the
+  author" button.</li>
 <li><strong>v0.62</strong> — rear-window heater; custom button as a trigger; service cleanup.</li>
-<li><strong>v0.60–0.61</strong> — “Trunk: open/close” action.</li>
-<li><strong>v0.5x</strong> — offline voice control (Vosk); “Mirrors: fold/unfold” action.</li>
+<li><strong>v0.60–0.61</strong> — "Trunk: open/close" action.</li>
+<li><strong>v0.5x</strong> — offline voice control (Vosk); "Mirrors: fold/unfold" action.</li>
 </ul>
 </div>
 
@@ -802,93 +712,52 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
-<li><strong>v0.99</strong> — کدگذاری حالت (برنامهٔ) ماساژ صندلی‌های جلو تأیید شد: در صفحهٔ انتخاب
-  حالت خود خودرو، برنامه‌ها از چپ به راست به‌ترتیب ۱ = موج، ۲ = گربه، ۳ = کشش، ۴ = مار، ۵ = پروانه
-  هستند — پیش‌تر این فیلد فقط به‌صورت عدد خام نمایش داده می‌شد. همچنین عملیات جدید «گرمکن نازل
-  شیشه‌شور» (روشن/خاموش) اضافه شد.</li>
-<li><strong>v0.98</strong> — پنل شناور تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت: پنل توسط یک
-  سرویس پس‌زمینه ساخته می‌شود، نه یک صفحهٔ برنامه، و مکانیزم سیستمی که تم داخل‌برنامه‌ای
-  («تم ← روشن») را اعمال می‌کند فقط کانتکست صفحه‌ها را وصله می‌زند — سرویس همچنان از تم خام
-  سیستم پیروی می‌کرد، صرف‌نظر از انتخاب کاربر. اکنون پنل خودش حالت درست تم را تنظیم می‌کند وقتی
-  «روشن» یا «تیره» انتخاب شده باشد (برای «مطابق سیستم» چیزی تغییر نمی‌کند — قبلاً هم یکسان بود).
-  همچنین عملیات «ماساژ صندلی‌های جلو» (حالت + شدت، راننده/سرنشین) اضافه شد — کدگذاری شدت روی
-  خودرو واقعی تأیید شد: ۰ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)؛ کدگذاری حالت
-  (برنامه‌های ماساژ) هنوز تأیید نشده و همچنان به‌صورت عدد خام نمایش داده می‌شود.</li>
+<li><strong>v0.99</strong> — نام‌های حالت ماساژ صندلی‌های جلو تأیید شد: «موج / گربه / کشش / مار /
+  پروانه» به‌جای یک عدد خام. عملیات جدید «گرمکن نازل شیشه‌شور» اضافه شد.</li>
+<li><strong>v0.98</strong> — رفع اشکال پنل شناور که همیشه با تم تیره نمایش داده می‌شد، حتی وقتی تم
+  روشن در برنامه انتخاب شده بود. عملیات «ماساژ صندلی‌های جلو» (حالت و شدت، راننده/سرنشین) اضافه
+  شد.</li>
 <li><strong>v0.95</strong> — تنظیم تم برنامه اضافه شد («مطابق سیستم» / «روشن» / «تیره»، صفحهٔ
-  تنظیمات): این بازنویسی روی این هد‌یونیت مفید است، چون تنظیم روشن/تیرهٔ خود سیستم روی این
-  فریمور همیشه در دسترس یا معنادار نیست.</li>
-<li><strong>v0.94–v0.96</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
-  بی‌سیم کاملاً از برنامه حذف شد: حتی اتصال به <code>127.0.0.1</code> (نه فقط آدرس
-  Wi-Fi خود هد‌یونیت) هم روی خود دستگاه پیوسته با یک IOException بدون پیام شکست
-  می‌خورد، در حالی که یک <code>adb connect</code> ساده از لپ‌تاپ به همان پورت فوراً
-  وصل می‌شود — به نظر می‌رسد چیزی روی خود هد‌یونیت مانع دسترسی برنامه‌های خودش به آن
-  پورت می‌شود. به‌جای ادامهٔ تلاش برای رفع این اتصال، دکمهٔ «باز کردن تنظیمات سیستم»
-  دوباره پس از اعطای مجوز پنهان می‌شود، و اعطای مجوز اکنون توسط یک برنامهٔ همراه کوچک
-  و جداگانه برای گوشی معمولی انجام می‌شود — <strong>Car Rules ADB Grant</strong>
-  (دانلود در بخش بالای صفحه؛ دستورالعمل در بخش «چگونه مجوز را بگیریم»).</li>
-<li><strong>v0.89–v0.93</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
-  بی‌سیم (بخش «پنل شناور») در واقع هرگز کار نمی‌کرد: کتابخانه‌ای که دستور shell را
-  می‌ساخت، آرگومان‌ها را بدون فاصله به هم می‌چسباند و هد‌یونیت به‌جای دستور
-  <code>appops set --user 0 … allow</code> یک رشتهٔ نامفهوم دریافت می‌کرد. همچنین
-  گاهی خطای کاذب «Stream closed» نمایش داده می‌شد، حتی زمانی که مجوز با موفقیت اعطا
-  شده بود. هر دو مشکل اکنون رفع شده‌اند؛ آدرس IP و پورت اتصال هم اکنون به‌طور خودکار
-  پر می‌شوند (قابل تغییر)، و اگر مجوز باز هم اعطا نشود، صفحه اکنون پاسخ دقیق دستور
-  shell را نشان می‌دهد، نه فقط «انجام نشد».</li>
-<li><strong>v0.88</strong> — بالا آوردن برنامه پیش از شنیدن (گزینهٔ v0.87) در عمل در پس‌زمینه کار
-  نمی‌کرد: اندروید اجرای مستقیم activity را بی‌سروصدا مسدود می‌کرد، بدون هیچ خطایی. اکنون بالا
-  آوردن از طریق همان سرویس سیستمی‌ای انجام می‌شود که برای اجرای خودکار هنگام روشن شدن هد‌یونیت
-  استفاده می‌شود — این سرویس مشمول آن محدودیت نیست و صرف‌نظر از اینکه برنامه در لحظهٔ فشردن دکمه
-  روی صفحه دیده می‌شود یا نه، کار می‌کند.</li>
-<li><strong>v0.87</strong> — اگر میکروفون برای لحظه‌ای در اختیار برنامهٔ دیگری باشد، اکنون پیش از
-  گزارش «میکروفون در دسترس نیست» تا ۳ بار دوباره تلاش می‌شود. گزینهٔ آزمایشی «بالا آوردن برنامه به
-  صفحه پیش از شنیدن» اضافه شد (صفحهٔ تنظیمات صدا، به‌طور پیش‌فرض خاموش).</li>
-<li><strong>v0.86</strong> — پیام «میکروفون در دسترس نیست» اکنون دلیل واقعی خطا را نیز نشان می‌دهد
-  (نه فقط اصل خطا)، و این دلیل در گزارش برنامه هم ثبت می‌شود — این کار بررسی گزارش‌های کاربران
-  دربارهٔ در دسترس نبودن میکروفون در پس‌زمینه را ساده‌تر کرد.</li>
-<li><strong>v0.85</strong> — اعطای خودکار مجوز از طریق adb بی‌سیم که در برخی نسخه‌های اندروید با خطای
-  NoSuchMethodException شکست می‌خورد، رفع شد.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — فهرست ویژگی‌های محرک/شرط و هدف عملیات در ویرایشگر
-  قانون اکنون به‌ترتیب الفبا مرتب شده‌اند، نه به ترتیب افزودن در کد — پیدا کردن ویژگی موردنظر با
-  رشد فهرست ساده‌تر شده است.</li>
-<li><strong>v0.83</strong> — صفحهٔ «پنل» اکنون در صورتی که مجوز از قبل داده شده باشد، دکمهٔ اعطای
-  مجوز، راهنمای دستور adb، و کل بخش اعطای خودکار از طریق adb بی‌سیم را پنهان می‌کند — پیش‌تر این‌ها
-  بدون نیاز روی صفحه باقی می‌ماندند.</li>
-<li><strong>v0.79–v0.82</strong> — <strong>پنل شناور اجرای سریع</strong> جدید: پنجره‌ای روی همهٔ
-  برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا افقی)، هرکدام با یک ضربه قانون خودش را اجرا می‌کند. به
-  مجوز سیستمی «نمایش روی سایر برنامه‌ها» نیاز دارد — این مجوز دیالوگ درخواست خودش را ندارد، و روی
-  این هد‌یونیت صفحهٔ تنظیمات آن ممکن است در دسترس نباشد، بنابراین برنامه اکنون می‌تواند از طریق adb
-  بی‌سیم آن را به خودش بدهد (پنل به adb خود هد‌یونیت وصل می‌شود و مجوز را بدون کامپیوتر به خودش
-  اعطا می‌کند) — یا همین نتیجه را می‌توان با یک دستور adb به‌صورت دستی گرفت (بخش «پنل شناور» در
-  بالا را ببینید). پنل با همان مجوزی که کنترل صوتی دارد محافظت می‌شود: یک کد هر دو را فعال می‌کند.</li>
-<li><strong>Car Rules v0.67</strong> — سه قابلیت که پیش‌تر فقط در Car Rules Voice بود اضافه شد:
-  عملیات «صندوق عقب: باز/بسته» (آگاه از وضعیت فعلی درِ صندوق، پس هرگز به دری که در حال حرکت
-  است دستور نمی‌فرستد)، عملیات «گرمکن شیشهٔ عقب»، و دکمهٔ سفارشی فرمان به‌عنوان شرط/محرک
-  (پیش‌تر فقط در گزارش ثبت می‌شد). فقط نسخهٔ بدون صدا — این قابلیت‌ها از قبل در Voice بود.</li>
-<li><strong>v0.78</strong> — درون‌ریزی اصلاح شد: پس از اصلاح قبلی، فایل برون‌بری بالاخره ساخته
-  می‌شد، اما دیگر نمی‌شد آن را درون‌ریزی کرد («در فایل قانونی نیست») — نسخهٔ انتشار هنگام
-  بسته‌بندی نام فیلدهای یک کلاس کمکی را تغییر می‌دهد، بنابراین فایل در واقع با کلیدهای
-  <code>"a"</code>/<code>"b"</code> نوشته می‌شد نه <code>"rules"</code>/<code>"voiceCommands"</code>،
-  و درون‌ریزی دقیقاً به‌دنبال "rules" می‌گردد. نام کلیدها اکنون به‌صراحت ثابت شده و از این
-  تغییر نام تأثیر نمی‌پذیرد. v0.77 به‌دلیل داشتن این باگ از سایت حذف شد.</li>
-<li><strong>v0.77</strong> — بالاخره علت واقعی خطای برون‌بری پیدا شد: MediaStore این هد‌یونیت فایل را
-  می‌بندد و بلافاصله دوباره آن را می‌پیچد، به همین دلیل هر نوشتنی با IllegalStateException
-  «Already closed» شکست می‌خورد؛ درج ردیف با پرچم IS_PENDING این مسیر را کاملاً دور می‌زند.
-  اگر برون‌بری باز هم کار نکرد، اکنون متن خطا هم در گزارش برنامه (خط ⚠) و هم در logcat
-  (برچسب CarRulesExport) نمایش داده می‌شود — آن را برای توسعه‌دهنده ارسال کنید. عملیات جدید
-  «دمای تهویه مطبوع» (راننده، سرنشین) اضافه شد — بازهٔ ۱۸٫۰ تا ۳۲٫۰ درجه با گام ۰٫۵، به‌همراه
-  Lo/Hi، دقیقاً برگرفته از تنظیم کارخانه‌ای تهویهٔ این هد‌یونیت. همین مورد در Car Rules v0.66
-  هم اعمال شد.</li>
-<li><strong>v0.74</strong> — برون‌بری قوانین اکنون فرمان‌های صوتی را هم شامل می‌شود: فایل برون‌بری اکنون یک شیء {"rules": [...], "voiceCommands": [...]} است نه یک فهرست ساده از قوانین، پس اتصال عبارت‌های صوتی به قوانین هم هنگام انتقال به دستگاه دیگر یا پس از نصب مجدد منتقل می‌شود و از بین نمی‌رود. فایل‌های برون‌بری قدیمی (فهرست ساده قوانین) هنوز هم درون‌ریزی می‌شوند — فقط فرمان‌های صوتی فعلی را دست‌نخورده باقی می‌گذارند. فقط مخصوص Car Rules Voice — نسخهٔ ساده Car Rules فرمان صوتی ندارد.</li>
-<li><strong>v0.73</strong> — شرط «برف‌پاک‌کن: حالت خودکار» حذف شد: این وضعیت در عمل هرگز از این مانیتور دریافت نمی‌شود (با وجود یک دامپ قدیمی که مقداری نشان داده بود)، بنابراین از فهرست شرط‌ها و از گزارش حذف شد؛ برون‌بری قوانین هم اصلاح شد — به‌دلیل رفتار MediaStore این مانیتور، بازنویسی مکرر روی یک فایل ثابت car-rules.json همیشه خطای برون‌بری نشان می‌داد و فایلی با حجم صفر باقی می‌گذاشت، اکنون هر برون‌بری فایلی جدید با برچسب زمان می‌سازد و درون‌ریزی دیالوگ انتخاب فایل خودش را نشان می‌دهد (همهٔ فایل‌های برون‌بری‌شده از جمله car-rules.json قدیمی را فهرست می‌کند). همین مورد در Car Rules v0.63 هم اعمال شد.</li>
-<li><strong>v0.72</strong> — شرط «برف‌پاک‌کن: حالت خودکار» اضافه شد (تنها وضعیت برف‌پاک‌کن که این مانیتور واقعاً ارائه می‌دهد — سطح/حالت تیغه‌ها قابل خواندن نیست) و هر تغییر وضعیت آن در گزارش ثبت می‌شود؛ عملیات «برف‌پاک‌کن: حالت سرویس» هم اضافه شد (همان دستوری که تنظیمات کارخانه برای بالا بردن تیغه‌ها جهت تعویض/تمیزکاری استفاده می‌کند) — این عملیات یک‌طرفه است، چون حتی سازنده هم راه نرم‌افزاری برای خروج ندارد و فقط با اهرم فیزیکی برف‌پاک‌کن بازمی‌گردد، پس بهتر است شرط «دنده = P» را به این قانون اضافه کنید؛ همچنین در ویرایشگر قانون گزینه‌ای اضافه شد که پیام و صدای «قانون اجرا شد» را برای یک قانون خاص خاموش می‌کند (گزارش و عملیات آن قانون در هر صورت اجرا می‌شود). همین موارد در Car Rules v0.62 هم اضافه شد.</li>
-<li><strong>v0.71</strong> — دو اشکال برطرف شد: (۱) برون‌بری دوباره ممکن بود برنامه را خراب کند و پوشهٔ برون‌بری را خالی بگذارد — اکنون فایل روی همان رکورد موجود در MediaStore بازنویسی می‌شود، نه با حذف و درج دوباره که با این مانیتور تداخل داشت؛ (۲) درون‌ریزی فایل وقتی قوانینی از قبل وجود داشت آن‌ها را تکراری می‌کرد — اکنون درون‌ریزی فایل همیشه کل مجموعهٔ قوانین فعلی را کاملاً جایگزین می‌کند (با تأیید در صورتی که قوانین پیش‌فرض نباشند)، نه اینکه روی آن‌ها اضافه شود. همین اصلاح در Car Rules v0.61 هم اعمال شد.</li>
-<li><strong>v0.70</strong> — برون‌بری/درون‌ریزی اکنون در یک رشتهٔ پس‌زمینه اجرا می‌شود نه در رشتهٔ اصلی: فراخوانی‌های MediaStore یک تماس مسدودکنندهٔ بین‌فرآیندی به‌همراه ورودی/خروجی دیسک هستند، و روی این مانیتور گاهی پاسخ‌دهی کند بود که باعث می‌شد برنامه یا هنگ کند و بسته شود، یا پیام «خطای برون‌بری» نشان دهد. همین اصلاح در Car Rules v0.60 هم اعمال شد.</li>
-<li><strong>v0.69</strong> — اشکال درون‌ریزی رفع شد: MediaStore همیشه مسیر پوشه را با یک اسلش پایانی ذخیره می‌کند، اما پرس‌وجوی درون‌ریزی مسیر را بدون آن اسلش مقایسه می‌کرد و به همین دلیل هرگز فایل برون‌بری‌شده را پیدا نمی‌کرد (با اینکه برون‌بری فایل را درست می‌ساخت). همین اصلاح در Car Rules v0.59 هم اعمال شد.</li>
-<li><strong>v0.68</strong> — درون‌ریزی/برون‌بری قوانین اکنون از طریق MediaStore (پوشهٔ عمومی Downloads/CarRulesVoice) انجام می‌شود، چون دسترسی «All files access» روی این مانیتور اصلاً داده نمی‌شود؛ حالا فایل بدون نیاز به هیچ دسترسی‌ای نوشته و خوانده می‌شود. همین اصلاح در Car Rules v0.58 هم اعمال شد.</li>
-<li><strong>v0.67</strong> — درون‌ریزی/برون‌بری قوانین اکنون مستقیماً فایل Download/car-rules.json را می‌نویسد و می‌خواند (با درخواست دسترسی لازم)، به‌جای انتخابگر فایل سیستم که روی این مانیتور چیزی برای باز کردن نداشت و باعث خرابی برنامه می‌شد؛ همین اصلاح در Car Rules v0.57 (نسخهٔ بدون صدا) هم اعمال شد که اکنون آن هم درون‌ریزی/برون‌بری به فایل را پشتیبانی می‌کند.</li>
-<li><strong>v0.65</strong> — ثبت هر فشردن دکمهٔ سفارشی فرمان در گزارش متوقف شد؛ اجرای یک قانون با فرمان صوتی اکنون به‌صورت یک رویداد عادی ثبت می‌شود، نه «اجرای آزمایشی».</li>
-<li><strong>v0.64</strong> — درون‌ریزی قوانین از برنامهٔ Car Rules (هنگام اولین اجرا یا از منوی «⋮») و درون‌ریزی/برون‌بری قوانین به فایل؛ نسخهٔ بدون صدای Car Rules 0.56 به سایت افزوده شد.</li>
-<li><strong>v0.63</strong> — دکمهٔ سفارشی فرمان به‌عنوان فعال‌سازی صوتی؛ حذف دکمهٔ «حمایت از سازنده».</li>
+  تنظیمات) — مفید است چون تنظیم روشن/تیرهٔ خود سیستم روی این هد‌یونیت همیشه قابل اعتماد نیست.</li>
+<li><strong>v0.94–v0.96</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از برنامه حذف شد —
+  این روش روی این هد‌یونیت هیچ‌وقت پایدار کار نکرد. اکنون این مجوز با یک برنامهٔ جداگانه برای گوشی
+  اعطا می‌شود — <strong>Car Rules ADB Grant</strong> (بخش دانلود بالا و «چگونه مجوز را بگیریم» را
+  ببینید).</li>
+<li><strong>v0.89–v0.93</strong> — اشکال اعطای خودکار مجوز از طریق adb رفع شد (دستور به‌درستی ساخته
+  نمی‌شد و تقریباً هیچ‌وقت کار نمی‌کرد)، خطای کاذبی که حتی پس از اعطای موفق مجوز نمایش داده می‌شد
+  حذف شد، و آدرس IP/پورت اکنون به‌طور خودکار پر می‌شوند.</li>
+<li><strong>v0.88</strong> — رفع اشکال گزینهٔ «بالا آوردن برنامه پیش از شنیدن» (از v0.87) که در
+  پس‌زمینه کار نمی‌کرد.</li>
+<li><strong>v0.87</strong> — اگر میکروفون برای لحظه‌ای در اختیار برنامهٔ دیگری باشد، اکنون چند بار
+  دوباره تلاش می‌شود، به‌جای شکست فوری. گزینهٔ آزمایشی «بالا آوردن برنامه پیش از شنیدن» اضافه شد
+  (به‌طور پیش‌فرض خاموش).</li>
+<li><strong>v0.86</strong> — پیام «میکروفون در دسترس نیست» اکنون دلیل واقعی خطا را هم نشان می‌دهد،
+  که بررسی گزارش‌های کاربران را ساده‌تر کرد.</li>
+<li><strong>v0.85</strong> — رفع اشکال اعطای خودکار مجوز که در برخی نسخه‌های اندروید با خطا شکست
+  می‌خورد.</li>
+<li><strong>v0.84 / Car Rules v0.68</strong> — فهرست‌های پارامتر در ویرایشگر قانون اکنون به‌ترتیب
+  الفبا مرتب شده‌اند.</li>
+<li><strong>v0.83</strong> — صفحهٔ «پنل» دیگر دکمهٔ اعطای مجوز و راهنمای adb را نشان نمی‌دهد اگر
+  مجوز از قبل داده شده باشد.</li>
+<li><strong>v0.79–v0.82</strong> — <strong>پنل شناور اجرای سریع</strong> اضافه شد: پنجره‌ای روی
+  همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ، هرکدام با یک ضربه قانون خودش را اجرا می‌کند. همان مجوز کنترل
+  صوتی — یک کد هر دو را فعال می‌کند.</li>
+<li><strong>Car Rules v0.67</strong> — سه قابلیت که پیش‌تر فقط در Car Rules Voice بود به نسخهٔ
+  ساده اضافه شد: «صندوق عقب: باز/بسته»، «گرمکن شیشهٔ عقب»، و دکمهٔ سفارشی فرمان به‌عنوان
+  شرط/محرک.</li>
+<li><strong>v0.67–v0.78</strong> — چند نسخهٔ پیاپی صرف پایدار کردن درون‌ریزی/برون‌بری قوانین به
+  فایل شد: ذخیرهٔ فایل روی این هد‌یونیت با اندروید معمولی فرق دارد و چند راه‌حل جایگزین لازم داشت —
+  از v0.78 به بعد پایدار است. در همین بازه: برون‌بری فرمان‌های صوتی را هم شامل شد (v0.74)، عملیات
+  «دمای تهویه مطبوع» اضافه شد (راننده/سرنشین، v0.77)، و عملیات «برف‌پاک‌کن: حالت سرویس» به‌همراه
+  گزینهٔ «بدون اعلان» برای یک قانون خاص اضافه شد (v0.72). شرط «برف‌پاک‌کن: حالت خودکار» برای
+  مدتی کوتاه اضافه و دوباره حذف شد (v0.72–v0.73) — این وضعیت در عمل روی این خودرو در دسترس
+  نیست.</li>
+<li><strong>v0.65</strong> — گزارش فشرده‌تر شد: ثبت هر فشردن دکمهٔ سفارشی فرمان متوقف شد، و اجرای
+  قانون با فرمان صوتی اکنون به‌صورت یک رویداد عادی ثبت می‌شود، نه «اجرای آزمایشی».</li>
+<li><strong>v0.64</strong> — درون‌ریزی قوانین از برنامهٔ Car Rules؛ درون‌ریزی/برون‌بری قوانین به
+  فایل. نسخهٔ بدون‌صدای Car Rules 0.56 به سایت افزوده شد.</li>
+<li><strong>v0.63</strong> — دکمهٔ سفارشی فرمان به‌عنوان فعال‌سازی صوتی؛ حذف دکمهٔ «حمایت از
+  سازنده».</li>
 <li><strong>v0.62</strong> — گرمکن شیشهٔ عقب؛ دکمهٔ سفارشی به‌عنوان محرک؛ پاک‌سازی سرویس.</li>
 <li><strong>v0.60–0.61</strong> — عملیات «درِ صندوق: باز/بسته».</li>
 <li><strong>v0.5x</strong> — کنترل صوتی آفلاین (Vosk)؛ عملیات «آینه‌ها: جمع/باز».</li>
