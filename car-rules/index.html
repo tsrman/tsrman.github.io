@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.93</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.96</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.93-ru-release.apk">CarRulesVoice-0.93-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.93-en-release.apk">CarRulesVoice-0.93-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.93-fa-release.apk">CarRulesVoice-0.93-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.96-ru-release.apk">CarRulesVoice-0.96-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.96-en-release.apk">CarRulesVoice-0.96-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.96-fa-release.apk">CarRulesVoice-0.96-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -244,6 +244,16 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.94–v0.96</strong> — самостоятельная выдача разрешения «Отображение поверх других
+  окон» через беспроводной adb удалена из приложения совсем: даже подключение к
+  <code>127.0.0.1</code> (не только к собственному Wi-Fi IP магнитолы) стабильно
+  падало с пустой ошибкой IOException прямо на устройстве, хотя обычный <code>adb
+  connect</code> с ноутбука к тому же порту подключается мгновенно — похоже, что-то на
+  самой магнитоле блокирует именно её собственным приложениям доступ к этому порту.
+  Вместо повторных попыток чинить самоподключение кнопка «Открыть системные настройки»
+  снова прячется, как только разрешение выдано, а сама выдача теперь делается отдельным
+  маленьким Android-приложением для обычного телефона (не публикуется здесь, по
+  запросу).</li>
 <li><strong>v0.89–v0.93</strong> — самостоятельная выдача разрешения «Отображение поверх других
   окон» через беспроводной adb (раздел «Плавающая панель») на деле никогда не работала:
   библиотека, которая формирует команду для shell, склеивала её аргументы без пробелов
@@ -480,6 +490,15 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.94–v0.96</strong> — the wireless-adb self-grant for "Display over other apps"
+  has been removed from the app entirely: even connecting to <code>127.0.0.1</code>
+  (not just the head unit's own Wi-Fi IP) still consistently failed with a bare,
+  message-less IOException from on-device, while a plain <code>adb connect</code> from
+  a laptop to the same port works instantly — something on the head unit itself
+  appears to block its own apps from reaching that port. Instead of chasing the
+  self-connect further, the "Open system settings" button goes back to hiding once
+  the permission is granted, and granting it is now done by a separate, small
+  companion Android app for an ordinary phone (not published here, on request).</li>
 <li><strong>v0.89–v0.93</strong> — the wireless-adb self-grant for "Display over other apps"
   (Floating panel section) never actually worked: the library building the shell
   command was gluing its arguments together with no spaces between them, so the head
@@ -715,6 +734,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.94–v0.96</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
+  بی‌سیم کاملاً از برنامه حذف شد: حتی اتصال به <code>127.0.0.1</code> (نه فقط آدرس
+  Wi-Fi خود هد‌یونیت) هم روی خود دستگاه پیوسته با یک IOException بدون پیام شکست
+  می‌خورد، در حالی که یک <code>adb connect</code> ساده از لپ‌تاپ به همان پورت فوراً
+  وصل می‌شود — به نظر می‌رسد چیزی روی خود هد‌یونیت مانع دسترسی برنامه‌های خودش به آن
+  پورت می‌شود. به‌جای ادامهٔ تلاش برای رفع این اتصال، دکمهٔ «باز کردن تنظیمات سیستم»
+  دوباره پس از اعطای مجوز پنهان می‌شود، و اعطای مجوز اکنون توسط یک برنامهٔ همراه کوچک
+  و جداگانه برای گوشی معمولی انجام می‌شود (اینجا منتشر نشده، فقط در صورت درخواست).</li>
 <li><strong>v0.89–v0.93</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
   بی‌سیم (بخش «پنل شناور») در واقع هرگز کار نمی‌کرد: کتابخانه‌ای که دستور shell را
   می‌ساخت، آرگومان‌ها را بدون فاصله به هم می‌چسباند و هد‌یونیت به‌جای دستور
