@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.98</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.99</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.98-ru-release.apk">CarRulesVoice-0.98-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.98-en-release.apk">CarRulesVoice-0.98-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.98-fa-release.apk">CarRulesVoice-0.98-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.99-ru-release.apk">CarRulesVoice-0.99-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.99-en-release.apk">CarRulesVoice-0.99-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.99-fa-release.apk">CarRulesVoice-0.99-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -184,8 +184,10 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>Что нового в этой версии</h2>
 <ul>
-<li><strong>Массаж передних сидений</strong> — новое действие: режим и интенсивность (водитель,
-  пассажир). Интенсивность — «Выкл / уровень 1 / уровень 2 / уровень 3 (макс)».</li>
+<li><strong>Подогрев форсунок омывателя</strong> — новое действие «включить/выключить».</li>
+<li><strong>Массаж передних сидений</strong> — действие «Режим»: «Волны / Кошка / Растяжка / Змея /
+  Бабочка» (подтверждено на автомобиле). Интенсивность — «Выкл / уровень 1 / уровень 2 / уровень 3
+  (макс)».</li>
 <li>Исправлена плавающая панель: она игнорировала выбранную в приложении светлую тему (см.
   «Настройки → Тема») и всегда рисовалась в тёмной, даже когда весь остальной интерфейс был
   светлым.</li>
@@ -256,6 +258,10 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.99</strong> — подтверждена кодировка режима массажа (программы) передних сидений:
+  на экране выбора режима автомобиля программы идут слева направо как 1 = Волны, 2 = Кошка,
+  3 = Растяжка, 4 = Змея, 5 = Бабочка — раньше это поле было доступно только как ввод числа.
+  Также добавлено новое действие «Подогрев форсунок омывателя» (включить/выключить).</li>
 <li><strong>v0.98</strong> — плавающая панель игнорировала выбранную в приложении светлую тему:
   панель создаётся фоновым сервисом, а не экраном приложения, и системный механизм, применяющий
   тему (переопределение «Тема → Светлая»), патчит только контексты экранов — сервис как был,
@@ -453,8 +459,9 @@ condition. Background location access is needed to fire while the app is closed.
 
 <h2>What’s new in this version</h2>
 <ul>
-<li><strong>Front-seat massage</strong> — a new action: mode and intensity (driver, passenger).
-  Intensity is "Off / level 1 / level 2 / level 3 (max)".</li>
+<li><strong>Washer nozzle heater</strong> — a new on/off action.</li>
+<li><strong>Front-seat massage</strong> — Mode is now "Waves / Cat / Stretch / Snake / Butterfly"
+  (confirmed on-car), not a raw number. Intensity is "Off / level 1 / level 2 / level 3 (max)".</li>
 <li>Fixed the floating panel ignoring the in-app Light theme choice (Settings → Theme) — it always
   rendered dark even when the rest of the UI was light.</li>
 <li><strong>Floating quick-launch panel</strong> — a window on top of every app with 4/6/8 large
@@ -523,6 +530,10 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.99</strong> — confirmed the front-seat massage mode (program) encoding: on the car's
+  own mode picker screen, the programs run left to right as 1 = Waves, 2 = Cat, 3 = Stretch,
+  4 = Snake, 5 = Butterfly — previously this field was only exposed as a raw number. Also added a
+  new "Washer nozzle heater" on/off action.</li>
 <li><strong>v0.98</strong> — the floating panel ignored the in-app Light theme choice: the panel is
   built by a background service, not an app screen, and the system mechanism that applies the
   in-app theme override ("Theme → Light") only patches screen contexts — the service kept
@@ -720,8 +731,9 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تازه‌ها در این نسخه</h2>
 <ul>
-<li><strong>ماساژ صندلی‌های جلو</strong> — عملیات جدید: حالت و شدت (راننده، سرنشین). شدت شامل
-  «خاموش / سطح ۱ / سطح ۲ / سطح ۳ (حداکثر)» است.</li>
+<li><strong>گرمکن نازل شیشه‌شور</strong> — عملیات جدید روشن/خاموش.</li>
+<li><strong>ماساژ صندلی‌های جلو</strong> — حالت اکنون «موج / گربه / کشش / مار / پروانه» است (تأیید
+  شده روی خودرو)، نه یک عدد خام. شدت شامل «خاموش / سطح ۱ / سطح ۲ / سطح ۳ (حداکثر)» است.</li>
 <li>رفع اشکال پنل شناور که تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت — همیشه با تم تیره
   نمایش داده می‌شد، حتی وقتی بقیهٔ رابط کاربری روشن بود.</li>
 <li><strong>پنل شناور اجرای سریع</strong> — پنجره‌ای روی همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا
@@ -790,6 +802,10 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.99</strong> — کدگذاری حالت (برنامهٔ) ماساژ صندلی‌های جلو تأیید شد: در صفحهٔ انتخاب
+  حالت خود خودرو، برنامه‌ها از چپ به راست به‌ترتیب ۱ = موج، ۲ = گربه، ۳ = کشش، ۴ = مار، ۵ = پروانه
+  هستند — پیش‌تر این فیلد فقط به‌صورت عدد خام نمایش داده می‌شد. همچنین عملیات جدید «گرمکن نازل
+  شیشه‌شور» (روشن/خاموش) اضافه شد.</li>
 <li><strong>v0.98</strong> — پنل شناور تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت: پنل توسط یک
   سرویس پس‌زمینه ساخته می‌شود، نه یک صفحهٔ برنامه، و مکانیزم سیستمی که تم داخل‌برنامه‌ای
   («تم ← روشن») را اعمال می‌کند فقط کانتکست صفحه‌ها را وصله می‌زند — سرویس همچنان از تم خام
