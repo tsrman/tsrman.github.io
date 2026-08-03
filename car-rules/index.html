@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v0.96</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v0.98</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-0.96-ru-release.apk">CarRulesVoice-0.96-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-0.96-en-release.apk">CarRulesVoice-0.96-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-0.96-fa-release.apk">CarRulesVoice-0.96-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-0.98-ru-release.apk">CarRulesVoice-0.98-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-0.98-en-release.apk">CarRulesVoice-0.98-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-0.98-fa-release.apk">CarRulesVoice-0.98-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.68</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -184,6 +184,11 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>Что нового в этой версии</h2>
 <ul>
+<li><strong>Массаж передних сидений</strong> — новое действие: режим и интенсивность (водитель,
+  пассажир). Интенсивность — «Выкл / уровень 1 / уровень 2 / уровень 3 (макс)».</li>
+<li>Исправлена плавающая панель: она игнорировала выбранную в приложении светлую тему (см.
+  «Настройки → Тема») и всегда рисовалась в тёмной, даже когда весь остальной интерфейс был
+  светлым.</li>
 <li><strong>Плавающая панель быстрого запуска</strong> — окно поверх всех приложений с 4/6/8 крупными
   кнопками (вертикально или горизонтально), каждая запускает своё правило. Та же лицензия, что и у
   голоса.</li>
@@ -251,6 +256,18 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v0.98</strong> — плавающая панель игнорировала выбранную в приложении светлую тему:
+  панель создаётся фоновым сервисом, а не экраном приложения, и системный механизм, применяющий
+  тему (переопределение «Тема → Светлая»), патчит только контексты экранов — сервис как был,
+  так и оставался привязан к «сырой» теме системы независимо от выбора пользователя. Теперь
+  панель сама выставляет нужный режим темы, если выбрана «Светлая» или «Тёмная» (для «Как в
+  системе» ничего менять не нужно — это и так уже совпадало). Также добавлено действие «Массаж
+  передних сидений» (режим + интенсивность, водитель/пассажир) — подтверждённая на живой машине
+  кодировка интенсивности: 0 = выкл, 2 = уровень 1, 3 = уровень 2, 4 = уровень 3 (макс);
+  кодировка режима (программы массажа) пока не подтверждена и оставлена как ввод числа.</li>
+<li><strong>v0.95</strong> — добавлена настройка темы приложения («Как в системе» / «Светлая» /
+  «Тёмная», экран «Настройки»): переопределение полезно на этой магнитоле, потому что системная
+  настройка тёмной/светлой темы не всегда доступна или что-то значит на данной прошивке.</li>
 <li><strong>v0.94–v0.96</strong> — самостоятельная выдача разрешения «Отображение поверх других
   окон» через беспроводной adb удалена из приложения совсем: даже подключение к
   <code>127.0.0.1</code> (не только к собственному Wi-Fi IP магнитолы) стабильно
@@ -436,6 +453,10 @@ condition. Background location access is needed to fire while the app is closed.
 
 <h2>What’s new in this version</h2>
 <ul>
+<li><strong>Front-seat massage</strong> — a new action: mode and intensity (driver, passenger).
+  Intensity is "Off / level 1 / level 2 / level 3 (max)".</li>
+<li>Fixed the floating panel ignoring the in-app Light theme choice (Settings → Theme) — it always
+  rendered dark even when the rest of the UI was light.</li>
 <li><strong>Floating quick-launch panel</strong> — a window on top of every app with 4/6/8 large
   buttons (vertical or horizontal), each running its own rule. Same license as voice control.</li>
 <li><strong>Car Rules ADB Grant</strong> — a separate phone app that grants this permission over
@@ -502,6 +523,18 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v0.98</strong> — the floating panel ignored the in-app Light theme choice: the panel is
+  built by a background service, not an app screen, and the system mechanism that applies the
+  in-app theme override ("Theme → Light") only patches screen contexts — the service kept
+  following the raw system theme regardless of what the user picked. The panel now sets the
+  correct theme mode itself when "Light" or "Dark" is chosen (nothing changes for "Follow
+  system", which already matched). Also added a "Front-seat massage" action (mode + intensity,
+  driver/passenger) — the intensity encoding was confirmed on a real car: 0 = off, 2 = level 1,
+  3 = level 2, 4 = level 3 (max); the mode (massage program) encoding isn't confirmed yet and is
+  still exposed as a raw number.</li>
+<li><strong>v0.95</strong> — added an in-app theme setting ("Follow system" / "Light" / "Dark",
+  Settings screen): useful on this head unit because the platform's own light/dark setting isn't
+  always reachable or meaningful on this firmware.</li>
 <li><strong>v0.94–v0.96</strong> — the wireless-adb self-grant for "Display over other apps"
   has been removed from the app entirely: even connecting to <code>127.0.0.1</code>
   (not just the head unit's own Wi-Fi IP) still consistently failed with a bare,
@@ -687,6 +720,10 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تازه‌ها در این نسخه</h2>
 <ul>
+<li><strong>ماساژ صندلی‌های جلو</strong> — عملیات جدید: حالت و شدت (راننده، سرنشین). شدت شامل
+  «خاموش / سطح ۱ / سطح ۲ / سطح ۳ (حداکثر)» است.</li>
+<li>رفع اشکال پنل شناور که تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت — همیشه با تم تیره
+  نمایش داده می‌شد، حتی وقتی بقیهٔ رابط کاربری روشن بود.</li>
 <li><strong>پنل شناور اجرای سریع</strong> — پنجره‌ای روی همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا
   افقی)، هرکدام قانون خودش را اجرا می‌کند. همان مجوز کنترل صوتی.</li>
 <li><strong>Car Rules ADB Grant</strong> — برنامه‌ای جداگانه برای گوشی که این مجوز را از طریق adb
@@ -753,6 +790,17 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v0.98</strong> — پنل شناور تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت: پنل توسط یک
+  سرویس پس‌زمینه ساخته می‌شود، نه یک صفحهٔ برنامه، و مکانیزم سیستمی که تم داخل‌برنامه‌ای
+  («تم ← روشن») را اعمال می‌کند فقط کانتکست صفحه‌ها را وصله می‌زند — سرویس همچنان از تم خام
+  سیستم پیروی می‌کرد، صرف‌نظر از انتخاب کاربر. اکنون پنل خودش حالت درست تم را تنظیم می‌کند وقتی
+  «روشن» یا «تیره» انتخاب شده باشد (برای «مطابق سیستم» چیزی تغییر نمی‌کند — قبلاً هم یکسان بود).
+  همچنین عملیات «ماساژ صندلی‌های جلو» (حالت + شدت، راننده/سرنشین) اضافه شد — کدگذاری شدت روی
+  خودرو واقعی تأیید شد: ۰ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)؛ کدگذاری حالت
+  (برنامه‌های ماساژ) هنوز تأیید نشده و همچنان به‌صورت عدد خام نمایش داده می‌شود.</li>
+<li><strong>v0.95</strong> — تنظیم تم برنامه اضافه شد («مطابق سیستم» / «روشن» / «تیره»، صفحهٔ
+  تنظیمات): این بازنویسی روی این هد‌یونیت مفید است، چون تنظیم روشن/تیرهٔ خود سیستم روی این
+  فریمور همیشه در دسترس یا معنادار نیست.</li>
 <li><strong>v0.94–v0.96</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از طریق adb
   بی‌سیم کاملاً از برنامه حذف شد: حتی اتصال به <code>127.0.0.1</code> (نه فقط آدرس
   Wi-Fi خود هد‌یونیت) هم روی خود دستگاه پیوسته با یک IOException بدون پیام شکست
