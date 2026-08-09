@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.04</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.05</strong>
   <ul>
-    <li>🇷🇺 <a href="CarRulesVoice-1.04-ru-release.apk">CarRulesVoice-1.04-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="CarRulesVoice-1.04-en-release.apk">CarRulesVoice-1.04-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="CarRulesVoice-1.04-fa-release.apk">CarRulesVoice-1.04-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="CarRulesVoice-1.05-ru-release.apk">CarRulesVoice-1.05-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="CarRulesVoice-1.05-en-release.apk">CarRulesVoice-1.05-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="CarRulesVoice-1.05-fa-release.apk">CarRulesVoice-1.05-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.69</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -266,6 +266,12 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.05</strong> — кнопка на плавающей панели теперь запускает правило сразу,
+  без проверки его условий и гео-зоны (раньше кнопка проверяла их так же, как обычный
+  автоматический триггер, и при несовпадении молча ничего не делала). Также добавлены
+  «Статус автоблокировки» и «Статус авторазблокировки» — состояние переключателей
+  «Автоблокировка при удалении» / «Авторазблокировка при приближении» теперь можно
+  использовать как условие или триггер правила.</li>
 <li><strong>v1.04</strong> — новое действие «Авто-яркость экрана» (вкл/выкл) — тот же
   переключатель «Авто», что на экране настроек яркости в SeresSettings. В отличие от
   действия «Яркость экрана» (уровень, через сервис подсветки), для этого действия снова
@@ -537,6 +543,11 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.05</strong> — a floating-panel button now runs the rule's targets immediately,
+  ignoring its conditions and geofence (it used to check them like an automatic trigger,
+  and could silently do nothing if they didn't hold). Also added "Auto-lock status" and
+  "Auto-unlock status" — the on/off state of the "Auto-lock on walk-away" / "Auto-unlock on
+  approach" switches can now be used as a rule condition or trigger.</li>
 <li><strong>v1.04</strong> — new "Auto brightness" action (on/off) — the same "Auto" switch
   SeresSettings' own display-brightness screen has. Unlike "Screen brightness" (the level,
   via the backlight service), this one needs the "Modify system settings" permission again —
@@ -798,6 +809,11 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.05</strong> — دکمهٔ روی پنل شناور اکنون هدف‌های قانون را بلافاصله اجرا می‌کند، بدون
+  بررسی شرایط و ژئوفنس آن (پیش‌تر مانند یک محرک خودکار آن‌ها را بررسی می‌کرد و در صورت برقرار
+  نبودن، بی‌صدا هیچ کاری انجام نمی‌داد). همچنین «وضعیت قفل خودکار» و «وضعیت باز شدن خودکار قفل»
+  اضافه شد — وضعیت کلیدهای «قفل خودکار هنگام دور شدن» / «باز شدن خودکار قفل هنگام نزدیک شدن»
+  اکنون می‌تواند به‌عنوان شرط یا محرک قانون استفاده شود.</li>
 <li><strong>v1.04</strong> — عملیات جدید «روشنایی خودکار» (روشن/خاموش) — همان کلید «خودکار» که در
   صفحهٔ روشنایی SeresSettings وجود دارد. برخلاف «روشنایی صفحه» (سطح روشنایی، از طریق سرویس
   پس‌زمینه)، این یکی دوباره به مجوز «تغییر تنظیمات سیستم» نیاز دارد — که با Car Rules ADB
