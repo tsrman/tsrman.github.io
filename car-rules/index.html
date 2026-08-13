@@ -145,6 +145,8 @@ APK того языка, на котором будете говорить.</p>
 <p>Тот же результат можно получить вручную с компьютера, если у вас есть adb:<br>
 <code>adb connect &lt;IP магнитолы&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
+<p>Действию «Авто-яркость экрана» нужно ещё одно разрешение — «Изменение системных настроек»:<br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice WRITE_SETTINGS allow</code></p>
 
 <h2>Первый запуск</h2>
 <ol>
@@ -436,6 +438,8 @@ service, no special permission required.</p>
 <p>The same result can also be reached manually from a computer, if you have adb:<br>
 <code>adb connect &lt;head unit IP&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
+<p>The "Auto brightness" action needs one more permission — "Modify system settings":<br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice WRITE_SETTINGS allow</code></p>
 
 <h2>First run</h2>
 <ol>
@@ -713,6 +717,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <p>همین نتیجه را می‌توان به‌صورت دستی از یک کامپیوتر هم گرفت، اگر adb دارید:<br>
 <code>adb connect &lt;آدرس IP هد‌یونیت&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
+<p>عملیات «روشنایی خودکار صفحه» به یک مجوز دیگر هم نیاز دارد — «تغییر تنظیمات سیستم»:<br>
+<code>adb shell appops set --user 0 org.tsrman.carrules.voice WRITE_SETTINGS allow</code></p>
 
 <h2>اجرای نخست</h2>
 <ol>
