@@ -235,41 +235,57 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Температура за бортом</td><td>число, °C</td></tr>
 <tr><td>Скорость</td><td>число, км/ч</td></tr>
 <tr><td>Заряд батареи</td><td>число, %</td></tr>
-<tr><td>Питание автомобиля</td><td>0 = Выкл, 1 = ON / в движении</td></tr>
+<tr><td>Уровень топлива</td><td>число, %</td></tr>
+<tr><td>Питание автомобиля</td><td>0 = Выкл, 1 = ON / готов к движению</td></tr>
 <tr><td>Передача (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
+<tr><td>Статус зарядки (AC / DC быстрая)</td><td>0 = Не заряжается, 1 = Термоподготовка, 2 = Заряжается, 3 = Завершена, 4 = На паузе, 5 = Остановлена</td></tr>
+<tr><td>Подключение зарядного кабеля</td><td>число (код зависит от типа разъёма — смотрите живое значение)</td></tr>
 <tr><td>Педаль тормоза</td><td>0 = Отпущена, 1 = Нажата</td></tr>
 <tr><td>Открыта любая дверь</td><td>0 = Все закрыты, 1 = Хотя бы одна открыта</td></tr>
 <tr><td>Руль: скролл вверх / PAGE UP</td><td>0 = Отпущена, 1 = Нажата</td></tr>
 <tr><td>Руль: скролл вниз / PAGE DOWN</td><td>0 = Отпущена, 1 = Нажата</td></tr>
-<tr><td>Руль: двойное нажатие вверх (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
-<tr><td>Руль: двойное нажатие вниз (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
 <tr><td>Руль: кастомная кнопка</td><td>0 = Отпущена, 1 = Нажата</td></tr>
+<tr><td>Руль: двойное нажатие скролла вверх (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
+<tr><td>Руль: двойное нажатие скролла вниз (событие)</td><td>1 = Событие (два нажатия за 0,4 с)</td></tr>
 <tr><td>Ремень водителя / пассажира</td><td>0 = Не пристёгнут, 1 = Пристёгнут</td></tr>
 <tr><td>Датчики сидений (водитель, пассажир, задние Л/С/П)</td><td>0 = Пусто, 1 = Занято</td></tr>
+<tr><td>Режим вождения</td><td>1 = Спорт, 2 = Комфорт, 3 = Экономичный, 13 = Гоночный</td></tr>
+<tr><td>Дорожный режим</td><td>0 = Обычный, 1 = Скользко/мокро, 2 = Снег</td></tr>
+<tr><td>Вентиляция сидений (водитель, пассажир)</td><td>1 = Выкл, 2–4 = уровень</td></tr>
 <tr><td>Статус зеркал</td><td>0 = Разложены, 1 = Сложены</td></tr>
 <tr><td>Статус багажника</td><td>0 = Закрыт, 1 = Открыт, 5 = Не закрыт до конца</td></tr>
-<tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Статус автоблокировки (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Статус авторазблокировки (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
 </tbody></table>
 
 <h2>Действия (что можно включать)</h2>
 <table><thead><tr><th>Действие</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Климат-контроль (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
-<tr><td>Температура климата (водитель, пассажир)</td><td>17.5 = Lo, 18.0–32.0 (шаг 0.5 °C), 32.5 = Hi</td></tr>
 <tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Температура климата (водитель, пассажир)</td><td>17.5 = Lo, 18.0–32.0 (шаг 0.5 °C), 32.5 = Hi</td></tr>
 <tr><td>Подогрев сидений (водитель, пассажир, задние Л/П)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
 <tr><td>Вентиляция сидений (водитель, пассажир)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
+<tr><td>Массаж сиденья, режим (водитель, пассажир)</td><td>1 = Волны, 2 = Кошка, 3 = Растяжка, 4 = Змея, 5 = Бабочка</td></tr>
+<tr><td>Массаж сиденья, интенсивность (водитель, пассажир)</td><td>0 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
 <tr><td>Подогрев руля</td><td>0 = Выкл, 1 = 1, 2 = 2, 3 = 3</td></tr>
+<tr><td>Подогрев форсунок омывателя</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Замок дверей (централизованный)</td><td>1 = Разблокировано, 2 = Заблокировано</td></tr>
+<tr><td>Детский замок (задняя левая / правая дверь)</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Авторазблокировка при приближении</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Автоблокировка при удалении</td><td>0 = Выкл, 1 = Вкл</td></tr>
-<tr><td>Режим вождения</td><td>1 = Спорт, 2 = Комфорт, 3 = Эконом, 13 = Гоночный</td></tr>
+<tr><td>Лючок зарядки (откр./закр.)</td><td>0 = Закрыт, 1 = Открыт</td></tr>
+<tr><td>Лючок бака</td><td>открывает лючок (закрыть можно только вручную)</td></tr>
+<tr><td>Режим вождения</td><td>1 = Спорт, 2 = Комфорт, 3 = Экономичный, 13 = Гоночный</td></tr>
 <tr><td>Дорожный режим</td><td>0 = Обычный, 1 = Скользко/мокро, 2 = Снег</td></tr>
-<tr><td>Режим гибрида</td><td>2 = Сначала электро, 3 = Авто, 4 = Сначала бензин</td></tr>
+<tr><td>Режим гибрида (приоритет электро/бензин)</td><td>2 = Сначала электро, 3 = Авто, 4 = Сначала бензин</td></tr>
+<tr><td>Дворники: сервисный режим (замена щёток)</td><td>поднимает щётки (вернуть можно только вручную рычагом стеклоочистителя)</td></tr>
 <tr><td>Зеркала: сложить / разложить</td><td>Сложить / Разложить</td></tr>
 <tr><td>Багажник: открыть / закрыть</td><td>Открыть / Закрыть</td></tr>
 <tr><td>Запустить приложение</td><td>выбор из установленных</td></tr>
+<tr><td>Перекинуть приложение: приборка / центральный экран</td><td>выбор из установленных (переключается при каждом срабатывании)</td></tr>
 <tr><td>Управление Яндекс Музыкой</td><td>Играть, Пауза, Играть/Пауза, Следующий, Предыдущий</td></tr>
 <tr><td>Яркость экрана</td><td>число 0–100, %</td></tr>
+<tr><td>Авто-яркость экрана</td><td>0 = Выкл, 1 = Вкл</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>Про кнопки руля.</strong> Одиночное и двойное нажатие скролла разведены: одиночный
@@ -545,48 +561,64 @@ condition. Background location access is needed to fire while the app is closed.
 
 <h2>Parameters (triggers &amp; conditions)</h2>
 <table><thead><tr><th>Parameter</th><th>Values</th></tr></thead><tbody>
-<tr><td>Device / app start (event)</td><td>1 = Event</td></tr>
+<tr><td>Device booted / app started (event)</td><td>1 = Event</td></tr>
 <tr><td>Screen turned on (event)</td><td>1 = Event</td></tr>
-<tr><td>Screen unlock (event)</td><td>1 = Event</td></tr>
+<tr><td>Screen unlocked (event)</td><td>1 = Event</td></tr>
 <tr><td>Internet access (event)</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Outside temperature</td><td>number, °C</td></tr>
 <tr><td>Speed</td><td>number, km/h</td></tr>
-<tr><td>Battery charge</td><td>number, %</td></tr>
-<tr><td>Vehicle power</td><td>0 = Off, 1 = ON / driving</td></tr>
+<tr><td>Battery charge level</td><td>number, %</td></tr>
+<tr><td>Fuel level</td><td>number, %</td></tr>
+<tr><td>Vehicle power</td><td>0 = Off, 1 = On / ready to drive</td></tr>
 <tr><td>Gear (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
+<tr><td>Charging status (AC / DC fast charge)</td><td>0 = Not charging, 1 = Pre-charge thermal conditioning, 2 = Charging, 3 = Finished, 4 = Paused, 5 = Stopped</td></tr>
+<tr><td>Charge cable connection</td><td>number (code depends on connector type — check the live value)</td></tr>
 <tr><td>Brake pedal</td><td>0 = Released, 1 = Pressed</td></tr>
 <tr><td>Any door open</td><td>0 = All closed, 1 = At least one open</td></tr>
-<tr><td>Wheel: scroll up / PAGE UP</td><td>0 = Released, 1 = Pressed</td></tr>
-<tr><td>Wheel: scroll down / PAGE DOWN</td><td>0 = Released, 1 = Pressed</td></tr>
-<tr><td>Wheel: scroll-up double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
-<tr><td>Wheel: scroll-down double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
-<tr><td>Wheel: custom button</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Steering wheel: scroll up / PAGE UP</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Steering wheel: scroll down / PAGE DOWN</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Steering wheel: custom button</td><td>0 = Released, 1 = Pressed</td></tr>
+<tr><td>Steering wheel: PAGE UP double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
+<tr><td>Steering wheel: PAGE DOWN double press (event)</td><td>1 = Event (two presses within 0.4 s)</td></tr>
 <tr><td>Driver / passenger seatbelt</td><td>0 = Unbuckled, 1 = Buckled</td></tr>
 <tr><td>Seat sensors (driver, passenger, rear L/M/R)</td><td>0 = Empty, 1 = Occupied</td></tr>
+<tr><td>Drive mode</td><td>1 = Sport, 2 = Comfort, 3 = Eco, 13 = Race</td></tr>
+<tr><td>Road mode</td><td>0 = Normal, 1 = Wet/slippery, 2 = Snow</td></tr>
+<tr><td>Seat ventilation (driver, passenger)</td><td>1 = Off, 2–4 = level</td></tr>
 <tr><td>Mirror status</td><td>0 = Unfolded, 1 = Folded</td></tr>
 <tr><td>Trunk status</td><td>0 = Closed, 1 = Open, 5 = Not fully closed</td></tr>
-<tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Auto-lock status (on/off)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Auto-unlock status (on/off)</td><td>0 = Off, 1 = On</td></tr>
 </tbody></table>
 
 <h2>Actions (what you can control)</h2>
 <table><thead><tr><th>Action</th><th>Values</th></tr></thead><tbody>
 <tr><td>Climate control (on/off)</td><td>0 = Off, 1 = On</td></tr>
-<tr><td>Climate temperature (driver, passenger)</td><td>17.5 = Lo, 18.0-32.0 (0.5°C steps), 32.5 = Hi</td></tr>
 <tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
-<tr><td>Seat heaters (driver, passenger, rear L/R)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
+<tr><td>Climate temperature (driver, passenger)</td><td>17.5 = Lo, 18.0-32.0 (0.5°C steps), 32.5 = Hi</td></tr>
+<tr><td>Seat heater (driver, passenger, rear L/R)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
 <tr><td>Seat ventilation (driver, passenger)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
+<tr><td>Seat massage mode (driver, passenger)</td><td>1 = Waves, 2 = Cat, 3 = Stretch, 4 = Snake, 5 = Butterfly</td></tr>
+<tr><td>Seat massage intensity (driver, passenger)</td><td>0 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
 <tr><td>Steering-wheel heater</td><td>0 = Off, 1 = 1, 2 = 2, 3 = 3</td></tr>
+<tr><td>Washer nozzle heater</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Door lock (central)</td><td>1 = Unlocked, 2 = Locked</td></tr>
+<tr><td>Child lock (rear left / right door)</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Auto-unlock on approach</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Auto-lock on leaving</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Charge port flap (open/closed)</td><td>0 = Closed, 1 = Open</td></tr>
+<tr><td>Fuel filler flap</td><td>opens the flap (can only be closed by hand)</td></tr>
 <tr><td>Drive mode</td><td>1 = Sport, 2 = Comfort, 3 = Eco, 13 = Race</td></tr>
 <tr><td>Road mode</td><td>0 = Normal, 1 = Wet/slippery, 2 = Snow</td></tr>
-<tr><td>Hybrid mode</td><td>2 = EV first, 3 = Auto, 4 = Fuel first</td></tr>
+<tr><td>Vehicle mode (EV/fuel priority)</td><td>2 = EV-first, 3 = Auto, 4 = Fuel-first</td></tr>
+<tr><td>Wipers: service mode (blade replacement)</td><td>raises the blades (can only be exited by hand)</td></tr>
 <tr><td>Mirrors: fold / unfold</td><td>Fold / Unfold</td></tr>
 <tr><td>Trunk: open / close</td><td>Open / Close</td></tr>
 <tr><td>Launch app</td><td>pick an installed app</td></tr>
+<tr><td>Toggle app: cluster / center display</td><td>pick an installed app (toggles display each time it fires)</td></tr>
 <tr><td>Yandex Music control</td><td>Play, Pause, Play/Pause, Next, Previous</td></tr>
 <tr><td>Screen brightness</td><td>number 0–100, %</td></tr>
+<tr><td>Auto brightness</td><td>0 = Off, 1 = On</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>About wheel buttons.</strong> Single and double scroll presses are separated: the single
@@ -851,48 +883,64 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
 <table><thead><tr><th>پارامتر</th><th>مقادیر</th></tr></thead><tbody>
-<tr><td>شروع دستگاه / برنامه (رویداد)</td><td>۱ = رویداد</td></tr>
-<tr><td>روشن‌شدن صفحه (رویداد)</td><td>۱ = رویداد</td></tr>
+<tr><td>روشن شدن دستگاه / شروع برنامه (رویداد)</td><td>۱ = رویداد</td></tr>
+<tr><td>روشن شدن صفحه (رویداد)</td><td>۱ = رویداد</td></tr>
 <tr><td>باز شدن قفل صفحه (رویداد)</td><td>۱ = رویداد</td></tr>
-<tr><td>دسترسی اینترنت (رویداد)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>دسترسی به اینترنت (رویداد)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>دمای بیرون</td><td>عدد، °C</td></tr>
-<tr><td>سرعت</td><td>عدد، کیلومتر بر ساعت</td></tr>
-<tr><td>شارژ باتری</td><td>عدد، ٪</td></tr>
-<tr><td>برق خودرو</td><td>۰ = خاموش، ۱ = روشن / در حرکت</td></tr>
+<tr><td>سرعت</td><td>عدد، کیلومتر/ساعت</td></tr>
+<tr><td>سطح شارژ باتری</td><td>عدد، ٪</td></tr>
+<tr><td>سطح سوخت</td><td>عدد، ٪</td></tr>
+<tr><td>برق خودرو</td><td>۰ = خاموش، ۱ = روشن / آماده رانندگی</td></tr>
 <tr><td>دنده (P/R/N/D)</td><td>۰ = P، ۱ = R، ۲ = N، ۳ = D</td></tr>
-<tr><td>پدال ترمز</td><td>۰ = رها، ۱ = فشرده</td></tr>
+<tr><td>وضعیت شارژ (AC / DC سریع)</td><td>۰ = در حال شارژ نیست، ۱ = تنظیم دمایی پیش از شارژ، ۲ = در حال شارژ، ۳ = شارژ کامل شد، ۴ = متوقف‌شده (موقت)، ۵ = متوقف شد</td></tr>
+<tr><td>اتصال کابل شارژ</td><td>عدد (کد بسته به نوع رابط متفاوت است — مقدار زنده را بررسی کنید)</td></tr>
+<tr><td>پدال ترمز</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
 <tr><td>باز بودن هر در</td><td>۰ = همه بسته، ۱ = حداقل یکی باز</td></tr>
-<tr><td>فرمان: پیمایش بالا / PAGE UP</td><td>۰ = رها، ۱ = فشرده</td></tr>
-<tr><td>فرمان: پیمایش پایین / PAGE DOWN</td><td>۰ = رها، ۱ = فشرده</td></tr>
-<tr><td>فرمان: دو بار فشردن بالا (رویداد)</td><td>۱ = رویداد (دو فشار در ۰٫۴ ثانیه)</td></tr>
-<tr><td>فرمان: دو بار فشردن پایین (رویداد)</td><td>۱ = رویداد (دو فشار در ۰٫۴ ثانیه)</td></tr>
-<tr><td>فرمان: دکمهٔ سفارشی</td><td>۰ = رها، ۱ = فشرده</td></tr>
-<tr><td>کمربند راننده / سرنشین</td><td>۰ = نبسته، ۱ = بسته</td></tr>
-<tr><td>حسگر صندلی‌ها (راننده، سرنشین، عقب چ/و/ر)</td><td>۰ = خالی، ۱ = اشغال</td></tr>
-<tr><td>وضعیت آینه‌ها</td><td>۰ = باز، ۱ = جمع‌شده</td></tr>
-<tr><td>وضعیت درِ صندوق</td><td>۰ = بسته، ۱ = باز، ۵ = کاملاً بسته نیست</td></tr>
-<tr><td>گرمکن شیشهٔ عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>فرمان: پیمایش به بالا / PAGE UP</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
+<tr><td>فرمان: پیمایش به پایین / PAGE DOWN</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
+<tr><td>فرمان: دکمه سفارشی</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
+<tr><td>فرمان: دو بار فشردن PAGE UP (رویداد)</td><td>۱ = رویداد (دو فشار طی ۰٫۴ ثانیه)</td></tr>
+<tr><td>فرمان: دو بار فشردن PAGE DOWN (رویداد)</td><td>۱ = رویداد (دو فشار طی ۰٫۴ ثانیه)</td></tr>
+<tr><td>کمربند راننده / سرنشین</td><td>۰ = بسته‌نشده، ۱ = بسته‌شده</td></tr>
+<tr><td>حسگرهای صندلی (راننده، سرنشین، عقب چپ/وسط/راست)</td><td>۰ = خالی، ۱ = اشغال‌شده</td></tr>
+<tr><td>حالت رانندگی</td><td>۱ = اسپرت، ۲ = راحت، ۳ = اقتصادی، ۱۳ = مسابقه</td></tr>
+<tr><td>حالت جاده</td><td>۰ = عادی، ۱ = خیس/لغزنده، ۲ = برف</td></tr>
+<tr><td>تهویه صندلی (راننده، سرنشین)</td><td>۱ = خاموش، ۲ تا ۴ = سطح</td></tr>
+<tr><td>وضعیت آینه</td><td>۰ = بازشده، ۱ = جمع‌شده</td></tr>
+<tr><td>وضعیت صندوق عقب</td><td>۰ = بسته، ۱ = باز، ۵ = کاملاً بسته نشده</td></tr>
+<tr><td>وضعیت قفل خودکار (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>وضعیت باز شدن خودکار قفل (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 </tbody></table>
 
 <h2>عملیات (چه چیزهایی قابل کنترل است)</h2>
 <table><thead><tr><th>عملیات</th><th>مقادیر</th></tr></thead><tbody>
 <tr><td>تهویه مطبوع (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>گرمکن شیشه عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>دمای تهویه مطبوع (راننده، سرنشین)</td><td>۱۷٫۵ = Lo، ۱۸٫۰ تا ۳۲٫۰ (گام ۰٫۵ درجه)، ۳۲٫۵ = Hi</td></tr>
-<tr><td>گرمکن شیشهٔ عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
-<tr><td>گرمکن صندلی‌ها (راننده، سرنشین، عقب چ/ر)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
-<tr><td>تهویه صندلی‌ها (راننده، سرنشین)</td><td>۱ = خاموش، ۲ = ۱، ۳ = ۲، ۴ = ۳ (حداکثر)</td></tr>
+<tr><td>گرمکن صندلی (راننده، سرنشین، عقب چپ/راست)</td><td>۱ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)</td></tr>
+<tr><td>تهویه صندلی (راننده، سرنشین)</td><td>۱ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)</td></tr>
+<tr><td>ماساژ صندلی، حالت (راننده، سرنشین)</td><td>۱ = موج، ۲ = گربه، ۳ = کشش، ۴ = مار، ۵ = پروانه</td></tr>
+<tr><td>ماساژ صندلی، شدت (راننده، سرنشین)</td><td>۰ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)</td></tr>
 <tr><td>گرمکن فرمان</td><td>۰ = خاموش، ۱ = ۱، ۲ = ۲، ۳ = ۳</td></tr>
-<tr><td>قفل مرکزی درها</td><td>۱ = باز، ۲ = قفل</td></tr>
-<tr><td>باز شدن خودکار هنگام نزدیک‌شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
-<tr><td>قفل خودکار هنگام دورشدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
-<tr><td>حالت رانندگی</td><td>۱ = اسپرت، ۲ = کامفورت، ۳ = اقتصادی، ۱۳ = مسابقه</td></tr>
+<tr><td>گرمکن نازل شیشه‌شور</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>قفل در (قفل مرکزی)</td><td>۱ = باز، ۲ = قفل</td></tr>
+<tr><td>قفل کودک (درب عقب چپ / راست)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>باز شدن خودکار قفل هنگام نزدیک شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>قفل خودکار هنگام دور شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>دریچه محل شارژ (باز/بسته)</td><td>۰ = بسته، ۱ = باز</td></tr>
+<tr><td>درب باک سوخت</td><td>درب را باز می‌کند (بستن فقط با دست ممکن است)</td></tr>
+<tr><td>حالت رانندگی</td><td>۱ = اسپرت، ۲ = راحت، ۳ = اقتصادی، ۱۳ = مسابقه</td></tr>
 <tr><td>حالت جاده</td><td>۰ = عادی، ۱ = خیس/لغزنده، ۲ = برف</td></tr>
-<tr><td>حالت هیبرید</td><td>۲ = اول برقی، ۳ = خودکار، ۴ = اول بنزین</td></tr>
-<tr><td>آینه‌ها: جمع / باز</td><td>جمع‌کردن / بازکردن</td></tr>
-<tr><td>درِ صندوق: باز / بسته</td><td>بازکردن / بستن</td></tr>
+<tr><td>حالت خودرو (اولویت برقی/سوخت)</td><td>۲ = اولویت برقی، ۳ = خودکار، ۴ = اولویت سوخت</td></tr>
+<tr><td>برف‌پاک‌کن: حالت سرویس (تعویض تیغه)</td><td>تیغه‌ها را بالا می‌برد (خروج فقط با دست ممکن است)</td></tr>
+<tr><td>آینه‌ها: جمع کردن / باز کردن</td><td>جمع کردن / باز کردن</td></tr>
+<tr><td>صندوق عقب: باز کردن / بستن</td><td>باز کردن / بستن</td></tr>
 <tr><td>اجرای برنامه</td><td>انتخاب از برنامه‌های نصب‌شده</td></tr>
-<tr><td>کنترل یاندکس موزیک</td><td>پخش، توقف، پخش/توقف، بعدی، قبلی</td></tr>
+<tr><td>جابجایی برنامه: صفحه کلاستر / صفحه مرکزی</td><td>انتخاب از برنامه‌های نصب‌شده (هر بار اجرا جابجا می‌شود)</td></tr>
+<tr><td>کنترل یاندکس موزیک</td><td>پخش، توقف، پخش/توقف، قطعه بعدی، قطعه قبلی</td></tr>
 <tr><td>روشنایی صفحه</td><td>عدد ۰ تا ۱۰۰، ٪</td></tr>
+<tr><td>روشنایی خودکار صفحه</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>دربارهٔ دکمه‌های فرمان.</strong> فشار یک‌باره و دوباره جدا هستند: محرک یک‌باره با ۰٫۴ ثانیه
