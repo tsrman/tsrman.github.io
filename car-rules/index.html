@@ -53,11 +53,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.17</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.18</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.17/CarRulesVoice-1.17-ru-release.apk">CarRulesVoice-1.17-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.17/CarRulesVoice-1.17-en-release.apk">CarRulesVoice-1.17-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.17/CarRulesVoice-1.17-fa-release.apk">CarRulesVoice-1.17-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.18/CarRulesVoice-1.18-ru-release.apk">CarRulesVoice-1.18-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.18/CarRulesVoice-1.18-en-release.apk">CarRulesVoice-1.18-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.18/CarRulesVoice-1.18-fa-release.apk">CarRulesVoice-1.18-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.69</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -284,6 +284,7 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Запустить приложение</td><td>выбор из установленных</td></tr>
 <tr><td>Перекинуть приложение: приборка / центральный экран</td><td>выбор из установленных (переключается при каждом срабатывании)</td></tr>
 <tr><td>Управление Яндекс Музыкой</td><td>Играть, Пауза, Играть/Пауза, Следующий, Предыдущий</td></tr>
+<tr><td>Управление штатным медиаплеером</td><td>Bluetooth-аудио / USB-аудио × Играть, Пауза, Продолжить, Следующий, Предыдущий</td></tr>
 <tr><td>Яркость экрана</td><td>число 0–100, %</td></tr>
 <tr><td>Авто-яркость экрана</td><td>0 = Выкл, 1 = Вкл</td></tr>
 </tbody></table>
@@ -301,6 +302,12 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>Car Rules Voice v1.18</strong> — новое действие «Управление штатным медиаплеером»:
+  play/pause/next/previous для Bluetooth- и USB-аудио через тот же вещательный механизм,
+  которым сама прошивка переключает источник с руля. В настройках голоса появилась опция
+  «Ставить медиа на паузу во время прослушивания»: глушит Яндекс Музыку и штатный плеер перед
+  открытием микрофона и включает обратно сразу после — независимо от того, распознана ли
+  команда.</li>
 <li><strong>Car Rules Voice v1.17</strong> — новый экран «Настройки»: можно отключить звуковой
   сигнал при запуске программы и включить панель быстрого запуска на главном экране (до 8
   кнопок в один ряд на всю ширину, каждая запускает выбранное правило) — доступна бесплатно,
@@ -617,6 +624,7 @@ condition. Background location access is needed to fire while the app is closed.
 <tr><td>Launch app</td><td>pick an installed app</td></tr>
 <tr><td>Toggle app: cluster / center display</td><td>pick an installed app (toggles display each time it fires)</td></tr>
 <tr><td>Yandex Music control</td><td>Play, Pause, Play/Pause, Next, Previous</td></tr>
+<tr><td>Standard media player control</td><td>Bluetooth audio / USB audio × Play, Pause, Resume, Next, Previous</td></tr>
 <tr><td>Screen brightness</td><td>number 0–100, %</td></tr>
 <tr><td>Auto brightness</td><td>0 = Off, 1 = On</td></tr>
 </tbody></table>
@@ -634,6 +642,11 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>Car Rules Voice v1.18</strong> — new "Standard media player control" action:
+  play/pause/next/previous for Bluetooth and USB audio, via the same broadcast mechanism the
+  firmware itself uses for steering-wheel source switching. Voice settings gained a "Pause
+  media while listening" option: mutes Yandex Music and the stock player right before the mic
+  opens and resumes both right after, regardless of whether a command was recognized.</li>
 <li><strong>Car Rules Voice v1.17</strong> — new "Settings" screen: turn off the program-start
   sound and enable a quick-launch bar on the main screen (up to 8 buttons in a single
   full-width row, each running a chosen rule) — free, not tied to the floating panel's paid
@@ -939,6 +952,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <tr><td>اجرای برنامه</td><td>انتخاب از برنامه‌های نصب‌شده</td></tr>
 <tr><td>جابجایی برنامه: صفحه کلاستر / صفحه مرکزی</td><td>انتخاب از برنامه‌های نصب‌شده (هر بار اجرا جابجا می‌شود)</td></tr>
 <tr><td>کنترل یاندکس موزیک</td><td>پخش، توقف، پخش/توقف، قطعه بعدی، قطعه قبلی</td></tr>
+<tr><td>کنترل پخش‌کننده رسانه استاندارد</td><td>صوت بلوتوث / صوت USB × پخش، توقف، ادامه، قطعه بعدی، قطعه قبلی</td></tr>
 <tr><td>روشنایی صفحه</td><td>عدد ۰ تا ۱۰۰، ٪</td></tr>
 <tr><td>روشنایی خودکار صفحه</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 </tbody></table>
@@ -956,6 +970,11 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>Car Rules Voice v1.18</strong> — عملکرد جدید «کنترل پخش‌کننده رسانه استاندارد»:
+  play/pause/next/previous برای صوت بلوتوث و USB، از طریق همان روش پیام پخشی که خود سیستم برای
+  تعویض منبع از فرمان استفاده می‌کند. در تنظیمات صدا گزینهٔ «هنگام گوش دادن، رسانه را متوقف کن»
+  اضافه شد: پیش از باز شدن میکروفون یاندکس موزیک و پخش‌کننده استاندارد را متوقف، و بلافاصله پس
+  از آن دوباره پخش می‌کند — صرف‌نظر از اینکه فرمان شناسایی شد یا نه.</li>
 <li><strong>Car Rules Voice v1.17</strong> — صفحهٔ جدید «تنظیمات»: می‌توانید صدای شروع برنامه
   را خاموش کنید و نوار دسترسی سریع را در صفحهٔ اصلی فعال کنید (حداکثر ۸ دکمه در یک ردیف به
   عرض کامل صفحه، هر کدام یک قانون انتخابی را اجرا می‌کند) — رایگان و بدون نیاز به لایسنس
