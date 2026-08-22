@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как создать правило и голосовую команду — Car Rules Voice</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.4rem 1.2rem 4rem;
+  }
+  h1 { font-size: 1.6rem; border-bottom: 1px solid #8884; padding-bottom: .4rem; }
+  h2 { font-size: 1.25rem; margin-top: 2.2rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  blockquote {
+    margin: 1rem 0; padding: .6rem 1rem;
+    border-left: 4px solid #4f8ef7; background: #4f8ef714;
+    border-radius: 0 6px 6px 0;
+  }
+  [dir="rtl"] blockquote { border-left: none; border-right: 4px solid #4f8ef7; border-radius: 6px 0 0 6px; }
+  code { background: #8882; padding: .1em .35em; border-radius: 4px; font-size: .92em; }
+  a { color: #4f8ef7; }
+  li { margin: .25rem 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+  th, td { border: 1px solid #8885; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
+  th { background: #8882; }
+  tbody tr:nth-child(even) { background: #8881; }
+  .langbar { position: sticky; top: 0; background: Canvas; padding: .6rem 0; margin: 0 0 1rem;
+    border-bottom: 1px solid #8884; display: flex; gap: .5rem; flex-wrap: wrap; z-index: 5; }
+  .langbar button {
+    font: inherit; cursor: pointer; padding: .35rem .9rem; border-radius: 999px;
+    border: 1px solid #4f8ef7; background: transparent; color: #4f8ef7;
+  }
+  .langbar button.active { background: #4f8ef7; color: #fff; }
+  .back { display: inline-block; margin-bottom: .6rem; font-size: .95rem; }
+  .lang { display: none; }
+  .lang.active { display: block; }
+  .shot { margin: 1rem 0; }
+  .shot img { width: 100%; max-width: 760px; height: auto; border-radius: 8px; border: 1px solid #8885; display: block; }
+  .shot small { display: block; margin-top: .4rem; color: #888; }
+  details { margin: .6rem 0; padding: .6rem .9rem; border: 1px solid #8885; border-radius: 8px; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details[open] summary { margin-bottom: .5rem; }
+  .step { margin: 1.2rem 0; }
+</style>
+</head>
+<body>
+
+<div class="langbar">
+  <button data-go="ru" class="active">Русский</button>
+  <button data-go="en">English</button>
+  <button data-go="fa">فارسی</button>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  RU  ========================= -->
+<!-- ======================================================= -->
+<div class="lang active" data-lang="ru" lang="ru">
+<a class="back" href="index.html">← Назад на главную страницу</a>
+<h1>Как создать правило и голосовую команду</h1>
+<p>Подробная пошаговая инструкция со скриншотами: как собрать правило с нуля на двух
+примерах и как назначить ему голосовую фразу. Общий обзор экранов и полный список
+параметров/действий — на <a href="index.html">главной странице</a>; здесь — только
+практика.</p>
+
+<h2>Прежде чем начать</h2>
+<p>Любое правило — это:</p>
+<blockquote><p><strong>КОГДА</strong> что-то произошло (триггер) → <strong>И ЕСЛИ</strong>
+выполняются условия → <strong>ТО</strong> выполнить действия.</p></blockquote>
+<p><strong>Триггер</strong> — это переход («стало равно», «изменилось», «возросло»,
+«уменьшилось»): срабатывает один раз, в момент смены значения. <strong>Условие</strong> —
+это то, что должно быть верно <em>прямо сейчас</em>, в момент срабатывания триггера
+(«температура ниже −5°C» верно или нет здесь и сейчас, а не когда-то). Экран редактора
+разделён по этому же принципу: слева — «КОГДА» (триггеры + условия), справа — «ТОГДА»
+(действия) и настройки самого правила.</p>
+
+<h2>Шаг за шагом</h2>
+<div class="step">
+<p><strong>1. На главном экране нажмите «+ Правило».</strong> Откроется пустой редактор:</p>
+<div class="shot">
+  <img src="screenshots/guide-new-rule.png" alt="Пустой редактор нового правила">
+  <small>Пустой редактор: имя, пустой блок «КОГДА» с одной строкой триггера, пустой блок
+  «И ЕСЛИ», справа — «ТОГДА» и «Настройки».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>2. Введите название</strong> — оно просто для вас, ни на что не влияет.</p>
+<p><strong>3. «Когда (триггер)»</strong>: выберите параметр или событие, тип перехода и
+значение. Под полем показывается живое значение параметра — сверяйтесь с ним, если не
+уверены в кодировке (например, «занято» может быть и «1», и другим числом в зависимости
+от датчика). Кнопка «+ Триггер» добавляет ещё один — сработает <strong>любой</strong> из
+них (ИЛИ). Можно вообще не добавлять ни одного триггера — см. Пример 2 ниже.</p>
+<p><strong>4. «И если» (условия)</strong>: переключатель И/ИЛИ определяет, нужны ли все
+условия сразу (И, по умолчанию) или достаточно любого одного (ИЛИ). Кнопка «+ Условие»
+добавляет строку: параметр, оператор сравнения, значение.</p>
+<p><strong>5. «Тогда (действия)»</strong>: что включить и на какое значение. Поле «Минут» —
+автовыключение (переживает перезагрузку магнитолы); галочка «Задержка перед выполнением» —
+выполнить не сразу, а через N секунд после срабатывания. Зелёная кнопка ▶ рядом с действием
+выполняет его прямо сейчас, для проверки.</p>
+<p><strong>6. «Настройки»</strong> справа: «Сработать при старте, если условие уже верно» —
+правило дополнительно проверяется один раз при запуске программы (полезно, если магнитола
+загрузилась, когда водитель уже сидит на месте); «Показывать тост + звук при срабатывании» —
+отключите, если правило должно работать тихо, без всплывающего уведомления.</p>
+<p><strong>7. «Сохранить».</strong></p>
+</div>
+
+<h2>Пример 1 — правило по датчику и температуре</h2>
+<p>Классический автоматический случай — одно из готовых правил приложения:</p>
+<div class="shot">
+  <img src="screenshots/guide-example1.png" alt="Пример правила: подогрев при посадке в мороз">
+  <small>«Driver seated · severe frost»: когда датчик сиденья водителя стал «занято», и
+  если за бортом ниже −5°C — включить подогрев руля (ур. 3) и сиденья (макс.) на 15 минут.</small>
+</div>
+<p>Разбор: триггер «Датчик сиденья водителя» → «Стало равно» → «1» (занято) — сработает
+именно в момент посадки, а не всё время, пока водитель сидит. Условие «Температура за
+бортом» &lt; −5 — проверяется именно в тот момент. Оба действия получают «Минут» = 15, то
+есть через 15 минут подогрев сам выключится.</p>
+
+<h2>Пример 2 — правило «по требованию», без автоматического триггера</h2>
+<p>Правило не обязано ничего слушать само — если оставить «Когда» и «И если» пустыми,
+оно никогда не сработает <em>автоматически</em>, но остаётся полностью рабочим по кнопке
+«▶» в списке правил, с плавающей панели или по голосовой команде. Это — правильный способ
+сделать разовое действие «по требованию»:</p>
+<div class="shot">
+  <img src="screenshots/guide-example2.png" alt="Пример правила без триггера: открыть багажник">
+  <small>«Open the trunk»: блок «Когда» и «И если» пустые (кнопка «+ Триггер»/«+ Условие»,
+  ни одной строки), единственное действие — «Багажник: открыть/закрыть» = «Открыть».</small>
+</div>
+<p>Именно такие правила чаще всего имеет смысл привязывать к голосовым командам — дальше
+разберём это на этом же примере.</p>
+
+<h2>Как привязать правило к голосовой команде</h2>
+<p>Голосовое управление — платная функция (активация под конкретный VIN, подробности и
+цена — на <a href="index.html">главной странице</a>). Дальше предполагается, что
+активация уже пройдена.</p>
+<div class="step">
+<p><strong>1. На главном экране нажмите «Голос».</strong> Откроется экран настроек: общий
+переключатель, кнопка активации на руле, список уже настроенных фраз справа.</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-settings.png" alt="Экран настроек голосовых команд">
+  <small>Экран «Голосовые команды»: включение, выбор кнопки активации на руле,
+  «Пауза медиа во время прослушивания», справа — список фраз и «+ Голосовая команда».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>2. Нажмите «+ Голосовая команда»</strong> и выберите правило из выпадающего
+списка — все ваши правила уже там, по названию:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-pick-rule.png" alt="Выбор правила для голосовой команды">
+  <small>Выпадающий список «Правило для запуска» — здесь выбран пример «Open the trunk».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>3. Введите одну или несколько фраз</strong>, по одной на строку — сработает
+любая из них. Кнопка «Диктовать» позволяет наговорить фразу вместо набора на клавиатуре
+(удобно для кириллицы/фарси на магнитоле).</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-phrases.png" alt="Ввод голосовых фраз">
+  <small>Две фразы-синонима для одного правила: «Open the trunk» и «Pop the trunk».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>4. «Сохранить».</strong> Команда появится в списке справа:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-final.png" alt="Готовая голосовая команда в списке">
+  <small>Готово: правило и список его фраз — сразу видно, что к чему привязано.</small>
+</div>
+</div>
+<p>Чтобы воспользоваться: нажмите выбранную кнопку на руле (двойной клик скролла вверх/вниз
+или одиночный клик кастомной кнопки — что выбрано в настройках), дождитесь звукового
+сигнала «слушаю» и произнесите одну из фраз.</p>
+<blockquote><p><strong>Важно:</strong> голосовая команда пропускает сам триггер правила
+(неважно, что там настроено), но <strong>условия по-прежнему проверяются</strong>. Если у
+правила есть условие, а оно сейчас не выполняется — правило не сработает, в журнале
+появится запись «условия не выполнены». Для правил, которые должны срабатывать по голосу
+всегда, — как в Примере 2 — просто не добавляйте условий вообще.</p></blockquote>
+
+<h2>FAQ</h2>
+
+<details>
+<summary>Правило не срабатывает — что проверить?</summary>
+<p>1) Переключатель правила включён в списке. 2) Триггер настроен на реальный переход, а
+не «уже случившееся состояние» — например, «Стало равно 1» сработает только в момент, когда
+значение <em>меняется</em> на 1, а не всё время, пока оно уже равно 1 (для этого случая
+есть отдельная опция «Сработать при старте»). 3) Сверьте кодировку значения с живым
+значением, показанным под полем триггера — коды перечислений могут отличаться в другой
+комплектации.</p>
+</details>
+
+<details>
+<summary>Голосовая команда не распознаётся — что не так?</summary>
+<p>Распознавание полностью офлайн и зависит от языка установленного APK (ru/en/fa) —
+убедитесь, что говорите на языке установленной версии. Проверьте микрофон кнопкой «Проверить
+распознавание» на экране настроек. Если это происходит только когда приложение свёрнуто —
+включите «Bring app to front on activation» («вывести приложение на передний план при
+активации»): некоторые магнитолы дают надёжный доступ к микрофону только переднему
+приложению.</p>
+</details>
+
+<details>
+<summary>Голосовая команда «принята», но действие не произошло — почему?</summary>
+<p>Скорее всего, у правила есть условие, которое сейчас не выполняется — см. блок «Важно»
+выше. Голос запускает правило как обычное срабатывание (с проверкой условий), а не как
+безусловное нажатие кнопки.</p>
+</details>
+
+<details>
+<summary>Можно ли одной фразой запускать несколько правил, или одному правилу — несколько фраз?</summary>
+<p>Одна голосовая команда — это <em>одно</em> правило плюс список фраз-синонимов для него
+(«открой багажник» / «подними багажник» и т.п. — любая сработает). Обратное — нельзя: одна
+фраза не может быть привязана сразу к двум разным правилам.</p>
+</details>
+
+<details>
+<summary>После голосовой команды сама включилась музыка, хотя я её выключил — почему?</summary>
+<p>Это включена опция «Пауза медиа во время прослушивания» (экран настроек голоса): она
+безусловно ставит на паузу перед открытием микрофона и включает обратно после — без
+проверки, играло ли что-то на самом деле до этого. Если музыка уже была на паузе до
+активации, эта опция её включит. Отключите опцию, если это мешает.</p>
+</details>
+
+<details>
+<summary>Можно ли использовать одну и ту же кнопку руля и для голоса, и как триггер правила?</summary>
+<p>Технически да, но не стоит — выбранная кнопка активации голоса перестаёт доходить до
+обычной логики правил как отдельное нажатие, пока голос её перехватывает. Экран настроек
+голоса сам предупреждает об этом.</p>
+</details>
+
+<details>
+<summary>В чём разница между «Триггер» и «Условие», если оба можно поставить на одинаковый параметр?</summary>
+<p>Триггер — это <em>фронт</em>, момент изменения; правило проверяется ровно один раз, в
+момент этого перехода. Условие — это <em>уровень</em>, состояние, которое просто должно
+быть верным в момент проверки (сработавшего триггера, ручного запуска, голоса). Один и тот
+же параметр можно использовать и там, и там одновременно в разных ролях (см. Пример 1:
+датчик сиденья — триггер, температура — условие).</p>
+</details>
+
+<details>
+<summary>Что происходит, если у правила несколько триггеров?</summary>
+<p>Они всегда работают как ИЛИ — сработает любой из них. Для условий, в отличие от
+триггеров, режим И/ИЛИ можно переключить.</p>
+</details>
+
+<details>
+<summary>Голосовое управление и плавающая панель — это одна лицензия или две?</summary>
+<p>Одна: 16-значный код, привязанный к VIN, активирует обе платные функции сразу.
+Подробности — на <a href="index.html">главной странице</a>.</p>
+</details>
+
+<details>
+<summary>Правило с «Минут» = 15 не выключилось после перезагрузки магнитолы — почему?</summary>
+<p>Такого быть не должно: автовыключение по «Минут» хранится на диске и планируется через
+системный будильник (AlarmManager) — оно переживает перезагрузку и досрочно
+применяется, если время уже вышло к моменту старта. Если это всё же не срабатывает —
+похоже на баг, опишите его разработчику.</p>
+</details>
+
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  EN  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="en" lang="en">
+<a class="back" href="index.html">← Back to the main page</a>
+<h1>How to create a rule and a voice command</h1>
+<p>A detailed, step-by-step guide with screenshots: building a rule from scratch through
+two worked examples, then attaching a voice phrase to one. The screen-by-screen overview
+and the full parameter/action reference tables live on the <a href="index.html">main
+page</a>; this page is pure hands-on practice.</p>
+
+<h2>Before you start</h2>
+<p>Every rule is:</p>
+<blockquote><p><strong>WHEN</strong> something happens (a trigger) → <strong>AND IF</strong>
+conditions hold → <strong>THEN</strong> run actions.</p></blockquote>
+<p>A <strong>trigger</strong> is a transition ("became equal", "changed", "increased",
+"decreased") — it fires once, at the moment the value changes. A <strong>condition</strong>
+is something that must be true <em>right now</em>, at the moment the trigger fires
+("outside temperature is below −5°C" is either true or false at that instant, not some
+other time). The editor screen mirrors this split: the left column is "WHEN" (triggers +
+conditions), the right column is "THEN" (actions) plus the rule's own settings.</p>
+
+<h2>Step by step</h2>
+<div class="step">
+<p><strong>1. On the main screen, tap "+ Rule".</strong> An empty editor opens:</p>
+<div class="shot">
+  <img src="screenshots/guide-new-rule.png" alt="Empty new-rule editor">
+  <small>Empty editor: name field, an empty "WHEN" block with one trigger row, an empty
+  "AND IF" block, and "THEN" + "Settings" on the right.</small>
+</div>
+</div>
+<div class="step">
+<p><strong>2. Type a name</strong> — it's for you only, it has no effect on behavior.</p>
+<p><strong>3. "When (trigger)"</strong>: pick a parameter or event, a transition type, and
+a value. The live value shown under the field is there to check against — enum encodings
+can vary by trim level. "+ Trigger" adds another one — <strong>any</strong> of them firing
+starts evaluation (OR). You can also leave this with zero triggers entirely — see Example 2
+below.</p>
+<p><strong>4. "And if" (conditions)</strong>: the AND/OR toggle decides whether all
+conditions must hold at once (AND, default) or any single one is enough (OR). "+ Condition"
+adds a row: parameter, comparison operator, value.</p>
+<p><strong>5. "Then do" (actions)</strong>: what to set and to which value. "Minutes" is
+auto-off (survives a head-unit reboot); the "Delay before running" checkbox runs the action
+N seconds after the rule fires instead of immediately. The green ▶ button next to an action
+runs it right now, for testing.</p>
+<p><strong>6. "Settings"</strong> on the right: "Fire on start if the condition already
+holds" — the rule is additionally checked once when the app starts (useful if the head unit
+boots with the driver already seated); "Show a toast + sound when this rule fires" — turn
+this off if the rule should run silently, with no popup.</p>
+<p><strong>7. "Save".</strong></p>
+</div>
+
+<h2>Example 1 — a sensor + temperature rule</h2>
+<p>The classic automatic case — one of the app's own built-in rules:</p>
+<div class="shot">
+  <img src="screenshots/guide-example1.png" alt="Example rule: warm up on cold seat">
+  <small>"Driver seated · severe frost": when the driver seat sensor becomes "occupied",
+  and if it's below −5°C outside — turn on the steering wheel heater (level 3) and the seat
+  heater (max) for 15 minutes.</small>
+</div>
+<p>Breakdown: trigger "Driver seat sensor" → "Became equal" → "1" (occupied) — fires exactly
+at the moment of sitting down, not for the whole time the seat stays occupied. Condition
+"Outside temperature" &lt; −5 is checked at that exact moment. Both actions get "Minutes" =
+15, so the heaters switch themselves off 15 minutes later.</p>
+
+<h2>Example 2 — an on-demand rule with no automatic trigger</h2>
+<p>A rule doesn't have to listen for anything on its own — leaving both "When" and "And if"
+empty means it never fires <em>automatically</em>, but it's still fully usable via the "▶"
+button in the rule list, from the floating panel, or by voice command. This is the right
+way to build a one-off, on-demand action:</p>
+<div class="shot">
+  <img src="screenshots/guide-example2.png" alt="Trigger-less example rule: open the trunk">
+  <small>"Open the trunk": the "When" and "And if" blocks are both empty (just the "+
+  Trigger"/"+ Add condition" buttons, no rows), the only action is "Trunk: open/close" =
+  "Open".</small>
+</div>
+<p>Rules built exactly like this are usually the best candidates for a voice command —
+that's what the next section walks through, using this same example.</p>
+
+<h2>How to attach a rule to a voice command</h2>
+<p>Voice control is a paid feature (per-VIN activation — pricing and details are on the
+<a href="index.html">main page</a>). The rest of this section assumes activation is
+already done.</p>
+<div class="step">
+<p><strong>1. On the main screen, tap "Voice".</strong> The settings screen opens: a master
+switch, the wheel activation button picker, and the list of already-configured phrases on
+the right.</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-settings.png" alt="Voice command settings screen">
+  <small>The "Voice commands" screen: on/off, wheel activation-button choice, "Pause media
+  while listening", and on the right — the phrase list plus "+ Voice command".</small>
+</div>
+</div>
+<div class="step">
+<p><strong>2. Tap "+ Voice command"</strong> and pick a rule from the dropdown — every rule
+you have is already listed there, by name:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-pick-rule.png" alt="Picking a rule for the voice command">
+  <small>The "Rule to run" dropdown — "Open the trunk" is picked here.</small>
+</div>
+</div>
+<div class="step">
+<p><strong>3. Type one or more phrases</strong>, one per line — any of them will match.
+The "Dictate" button lets you speak the phrase instead of typing it (handy for Cyrillic or
+Persian on a head-unit keyboard).</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-phrases.png" alt="Entering voice phrases">
+  <small>Two synonym phrases for the same rule: "Open the trunk" and "Pop the trunk".</small>
+</div>
+</div>
+<div class="step">
+<p><strong>4. "Save".</strong> The command now appears in the list on the right:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-final.png" alt="The finished voice command in the list">
+  <small>Done — the rule and its phrase list are shown together, so it's obvious what's
+  bound to what.</small>
+</div>
+</div>
+<p>To use it: press the chosen wheel button (double-press the up/down scroll wheel, or a
+single press of the custom button — whichever is picked in settings), wait for the
+"listening" tone, and say one of the phrases.</p>
+<blockquote><p><strong>Important:</strong> a voice command skips the rule's own trigger
+entirely (whatever it's set to doesn't matter), but its <strong>conditions are still
+checked</strong>. If the rule has a condition and it doesn't currently hold, the rule will
+not fire — the journal logs "conditions failed". For rules that should always run by voice
+— like Example 2 — simply don't add any conditions at all.</p></blockquote>
+
+<h2>FAQ</h2>
+
+<details>
+<summary>The rule isn't firing — what should I check?</summary>
+<p>1) The rule's toggle is on in the list. 2) The trigger is set to an actual transition, not
+an "already-true state" — e.g. "Became equal to 1" only fires at the moment the value
+<em>changes</em> to 1, not for the whole time it's already 1 (that's what the separate
+"Fire on start" option is for). 3) Compare the value you typed against the live value shown
+under the trigger field — enum encodings can differ by trim level.</p>
+</details>
+
+<details>
+<summary>My voice command isn't being recognized — what's wrong?</summary>
+<p>Recognition is fully offline and tied to the installed APK's language (ru/en/fa) — make
+sure you're speaking the language of the version you installed. Check the mic with "Test
+recognition" on the settings screen. If it only fails while the app is backgrounded, enable
+"Bring app to front on activation" — some head units only give the foreground app reliable
+microphone access.</p>
+</details>
+
+<details>
+<summary>The voice command was "heard" but nothing happened — why?</summary>
+<p>The rule most likely has a condition that isn't currently true — see the "Important" box
+above. Voice runs the rule like a normal firing (conditions checked), not like an
+unconditional button press.</p>
+</details>
+
+<details>
+<summary>Can one phrase trigger several rules, or one rule have several phrases?</summary>
+<p>One voice command is <em>one</em> rule plus a list of synonym phrases for it ("open the
+trunk" / "pop the trunk" and so on — any of them work). The reverse isn't possible: one
+phrase can't be bound to two different rules at once.</p>
+</details>
+
+<details>
+<summary>Music started playing on its own after a voice command, even though I'd paused it — why?</summary>
+<p>That's the "Pause media while listening" option (voice settings screen): it
+unconditionally pauses before the mic opens and resumes right after — with no check for
+whether anything was actually playing beforehand. If music was already paused before you
+activated voice, this option will start it playing. Turn the option off if that's a
+problem.</p>
+</details>
+
+<details>
+<summary>Can I use the same wheel button for both voice activation and a rule's own trigger?</summary>
+<p>Technically yes, but it isn't a good idea — while voice is intercepting that button, its
+presses stop reaching the ordinary rule-trigger logic as a separate event. The voice
+settings screen warns about exactly this.</p>
+</details>
+
+<details>
+<summary>What's the actual difference between a "Trigger" and a "Condition" if both can watch the same parameter?</summary>
+<p>A trigger is an <em>edge</em> — the moment of change; the rule is checked exactly once,
+at that transition. A condition is a <em>level</em> — a state that simply has to be true at
+the moment of checking (a fired trigger, a manual run, a voice command). The same parameter
+can be used in both roles at once, in different rows (see Example 1: the seat sensor is the
+trigger, the temperature is the condition).</p>
+</details>
+
+<details>
+<summary>What happens if a rule has several triggers?</summary>
+<p>They always combine as OR — any one of them firing is enough. Conditions, unlike
+triggers, can be switched between AND and OR with the toggle.</p>
+</details>
+
+<details>
+<summary>Are voice control and the floating panel one license or two?</summary>
+<p>One: a single 16-digit, VIN-bound code activates both paid features at once. Details are
+on the <a href="index.html">main page</a>.</p>
+</details>
+
+<details>
+<summary>An action with "Minutes" = 15 didn't turn itself off after the head unit rebooted — why not?</summary>
+<p>It should have: auto-off timers are persisted to disk and scheduled through the system
+alarm manager, so they survive a reboot and are applied immediately if their time already
+passed by the time the app restarts. If that's genuinely not happening, it looks like a bug
+— please report it to the developer.</p>
+</details>
+
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  FA  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="fa" lang="fa" dir="rtl">
+<a class="back" href="index.html">→ بازگشت به صفحهٔ اصلی</a>
+<h1>چگونه یک قانون و یک فرمان صوتی بسازیم</h1>
+<p>راهنمای گام‌به‌گام و مصور: ساخت یک قانون از صفر با دو مثال کامل، سپس اختصاص یک عبارت
+صوتی به یکی از آن‌ها. مرور کلی صفحات و جدول کامل پارامترها/عملیات در
+<a href="index.html">صفحهٔ اصلی</a> است؛ این صفحه فقط تمرین عملی است.</p>
+
+<h2>پیش از شروع</h2>
+<p>هر قانون این‌گونه است:</p>
+<blockquote><p><strong>هنگامی که</strong> اتفاقی رخ می‌دهد (محرک) ← <strong>و اگر</strong>
+شرط‌ها برقرار باشند ← <strong>آنگاه</strong> عملیات اجرا شود.</p></blockquote>
+<p><strong>محرک</strong> یک گذار است («برابر شد»، «تغییر کرد»، «افزایش یافت»، «کاهش یافت»)
+— فقط یک‌بار، در لحظهٔ تغییر مقدار اجرا می‌شود. <strong>شرط</strong> چیزی است که باید
+<em>همین الان</em>، در لحظهٔ اجرای محرک، درست باشد («دمای بیرون کمتر از −۵ درجه» یا درست
+است یا نه، دقیقاً همان لحظه). صفحهٔ ویرایشگر هم دقیقاً همین تقسیم‌بندی را دارد: ستون چپ
+«هنگامی که» (محرک‌ها + شرط‌ها)، ستون راست «آنگاه» (عملیات) به‌همراه تنظیمات خود قانون.</p>
+
+<h2>گام‌به‌گام</h2>
+<div class="step">
+<p><strong>۱. در صفحهٔ اصلی روی «+ قانون» بزنید.</strong> یک ویرایشگر خالی باز می‌شود:</p>
+<div class="shot">
+  <img src="screenshots/guide-new-rule.png" alt="ویرایشگر خالی قانون جدید">
+  <small>ویرایشگر خالی: فیلد نام، بلوک خالی «هنگامی که» با یک ردیف محرک، بلوک خالی «و اگر»،
+  و در سمت راست «آنگاه» + «تنظیمات».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>۲. یک نام تایپ کنید</strong> — فقط برای خودتان است و روی رفتار قانون تأثیری ندارد.</p>
+<p><strong>۳. «هنگامی که (محرک)»</strong>: یک پارامتر یا رویداد، نوع گذار و یک مقدار انتخاب
+کنید. مقدار زندهٔ نمایش‌داده‌شده زیر فیلد برای مقایسه است — کدگذاری enum ممکن است بسته به
+تریم خودرو فرق کند. «+ محرک» یک ردیف دیگر اضافه می‌کند — اجرای <strong>هر یک</strong> از
+آن‌ها کافی است (یا). می‌توانید این بخش را کاملاً بدون هیچ محرکی هم بگذارید — مثال ۲ را
+پایین‌تر ببینید.</p>
+<p><strong>۴. «و اگر» (شرط‌ها)</strong>: کلید و/یا تعیین می‌کند که همهٔ شرط‌ها باید همزمان
+برقرار باشند (و، پیش‌فرض) یا برقراری هرکدام کافی است (یا). «+ شرط» یک ردیف اضافه می‌کند:
+پارامتر، عملگر مقایسه، مقدار.</p>
+<p><strong>۵. «آنگاه انجام بده (عملیات)»</strong>: چه چیزی روشن شود و روی چه مقداری.
+«دقیقه» یعنی خاموشی خودکار (پس از ری‌استارت هد‌یونیت هم باقی می‌ماند)؛ چک‌باکس «تأخیر پیش
+از اجرا» عملیات را N ثانیه پس از اجرای قانون، نه بلافاصله، اجرا می‌کند. دکمهٔ سبز ▶ کنار
+هر عملیات آن را همین حالا، برای آزمایش، اجرا می‌کند.</p>
+<p><strong>۶. «تنظیمات»</strong> در سمت راست: «اجرا هنگام شروع اگر شرط از پیش برقرار است» —
+قانون یک‌بار دیگر هم هنگام اجرای برنامه بررسی می‌شود (مفید وقتی هد‌یونیت درحالی‌که راننده
+از قبل نشسته روشن می‌شود)؛ «نمایش پیام + صدا هنگام اجرای این قانون» — اگر می‌خواهید قانون
+بی‌صدا و بدون پیام اجرا شود، آن را خاموش کنید.</p>
+<p><strong>۷. «ذخیره».</strong></p>
+</div>
+
+<h2>مثال ۱ — قانونی با سنسور و دما</h2>
+<p>حالت خودکار کلاسیک — یکی از قانون‌های پیش‌فرض خود برنامه:</p>
+<div class="shot">
+  <img src="screenshots/guide-example1.png" alt="مثال قانون: گرم کردن در هوای سرد هنگام نشستن">
+  <small>«Driver seated · severe frost»: وقتی سنسور صندلی راننده «اشغال» شود، و اگر بیرون
+  کمتر از −۵ درجه باشد — گرم‌کن فرمان (سطح ۳) و صندلی (حداکثر) به مدت ۱۵ دقیقه روشن شود.</small>
+</div>
+<p>تحلیل: محرک «سنسور صندلی راننده» ← «برابر شد» ← «۱» (اشغال) — دقیقاً در لحظهٔ نشستن اجرا
+می‌شود، نه در تمام مدتی که صندلی اشغال است. شرط «دمای بیرون» &lt; −۵ دقیقاً همان لحظه بررسی
+می‌شود. هر دو عملیات «دقیقه» = ۱۵ دارند، یعنی گرم‌کن‌ها خودشان پس از ۱۵ دقیقه خاموش می‌شوند.</p>
+
+<h2>مثال ۲ — قانونی «برحسب تقاضا»، بدون محرک خودکار</h2>
+<p>یک قانون لازم نیست خودش منتظر چیزی بماند — اگر «هنگامی که» و «و اگر» را خالی بگذارید،
+هرگز به‌طور <em>خودکار</em> اجرا نمی‌شود، اما همچنان کاملاً از طریق دکمهٔ «▶» در فهرست
+قانون‌ها، از پنل شناور یا با فرمان صوتی قابل‌استفاده است. این روش درست ساخت یک عملیات
+یک‌باره و «برحسب تقاضا» است:</p>
+<div class="shot">
+  <img src="screenshots/guide-example2.png" alt="مثال قانون بدون محرک: باز کردن صندوق عقب">
+  <small>«Open the trunk»: بلوک‌های «هنگامی که» و «و اگر» هر دو خالی‌اند (فقط دکمه‌های «+
+  محرک»/«+ افزودن شرط»، بدون هیچ ردیفی)، تنها عملیات «صندوق عقب: باز/بسته» = «باز» است.</small>
+</div>
+<p>قانون‌هایی دقیقاً به همین شکل معمولاً بهترین گزینه برای فرمان صوتی هستند — بخش بعدی با
+همین مثال این موضوع را نشان می‌دهد.</p>
+
+<h2>چگونه یک قانون را به فرمان صوتی متصل کنیم</h2>
+<p>کنترل صوتی یک قابلیت پولی است (فعال‌سازی بر اساس VIN — قیمت و جزئیات در
+<a href="index.html">صفحهٔ اصلی</a>). ادامهٔ این بخش فرض می‌کند فعال‌سازی قبلاً انجام
+شده است.</p>
+<div class="step">
+<p><strong>۱. در صفحهٔ اصلی روی «صدا» بزنید.</strong> صفحهٔ تنظیمات باز می‌شود: کلید اصلی،
+انتخاب دکمهٔ فعال‌سازی روی فرمان، و فهرست عبارت‌های از پیش تنظیم‌شده در سمت راست.</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-settings.png" alt="صفحهٔ تنظیمات فرمان صوتی">
+  <small>صفحهٔ «فرمان‌های صوتی»: روشن/خاموش، انتخاب دکمهٔ فعال‌سازی روی فرمان، «توقف رسانه
+  هنگام گوش دادن»، و در سمت راست فهرست عبارت‌ها به‌همراه «+ فرمان صوتی».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>۲. روی «+ فرمان صوتی» بزنید</strong> و یک قانون از فهرست کشویی انتخاب کنید — همهٔ
+قانون‌های شما از قبل با نام آنجا هستند:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-pick-rule.png" alt="انتخاب قانون برای فرمان صوتی">
+  <small>فهرست کشویی «قانون برای اجرا» — اینجا «Open the trunk» انتخاب شده است.</small>
+</div>
+</div>
+<div class="step">
+<p><strong>۳. یک یا چند عبارت وارد کنید</strong>، هرکدام در یک خط — هرکدام از آن‌ها کار
+می‌کند. دکمهٔ «ضبط صدا» به شما اجازه می‌دهد به‌جای تایپ، عبارت را با صدا بگویید (برای
+تایپ فارسی یا روسی روی صفحه‌کلید هد‌یونیت مفید است).</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-phrases.png" alt="وارد کردن عبارت‌های صوتی">
+  <small>دو عبارت مترادف برای یک قانون: «Open the trunk» و «Pop the trunk».</small>
+</div>
+</div>
+<div class="step">
+<p><strong>۴. «ذخیره».</strong> فرمان اکنون در فهرست سمت راست ظاهر می‌شود:</p>
+<div class="shot">
+  <img src="screenshots/guide-voice-final.png" alt="فرمان صوتی نهایی در فهرست">
+  <small>تمام شد — قانون و فهرست عبارت‌های آن با هم نمایش داده می‌شوند، پس مشخص است چه چیزی
+  به چه چیزی متصل است.</small>
+</div>
+</div>
+<p>برای استفاده: دکمهٔ انتخاب‌شدهٔ روی فرمان را فشار دهید (دوبار فشردن غلتک بالا/پایین، یا
+یک‌بار فشردن دکمهٔ سفارشی — هرکدام که در تنظیمات انتخاب شده)، منتظر بوق «در حال گوش دادن»
+بمانید و یکی از عبارت‌ها را بگویید.</p>
+<blockquote><p><strong>نکتهٔ مهم:</strong> فرمان صوتی محرک خود قانون را کاملاً نادیده
+می‌گیرد (هرچه تنظیم شده باشد فرقی نمی‌کند)، اما <strong>شرط‌ها همچنان بررسی می‌شوند</strong>.
+اگر قانون شرطی داشته باشد که همین الان برقرار نیست، قانون اجرا نخواهد شد — در گزارش «شرط‌ها
+برقرار نشد» ثبت می‌شود. برای قانون‌هایی که باید همیشه با صدا اجرا شوند — مثل مثال ۲ — کافی
+است اصلاً هیچ شرطی اضافه نکنید.</p></blockquote>
+
+<h2>سؤالات متداول</h2>
+
+<details>
+<summary>قانون اجرا نمی‌شود — چه چیزی را بررسی کنم؟</summary>
+<p>۱) کلید قانون در فهرست روشن است. ۲) محرک روی یک گذار واقعی تنظیم شده، نه یک «وضعیت از
+پیش برقرار» — مثلاً «برابر شد با ۱» فقط در لحظه‌ای که مقدار به ۱ <em>تغییر می‌کند</em> اجرا
+می‌شود، نه در تمام مدتی که از قبل ۱ است (برای آن حالت گزینهٔ جداگانهٔ «اجرا هنگام شروع»
+وجود دارد). ۳) مقداری که تایپ کرده‌اید را با مقدار زندهٔ زیر فیلد محرک مقایسه کنید —
+کدگذاری enum ممکن است بسته به تریم فرق کند.</p>
+</details>
+
+<details>
+<summary>فرمان صوتی من شناسایی نمی‌شود — مشکل چیست؟</summary>
+<p>شناسایی کاملاً آفلاین و وابسته به زبان نسخهٔ نصب‌شدهٔ APK (ru/en/fa) است — مطمئن شوید به
+زبان همان نسخه صحبت می‌کنید. میکروفون را با «آزمایش شناسایی» در صفحهٔ تنظیمات بررسی کنید.
+اگر فقط وقتی برنامه در پس‌زمینه است شکست می‌خورد، «انتقال برنامه به جلو هنگام فعال‌سازی» را
+روشن کنید — برخی هد‌یونیت‌ها فقط به برنامهٔ جلویی دسترسی میکروفون قابل‌اعتماد می‌دهند.</p>
+</details>
+
+<details>
+<summary>فرمان صوتی «شنیده» شد ولی هیچ اتفاقی نیفتاد — چرا؟</summary>
+<p>به احتمال زیاد قانون شرطی دارد که همین الان درست نیست — به کادر «نکتهٔ مهم» بالا نگاه
+کنید. صدا قانون را مثل یک اجرای معمولی (با بررسی شرط‌ها) اجرا می‌کند، نه مثل فشردن بی‌قیدوشرط
+یک دکمه.</p>
+</details>
+
+<details>
+<summary>آیا یک عبارت می‌تواند چند قانون را اجرا کند، یا یک قانون چند عبارت داشته باشد؟</summary>
+<p>یک فرمان صوتی یعنی <em>یک</em> قانون به‌همراه فهرستی از عبارت‌های مترادف برای آن («باز
+کن صندوق را» / «صندوق را باز کن» و مانند آن — هرکدام کار می‌کند). برعکسش ممکن نیست: یک
+عبارت نمی‌تواند هم‌زمان به دو قانون مختلف متصل باشد.</p>
+</details>
+
+<details>
+<summary>بعد از فرمان صوتی، موسیقی خودش پخش شد با اینکه من متوقفش کرده بودم — چرا؟</summary>
+<p>این گزینهٔ «توقف رسانه هنگام گوش دادن» است (صفحهٔ تنظیمات صدا): پیش از باز شدن میکروفون
+بدون قیدوشرط توقف می‌کند و بلافاصله پس از آن دوباره پخش می‌کند — بدون بررسی اینکه واقعاً
+چیزی از قبل در حال پخش بوده یا نه. اگر موسیقی از قبل متوقف بوده، این گزینه آن را پخش
+می‌کند. اگر مشکل‌ساز است، گزینه را خاموش کنید.</p>
+</details>
+
+<details>
+<summary>آیا می‌توانم از یک دکمهٔ فرمان هم برای فعال‌سازی صدا و هم به‌عنوان محرک قانون استفاده کنم؟</summary>
+<p>از نظر فنی بله، اما توصیه نمی‌شود — تا وقتی صدا آن دکمه را می‌قاپد، فشردن‌های آن دیگر
+به‌عنوان یک رویداد جدا به منطق معمول محرک قانون نمی‌رسد. صفحهٔ تنظیمات صدا خودش دربارهٔ
+همین موضوع هشدار می‌دهد.</p>
+</details>
+
+<details>
+<summary>اگر یک پارامتر هم به‌عنوان محرک و هم شرط قابل‌استفاده باشد، فرق واقعی «محرک» و «شرط» چیست؟</summary>
+<p>محرک یک <em>لبه</em> است — لحظهٔ تغییر؛ قانون دقیقاً یک‌بار، در همان گذار، بررسی می‌شود.
+شرط یک <em>سطح</em> است — وضعیتی که فقط باید در لحظهٔ بررسی (یک محرک اجراشده، اجرای دستی،
+فرمان صوتی) درست باشد. همان پارامتر می‌تواند هم‌زمان در هر دو نقش، در دو ردیف جدا،
+استفاده شود (مثال ۱ را ببینید: سنسور صندلی محرک است، دما شرط).</p>
+</details>
+
+<details>
+<summary>اگر یک قانون چند محرک داشته باشد چه اتفاقی می‌افتد؟</summary>
+<p>همیشه به‌صورت «یا» ترکیب می‌شوند — اجرای هرکدام کافی است. برخلاف محرک‌ها، شرط‌ها را
+می‌توان با کلید بین «و» و «یا» جابه‌جا کرد.</p>
+</details>
+
+<details>
+<summary>کنترل صوتی و پنل شناور یک لایسنس هستند یا دو تا؟</summary>
+<p>یکی: یک کد ۱۶ رقمی متصل به VIN هر دو قابلیت پولی را هم‌زمان فعال می‌کند. جزئیات در
+<a href="index.html">صفحهٔ اصلی</a> است.</p>
+</details>
+
+<details>
+<summary>عملیاتی با «دقیقه» = ۱۵ پس از ری‌استارت هد‌یونیت خودش خاموش نشد — چرا؟</summary>
+<p>نباید این‌طور می‌شد: تایمرهای خاموشی خودکار روی دیسک ذخیره و از طریق زمان‌بند سیستمی
+برنامه‌ریزی می‌شوند، پس ری‌استارت را پشت سر می‌گذارند و اگر زمانشان تا لحظهٔ راه‌اندازی
+مجدد برنامه گذشته باشد، بلافاصله اعمال می‌شوند. اگر واقعاً این‌طور نیست، به نظر می‌رسد
+یک باگ است — لطفاً آن را به توسعه‌دهنده گزارش دهید.</p>
+</details>
+
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.langbar button');
+    var sections = document.querySelectorAll('.lang');
+    function show(lang) {
+      sections.forEach(function (s) { s.classList.toggle('active', s.dataset.lang === lang); });
+      buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.go === lang); });
+      document.documentElement.lang = lang;
+      try { localStorage.setItem('crv_lang', lang); } catch (e) {}
+    }
+    buttons.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.go); }); });
+    var saved;
+    try { saved = localStorage.getItem('crv_lang'); } catch (e) {}
+    if (saved && document.querySelector('.lang[data-lang="' + saved + '"]')) show(saved);
+  })();
+</script>
+</body>
+</html>
