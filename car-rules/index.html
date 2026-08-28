@@ -62,11 +62,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.21</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.22</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.21/CarRulesVoice-1.21-ru-release.apk">CarRulesVoice-1.21-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.21/CarRulesVoice-1.21-en-release.apk">CarRulesVoice-1.21-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.21/CarRulesVoice-1.21-fa-release.apk">CarRulesVoice-1.21-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.22/CarRulesVoice-1.22-ru-release.apk">CarRulesVoice-1.22-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.22/CarRulesVoice-1.22-en-release.apk">CarRulesVoice-1.22-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.22/CarRulesVoice-1.22-fa-release.apk">CarRulesVoice-1.22-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.70</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -311,6 +311,7 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>Car Rules Voice v1.22</strong> — датчик дождя (ID_RAIN_LEVEL) не привязан к конкретному CAN-фрейму, поэтому его изменения теперь пишутся в журнал вместо постоянной строки статуса. PM2.5 в салоне (ID_HVAC_PM25, с реальным CAN-фреймом) добавлен в карточку статуса на главном экране.</li>
 <li><strong>Car Rules Voice v1.21</strong> — на редизайненном (v1.19) экране редактора поле
   «Параметр / событие» было слишком узким и обрезало длинные названия параметров — как в
   самом поле, так и в выпадающем списке. Теперь оно занимает всю ширину строки.</li>
@@ -670,6 +671,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>Car Rules Voice v1.22</strong> — the rain sensor (ID_RAIN_LEVEL) has no resolved CAN frame, so its changes are now logged instead of shown as a permanent status row. Cabin PM2.5 (ID_HVAC_PM25, which does have a real CAN frame) was added to the status card on the main screen.</li>
 <li><strong>Car Rules Voice v1.21</strong> — the "Parameter / event" field on the redesigned
   (v1.19) editor screen was too narrow, truncating long parameter names both in the field
   and its dropdown list. It now gets the full width of its row.</li>
@@ -1016,6 +1018,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>Car Rules Voice v1.22</strong> — حسگر باران (ID_RAIN_LEVEL) به هیچ فریم CAN مشخصی متصل نیست، بنابراین تغییرات آن اکنون در گزارش ثبت می‌شود نه به‌صورت یک ردیف دائمی در وضعیت. PM2.5 داخل کابین (ID_HVAC_PM25، که فریم CAN واقعی دارد) به کارت وضعیت در صفحهٔ اصلی اضافه شد.</li>
 <li><strong>Car Rules Voice v1.21</strong> — فیلد «پارامتر / رویداد» در صفحهٔ بازطراحی‌شدهٔ
   ویرایشگر (v1.19) خیلی باریک بود و نام‌های طولانی پارامتر را هم در خود فیلد و هم در فهرست
   کشویی کوتاه می‌کرد. اکنون کل عرض ردیف را در اختیار دارد.</li>
