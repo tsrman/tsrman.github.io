@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API для сторонних разработчиков — Car Rules Voice</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.65;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.4rem 1.2rem 4rem;
+  }
+  h1 { font-size: 1.6rem; border-bottom: 1px solid #8884; padding-bottom: .4rem; }
+  h2 { font-size: 1.25rem; margin-top: 2.2rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  blockquote {
+    margin: 1rem 0; padding: .6rem 1rem;
+    border-left: 4px solid #4f8ef7; background: #4f8ef714;
+    border-radius: 0 6px 6px 0;
+  }
+  [dir="rtl"] blockquote { border-left: none; border-right: 4px solid #4f8ef7; border-radius: 6px 0 0 6px; }
+  code { background: #8882; padding: .1em .35em; border-radius: 4px; font-size: .92em; }
+  pre {
+    background: #8882; padding: .8rem 1rem; border-radius: 8px; overflow-x: auto;
+    font-size: .88rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+  a { color: #4f8ef7; }
+  li { margin: .25rem 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+  th, td { border: 1px solid #8885; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
+  th { background: #8882; }
+  tbody tr:nth-child(even) { background: #8881; }
+  .langbar { position: sticky; top: 0; background: Canvas; padding: .6rem 0; margin: 0 0 1rem;
+    border-bottom: 1px solid #8884; display: flex; gap: .5rem; flex-wrap: wrap; z-index: 5; }
+  .langbar button {
+    font: inherit; cursor: pointer; padding: .35rem .9rem; border-radius: 999px;
+    border: 1px solid #4f8ef7; background: transparent; color: #4f8ef7;
+  }
+  .langbar button.active { background: #4f8ef7; color: #fff; }
+  .back { display: inline-block; margin-bottom: .6rem; font-size: .95rem; }
+  .lang { display: none; }
+  .lang.active { display: block; }
+  .warn {
+    margin: 1rem 0; padding: .6rem 1rem;
+    border-left: 4px solid #e0a030; background: #e0a03014;
+    border-radius: 0 6px 6px 0;
+  }
+  [dir="rtl"] .warn { border-left: none; border-right: 4px solid #e0a030; border-radius: 6px 0 0 6px; }
+</style>
+</head>
+<body>
+
+<div class="langbar">
+  <button data-go="ru" class="active">Русский</button>
+  <button data-go="en">English</button>
+  <button data-go="fa">فارسی</button>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  RU  ========================= -->
+<!-- ======================================================= -->
+<div class="lang active" data-lang="ru" lang="ru">
+<a class="back" href="index.html">← Назад на главную страницу</a>
+<h1>API для сторонних разработчиков</h1>
+<p>Начиная с <strong>Car Rules Voice v1.29</strong> любое другое приложение на том же
+устройстве может: 1) получить список сохранённых правил и 2) запустить конкретное
+правило по требованию — например, из своего собственного триггера, кнопки на экране
+или интеграции с другим сервисом. Это открытая нативная Android IPC (Content Provider +
+Broadcast), не веб-API — работает только на том же устройстве, между установленными
+приложениями.</p>
+
+<div class="warn"><p><strong>Важно:</strong> запуск правила выполняет его действия
+по-настоящему — включая управление автомобилем (окна, зеркала, багажник и т.д.), если
+правило это делает. Условия и геозона правила при внешнем запуске <strong>не
+проверяются</strong> — ведёт себя как нажатие кнопки «▶ Запустить» в приложении.</p></div>
+
+<h2>1. Разрешение</h2>
+<p>Оба механизма защищены одним и тем же разрешением уровня <code>normal</code> —
+такое разрешение не требует диалога с пользователем при установке, но
+вызывающее приложение обязано объявить его в своём <code>AndroidManifest.xml</code>:</p>
+<pre><code>&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code></pre>
+
+<h2>2. Получить список правил</h2>
+<p>Content Provider, метод <code>call()</code> (не таблица/Cursor — просто JSON-строка
+в ответе):</p>
+<table>
+<tr><th>Authority</th><td><code>org.tsrman.carrules.voice.rules</code></td></tr>
+<tr><th>Метод</th><td><code>listRules</code></td></tr>
+<tr><th>Ключ ответа</th><td><code>rules_json</code> — строка с JSON-массивом</td></tr>
+</table>
+<pre><code>val uri = Uri.parse("content://org.tsrman.carrules.voice.rules")
+val json = contentResolver.call(uri, "listRules", null, null)
+    ?.getString("rules_json")
+// json, например: [{"id":"3f2a...","name":"Открыть окна","enabled":true}, ...]</code></pre>
+<p>В ответе — только <code>id</code>, <code>name</code> и <code>enabled</code> каждого
+правила: этого достаточно, чтобы выбрать, что запускать. Триггеры/условия/действия
+правила наружу не отдаются. Если разрешение не выдано — метод вернёт <code>null</code>.</p>
+
+<h2>3. Запустить правило</h2>
+<p>Явный broadcast (без intent-filter — компонент нужно указывать по имени, обычная
+рассылка на этот приёмник система не доставит):</p>
+<table>
+<tr><th>Компонент</th><td><code>org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver</code></td></tr>
+<tr><th>Extra <code>rule_id</code></th><td>id правила (из списка выше) — имеет приоритет, если задан</td></tr>
+<tr><th>Extra <code>rule_name</code></th><td>точное имя правила — если id неизвестен</td></tr>
+</table>
+<pre><code>val intent = Intent()
+intent.component = ComponentName(
+    "org.tsrman.carrules.voice", "com.seres.carrules.RunRuleReceiver"
+)
+intent.putExtra("rule_name", "Открыть окна")  // или "rule_id" с UUID
+sendBroadcast(intent)</code></pre>
+<p>Через adb (для проверки без написания кода):</p>
+<pre><code>adb shell am broadcast -n org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver \
+  --es rule_name "Открыть окна"</code></pre>
+<p>Запуск — «выстрелил и забыл»: приёмник ничего не возвращает вызывающему приложению.
+Если правило с таким id/именем не найдено, Car Rules Voice запишет об этом строку в
+собственный журнал (виден только в самом приложении).</p>
+
+<h2>Итого: что нужно вызывающему приложению</h2>
+<ol>
+<li>Объявить <code>&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code>.</li>
+<li>(Опционально) запросить список правил через content-provider, чтобы получить их id/имена.</li>
+<li>Отправить explicit broadcast на <code>RunRuleReceiver</code> с <code>rule_id</code> или <code>rule_name</code>.</li>
+</ol>
+<p>Требуется Car Rules Voice <strong>v1.29 или новее</strong> — в более старых версиях
+ни приёмника, ни провайдера ещё нет.</p>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  EN  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="en" lang="en">
+<a class="back" href="index.html">← Back to the main page</a>
+<h1>Developer API</h1>
+<p>Starting with <strong>Car Rules Voice v1.29</strong>, any other app on the same
+device can: 1) list the saved rules, and 2) run a specific rule on demand — e.g. from
+its own trigger, a button in its UI, or an integration with another service. This is
+plain native Android IPC (a Content Provider + a Broadcast), not a web API — it only
+works on the same device, between installed apps.</p>
+
+<div class="warn"><p><strong>Important:</strong> running a rule actually executes its
+actions — including controlling the vehicle (windows, mirrors, tailgate, etc.) if the
+rule does that. A rule's conditions and geofence are <strong>not</strong> evaluated for
+an external run — it behaves exactly like tapping the app's own "▶ Run" button.</p></div>
+
+<h2>1. Permission</h2>
+<p>Both mechanisms are gated by the same <code>normal</code>-protection-level
+permission — it needs no install-time dialog, but the calling app must still declare
+it in its own <code>AndroidManifest.xml</code>:</p>
+<pre><code>&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code></pre>
+
+<h2>2. List the rules</h2>
+<p>A Content Provider, using <code>call()</code> (not a table/Cursor — just a JSON
+string in the reply):</p>
+<table>
+<tr><th>Authority</th><td><code>org.tsrman.carrules.voice.rules</code></td></tr>
+<tr><th>Method</th><td><code>listRules</code></td></tr>
+<tr><th>Reply key</th><td><code>rules_json</code> — a JSON array as a string</td></tr>
+</table>
+<pre><code>val uri = Uri.parse("content://org.tsrman.carrules.voice.rules")
+val json = contentResolver.call(uri, "listRules", null, null)
+    ?.getString("rules_json")
+// json, e.g.: [{"id":"3f2a...","name":"Open windows","enabled":true}, ...]</code></pre>
+<p>The reply carries only each rule's <code>id</code>, <code>name</code> and
+<code>enabled</code> flag — enough to pick what to run. A rule's triggers/conditions/
+actions are not exposed. If the permission isn't granted, the call returns
+<code>null</code>.</p>
+
+<h2>3. Run a rule</h2>
+<p>An explicit broadcast (no intent-filter — it must be targeted by component name; a
+plain broadcast won't reach this receiver):</p>
+<table>
+<tr><th>Component</th><td><code>org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver</code></td></tr>
+<tr><th>Extra <code>rule_id</code></th><td>the rule's id (from the list above) — takes priority if given</td></tr>
+<tr><th>Extra <code>rule_name</code></th><td>an exact rule name — for when the id isn't known</td></tr>
+</table>
+<pre><code>val intent = Intent()
+intent.component = ComponentName(
+    "org.tsrman.carrules.voice", "com.seres.carrules.RunRuleReceiver"
+)
+intent.putExtra("rule_name", "Open windows")  // or "rule_id" with a UUID
+sendBroadcast(intent)</code></pre>
+<p>Over adb (for testing without writing code):</p>
+<pre><code>adb shell am broadcast -n org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver \
+  --es rule_name "Open windows"</code></pre>
+<p>The run is fire-and-forget: the receiver returns nothing to the caller. If no rule
+matches the given id/name, Car Rules Voice logs a line about it in its own journal
+(visible only inside the app itself).</p>
+
+<h2>Summary: what a caller needs</h2>
+<ol>
+<li>Declare <code>&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code>.</li>
+<li>(Optional) query the content provider to learn the rules' ids/names.</li>
+<li>Send an explicit broadcast to <code>RunRuleReceiver</code> with <code>rule_id</code> or <code>rule_name</code>.</li>
+</ol>
+<p>Requires Car Rules Voice <strong>v1.29 or newer</strong> — older versions have
+neither the receiver nor the provider.</p>
+</div>
+
+<!-- ======================================================= -->
+<!-- =========================  FA  ========================= -->
+<!-- ======================================================= -->
+<div class="lang" data-lang="fa" lang="fa" dir="rtl">
+<a class="back" href="index.html">← بازگشت به صفحهٔ اصلی</a>
+<h1>API برای توسعه‌دهندگان</h1>
+<p>از نسخهٔ <strong>Car Rules Voice v1.29</strong> به بعد، هر برنامهٔ دیگری روی همان
+دستگاه می‌تواند: ۱) فهرست قوانین ذخیره‌شده را دریافت کند و ۲) یک قانون مشخص را در هر
+زمان اجرا کند — مثلاً از محرک خودش، یک دکمه در رابط کاربری‌اش، یا یکپارچه‌سازی با
+سرویسی دیگر. این یک IPC ساده و بومی اندروید (یک Content Provider + یک Broadcast) است،
+نه یک API وب — فقط روی همان دستگاه، بین برنامه‌های نصب‌شده کار می‌کند.</p>
+
+<div class="warn"><p><strong>مهم:</strong> اجرای یک قانون واقعاً اقدامات آن را انجام
+می‌دهد — از جمله کنترل خودرو (شیشه‌ها، آینه‌ها، درب صندوق و غیره) اگر قانون چنین کاری
+انجام دهد. شرط‌ها و ژئوفنس قانون برای اجرای خارجی بررسی <strong>نمی‌شوند</strong> —
+دقیقاً مانند فشردن دکمهٔ «▶ اجرا» در خود برنامه عمل می‌کند.</p></div>
+
+<h2>۱. مجوز</h2>
+<p>هر دو مکانیزم با یک مجوز با سطح حفاظت <code>normal</code> کنترل می‌شوند — این مجوز
+نیازی به پنجرهٔ تأیید هنگام نصب ندارد، اما برنامهٔ فراخواننده باید آن را در
+<code>AndroidManifest.xml</code> خودش اعلام کند:</p>
+<pre><code>&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code></pre>
+
+<h2>۲. دریافت فهرست قوانین</h2>
+<p>یک Content Provider، با استفاده از <code>call()</code> (نه یک جدول/Cursor — فقط
+یک رشتهٔ JSON در پاسخ):</p>
+<table>
+<tr><th>Authority</th><td><code>org.tsrman.carrules.voice.rules</code></td></tr>
+<tr><th>متد</th><td><code>listRules</code></td></tr>
+<tr><th>کلید پاسخ</th><td><code>rules_json</code> — یک آرایهٔ JSON به‌صورت رشته</td></tr>
+</table>
+<pre dir="ltr"><code>val uri = Uri.parse("content://org.tsrman.carrules.voice.rules")
+val json = contentResolver.call(uri, "listRules", null, null)
+    ?.getString("rules_json")
+// json, e.g.: [{"id":"3f2a...","name":"Open windows","enabled":true}, ...]</code></pre>
+<p>پاسخ فقط شامل <code>id</code>، <code>name</code> و وضعیت <code>enabled</code> هر
+قانون است — همین برای انتخاب اینکه چه چیزی اجرا شود کافی است. محرک‌ها/شرط‌ها/اقدامات
+یک قانون افشا نمی‌شوند. اگر مجوز داده نشده باشد، فراخوانی <code>null</code> برمی‌گرداند.</p>
+
+<h2>۳. اجرای یک قانون</h2>
+<p>یک broadcast صریح (بدون intent-filter — باید با نام کامپوننت هدف‌گذاری شود؛ یک
+broadcast معمولی به این receiver نمی‌رسد):</p>
+<table>
+<tr><th>کامپوننت</th><td><code>org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver</code></td></tr>
+<tr><th>Extra با کلید <code>rule_id</code></th><td>شناسهٔ قانون (از فهرست بالا) — در صورت وجود، اولویت دارد</td></tr>
+<tr><th>Extra با کلید <code>rule_name</code></th><td>نام دقیق قانون — وقتی شناسه مشخص نیست</td></tr>
+</table>
+<pre dir="ltr"><code>val intent = Intent()
+intent.component = ComponentName(
+    "org.tsrman.carrules.voice", "com.seres.carrules.RunRuleReceiver"
+)
+intent.putExtra("rule_name", "Open windows")  // یا "rule_id" با یک UUID
+sendBroadcast(intent)</code></pre>
+<p>از طریق adb (برای آزمایش بدون نوشتن کد):</p>
+<pre dir="ltr"><code>adb shell am broadcast -n org.tsrman.carrules.voice/com.seres.carrules.RunRuleReceiver \
+  --es rule_name "Open windows"</code></pre>
+<p>اجرا به‌صورت «شلیک و فراموش» است: receiver چیزی به فراخواننده برنمی‌گرداند. اگر
+قانونی با آن id/نام یافت نشود، Car Rules Voice خطی دربارهٔ آن در گزارش داخلی خودش
+ثبت می‌کند (فقط داخل خود برنامه قابل مشاهده است).</p>
+
+<h2>خلاصه: چه چیزی برای فراخواننده لازم است</h2>
+<ol>
+<li>اعلام <code dir="ltr">&lt;uses-permission android:name="org.tsrman.carrules.voice.permission.RUN_RULE" /&gt;</code>.</li>
+<li>(اختیاری) درخواست از content provider برای دریافت id/نام قوانین.</li>
+<li>ارسال یک broadcast صریح به <code>RunRuleReceiver</code> با <code>rule_id</code> یا <code>rule_name</code>.</li>
+</ol>
+<p>نیازمند Car Rules Voice <strong>نسخهٔ ۱٫۲۹ یا جدیدتر</strong> است — نسخه‌های
+قدیمی‌تر نه این receiver را دارند و نه آن provider را.</p>
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.langbar button');
+    var sections = document.querySelectorAll('.lang');
+    function show(lang) {
+      sections.forEach(function (s) { s.classList.toggle('active', s.dataset.lang === lang); });
+      buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.go === lang); });
+      document.documentElement.lang = lang;
+      try { localStorage.setItem('crv_lang', lang); } catch (e) {}
+    }
+    buttons.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.go); }); });
+    var saved;
+    try { saved = localStorage.getItem('crv_lang'); } catch (e) {}
+    if (saved && document.querySelector('.lang[data-lang="' + saved + '"]')) show(saved);
+  })();
+</script>
+</body>
+</html>
