@@ -321,9 +321,8 @@ APK того языка, на котором будете говорить.</p>
 <h2>История изменений</h2>
 <ul>
 <li><strong>Car Rules Voice v1.38</strong> — на загрузке ADB не включается, если VR-компаньон уже установлен и включён (проверка через PackageManager, без ADB); ADB задействуется только когда реально нужно что-то починить.</li>
-<li><strong>Car Rules Voice v1.38</strong> — исправлена ошибка ADB-авторизации (ClassCastException) на части устройств, из-за которой падала установка/включение VR-компаньона и выдача прав.</li>
-
-<li><strong>Car Rules Voice v1.38</strong> — VR-компаньон устанавливается/включается на перезагрузке только если выбран способ активации «Кнопка голосового помощника»; иначе на загрузке компаньон и ADB не трогаются.</li>
+<li><strong>Car Rules Voice v1.37</strong> — исправлена ошибка ADB-авторизации (ClassCastException) на части устройств, из-за которой падала установка/включение VR-компаньона и выдача прав.</li>
+<li><strong>Car Rules Voice v1.36</strong> — VR-компаньон устанавливается/включается на перезагрузке только если выбран способ активации «Кнопка голосового помощника»; иначе на загрузке компаньон и ADB не трогаются.</li>
 <li><strong>Car Rules Voice v1.35</strong> — кнопка голосового помощника на руле теперь работает без отдельного приложения: VR-компаньон встроен и на перезагрузке (или сразу при выборе способа активации «Кнопка голосового помощника») автоматически устанавливается/включается через собственный adbd. Новый способ активации голоса — «Кнопка голосового помощника (на руле)».</li>
 <li><strong>Car Rules Voice v1.34</strong> — кнопка «Включить ADB и выдать права» перенесена на экран «Плавающая панель» (туда, где сообщается об отсутствии разрешения): обычное нажатие — автоматическая выдача, долгое нажатие — ручной путь в системные настройки.</li>
 <li><strong>Car Rules Voice v1.33</strong> — приложение теперь само включает ADB (штатной заводской диагностической процедурой) и выдаёт себе разрешение «Отображение поверх других окон» через собственный adbd — отдельный Car Rules ADB Grant для этого больше не нужен. Кнопка «Включить ADB и выдать права» в настройках приложения; при первом запуске один раз подтвердите системный диалог «Разрешить отладку».</li>
@@ -697,9 +696,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <h2>Changelog</h2>
 <ul>
 <li><strong>Car Rules Voice v1.38</strong> — ADB is no longer enabled at boot when the VR companion is already installed and enabled (checked via PackageManager, no ADB needed); ADB is engaged only when something actually needs fixing.</li>
-<li><strong>Car Rules Voice v1.38</strong> — fixed an ADB authorization crash (ClassCastException) on some devices that broke VR-companion install/enable and permission granting.</li>
-
-<li><strong>Car Rules Voice v1.38</strong> — the VR companion is installed/enabled on boot only when the "voice-assistant button" activation mode is selected; otherwise the companion and ADB are left untouched at boot.</li>
+<li><strong>Car Rules Voice v1.37</strong> — fixed an ADB authorization crash (ClassCastException) on some devices that broke VR-companion install/enable and permission granting.</li>
+<li><strong>Car Rules Voice v1.36</strong> — the VR companion is installed/enabled on boot only when the "voice-assistant button" activation mode is selected; otherwise the companion and ADB are left untouched at boot.</li>
 <li><strong>Car Rules Voice v1.35</strong> — the steering-wheel voice-assistant button now works without a separate app: the VR companion is bundled and, on reboot (or right when you pick the "voice-assistant button" activation mode), is auto-installed/enabled via the app's own adbd. New voice activation option: "voice-assistant button (steering wheel)".</li>
 <li><strong>Car Rules Voice v1.34</strong> — the "Enable ADB &amp; grant permissions" button moved to the Floating Panel screen (where the missing-permission notice appears): tap = automatic grant, long-press = manual fallback to system settings.</li>
 <li><strong>Car Rules Voice v1.33</strong> — the app can now enable ADB itself (via the factory diagnostic routine) and grant itself the "Display over other apps" permission through its own adbd — the separate Car Rules ADB Grant is no longer needed for this. "Enable ADB &amp; grant permissions" button in app settings; confirm the one-time "Allow debugging" system dialog on first run.</li>
@@ -1060,9 +1058,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
 <li><strong>Car Rules Voice v1.38</strong> — هنگام بوت اگر همراهِ VR از قبل نصب و فعال باشد، ADB دیگر فعال نمی‌شود (بررسی از طریق PackageManager، بدون نیاز به ADB)؛ ADB فقط زمانی به‌کار می‌رود که واقعاً نیاز به اصلاح باشد.</li>
-<li><strong>Car Rules Voice v1.38</strong> — خطای احراز هویت ADB (ClassCastException) در برخی دستگاه‌ها برطرف شد که باعث خرابی نصب/فعال‌سازی همراهِ VR و اعطای مجوزها می‌شد.</li>
-
-<li><strong>Car Rules Voice v1.38</strong> — همراهِ VR فقط زمانی هنگام راه‌اندازی نصب/فعال می‌شود که حالت فعال‌سازی «دکمهٔ دستیار صوتی» انتخاب شده باشد؛ در غیر این صورت هنگام بوت همراه و ADB دست‌نخورده می‌مانند.</li>
+<li><strong>Car Rules Voice v1.37</strong> — خطای احراز هویت ADB (ClassCastException) در برخی دستگاه‌ها برطرف شد که باعث خرابی نصب/فعال‌سازی همراهِ VR و اعطای مجوزها می‌شد.</li>
+<li><strong>Car Rules Voice v1.36</strong> — همراهِ VR فقط زمانی هنگام راه‌اندازی نصب/فعال می‌شود که حالت فعال‌سازی «دکمهٔ دستیار صوتی» انتخاب شده باشد؛ در غیر این صورت هنگام بوت همراه و ADB دست‌نخورده می‌مانند.</li>
 <li><strong>Car Rules Voice v1.35</strong> — دکمهٔ دستیار صوتی روی فرمان اکنون بدون برنامهٔ جداگانه کار می‌کند: همراهِ VR داخل برنامه گنجانده شده و هنگام راه‌اندازی مجدد (یا درست هنگام انتخاب حالت فعال‌سازی «دکمهٔ دستیار صوتی») به‌طور خودکار از طریق adbd خودِ برنامه نصب/فعال می‌شود. حالت جدید فعال‌سازی صدا: «دکمهٔ دستیار صوتی (روی فرمان)».</li>
 <li><strong>Car Rules Voice v1.34</strong> — دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» به صفحهٔ «پنل شناور» منتقل شد (همان‌جا که نبودِ مجوز اعلام می‌شود): لمس معمولی = اعطای خودکار، لمس طولانی = مسیر دستی به تنظیمات سیستم.</li>
 <li><strong>Car Rules Voice v1.33</strong> — برنامه اکنون می‌تواند خودش ADB را فعال کند (از طریق روال تشخیصی کارخانه) و مجوز «نمایش روی سایر برنامه‌ها» را از طریق adbd خودش به خودش اعطا کند — دیگر به برنامهٔ جداگانهٔ Car Rules ADB Grant برای این کار نیازی نیست. دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» در تنظیمات برنامه؛ در اولین اجرا یک‌بار پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی» را تأیید کنید.</li>
