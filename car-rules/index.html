@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.39</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.40</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.39/CarRulesVoice-1.39-ru-release.apk">CarRulesVoice-1.39-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.39/CarRulesVoice-1.39-en-release.apk">CarRulesVoice-1.39-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.39/CarRulesVoice-1.39-fa-release.apk">CarRulesVoice-1.39-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.40/CarRulesVoice-1.40-ru-release.apk">CarRulesVoice-1.40-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.40/CarRulesVoice-1.40-en-release.apk">CarRulesVoice-1.40-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.40/CarRulesVoice-1.40-fa-release.apk">CarRulesVoice-1.40-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -320,6 +320,7 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>Car Rules Voice v1.40</strong> — исправлен повторный краш ADB-авторизации (ClassCastException) на устройствах, где RSA-ключ генерируется без CRT-параметров вовсе; затрагивало выдачу прав и установку/включение VR-компаньона.</li>
 <li><strong>Car Rules Voice v1.39</strong> — для ещё 6 бинарных (вкл/выкл) свойств добавлена возможность «переключить» одним действием, как у «Циркуляция воздуха: переключить»: климат-контроль, обогрев заднего стекла, подогрев форсунок омывателя, лючок зарядки, авторазблокировка и автоблокировка при приближении/удалении.</li>
 <li><strong>Car Rules Voice v1.38</strong> — на загрузке ADB не включается, если VR-компаньон уже установлен и включён (проверка через PackageManager, без ADB); ADB задействуется только когда реально нужно что-то починить.</li>
 <li><strong>Car Rules Voice v1.37</strong> — исправлена ошибка ADB-авторизации (ClassCastException) на части устройств, из-за которой падала установка/включение VR-компаньона и выдача прав.</li>
@@ -696,6 +697,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>Car Rules Voice v1.40</strong> — fixed another ADB authorization crash (ClassCastException) on devices whose RSA keys have no CRT parameters at all; affected permission granting and VR-companion install/enable.</li>
 <li><strong>Car Rules Voice v1.39</strong> — added a one-action "toggle" for 6 more binary (on/off) properties, matching the existing "Air recirculation: toggle": climate power, rear defroster, washer-nozzle heater, charge port, proximity auto-unlock and auto-lock.</li>
 <li><strong>Car Rules Voice v1.38</strong> — ADB is no longer enabled at boot when the VR companion is already installed and enabled (checked via PackageManager, no ADB needed); ADB is engaged only when something actually needs fixing.</li>
 <li><strong>Car Rules Voice v1.37</strong> — fixed an ADB authorization crash (ClassCastException) on some devices that broke VR-companion install/enable and permission granting.</li>
@@ -1059,6 +1061,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>Car Rules Voice v1.40</strong> — خرابی دیگری در احراز هویت ADB (ClassCastException) روی دستگاه‌هایی که کلید RSA بدون پارامترهای CRT تولید می‌کنند برطرف شد؛ روی اعطای مجوزها و نصب/فعال‌سازی همراهِ VR اثر می‌گذاشت.</li>
 <li><strong>Car Rules Voice v1.39</strong> — برای ۶ ویژگی دوحالتی (روشن/خاموش) دیگر، مانند «گردش هوا: تعویض»، یک اقدام «تعویض» تک‌مرحله‌ای اضافه شد: روشن/خاموش تهویه، گرم‌کن شیشهٔ عقب، گرم‌کن نازل شوینده، درپوش شارژ، باز/قفل‌شدن خودکار بر اساس فاصله.</li>
 <li><strong>Car Rules Voice v1.38</strong> — هنگام بوت اگر همراهِ VR از قبل نصب و فعال باشد، ADB دیگر فعال نمی‌شود (بررسی از طریق PackageManager، بدون نیاز به ADB)؛ ADB فقط زمانی به‌کار می‌رود که واقعاً نیاز به اصلاح باشد.</li>
 <li><strong>Car Rules Voice v1.37</strong> — خطای احراز هویت ADB (ClassCastException) در برخی دستگاه‌ها برطرف شد که باعث خرابی نصب/فعال‌سازی همراهِ VR و اعطای مجوزها می‌شد.</li>
