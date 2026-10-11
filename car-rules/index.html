@@ -222,28 +222,6 @@ APK того языка, на котором будете говорить.</p>
 Пустой триггер → срабатывание при <strong>въезде</strong>; заданный триггер → геозона как доп. условие.
 Для работы в фоне нужен фоновый доступ к геолокации.</p>
 
-<h2>Что нового в этой версии</h2>
-<ul>
-<li><strong>Яркость экрана</strong> — действие, число 0–100%. С v1.02 пишет яркость через тот же
-  системный сервис подсветки, которым пользуется штатное меню настроек — раньше писало
-  обычную Android-яркость, которая на этой магнитоле ни на что не влияет. Никакого специального
-  разрешения больше не требуется.</li>
-<li><strong>Подогрев форсунок омывателя</strong> — новое действие «включить/выключить».</li>
-<li><strong>Массаж передних сидений</strong> — действие «Режим»: «Волны / Кошка / Растяжка / Змея /
-  Бабочка» (подтверждено на автомобиле). Интенсивность — «Выкл / уровень 1 / уровень 2 / уровень 3
-  (макс)».</li>
-<li>Исправлена плавающая панель: она игнорировала выбранную в приложении светлую тему (см.
-  «Настройки → Тема») и всегда рисовалась в тёмной, даже когда весь остальной интерфейс был
-  светлым.</li>
-<li><strong>Плавающая панель быстрого запуска</strong> — окно поверх всех приложений с 4/6/8 крупными
-  кнопками (вертикально или горизонтально), каждая запускает своё правило. Та же лицензия, что и у
-  голоса.</li>
-<li><strong>Car Rules ADB Grant</strong> — отдельное приложение для телефона, выдающее это
-  разрешение по Wi-Fi adb без компьютера (см. «Как получить разрешение…» выше).</li>
-<li>Исправлен экспорт правил, ронявший файл с ключами <code>"a"</code>/<code>"b"</code> вместо
-  <code>"rules"</code>/<code>"voiceCommands"</code> на релизных сборках.</li>
-</ul>
-
 <h2>Параметры (триггеры и условия)</h2>
 <table><thead><tr><th>Параметр</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Запуск устройства / приложения (событие)</td><td>1 = Событие</td></tr>
@@ -446,25 +424,6 @@ matches. It won’t fire twice per trip (re-armed when power is cut or after 4 h
 Empty trigger → fires on <strong>entering</strong>; a set trigger → the geofence acts as an extra
 condition. Background location access is needed to fire while the app is closed.</p>
 
-<h2>What’s new in this version</h2>
-<ul>
-<li><strong>Screen brightness</strong> — an action, 0–100%. As of v1.02 it writes brightness through
-  the same backlight service the platform's own settings menu uses — it used to write plain
-  Android brightness, which does nothing on this head unit. No special permission is needed
-  anymore.</li>
-<li><strong>Washer nozzle heater</strong> — a new on/off action.</li>
-<li><strong>Front-seat massage</strong> — Mode is now "Waves / Cat / Stretch / Snake / Butterfly"
-  (confirmed on-car), not a raw number. Intensity is "Off / level 1 / level 2 / level 3 (max)".</li>
-<li>Fixed the floating panel ignoring the in-app Light theme choice (Settings → Theme) — it always
-  rendered dark even when the rest of the UI was light.</li>
-<li><strong>Floating quick-launch panel</strong> — a window on top of every app with 4/6/8 large
-  buttons (vertical or horizontal), each running its own rule. Same license as voice control.</li>
-<li><strong>Car Rules ADB Grant</strong> — a separate phone app that grants this permission over
-  Wi-Fi adb, no computer needed (see "How to get the ... permission" above).</li>
-<li>Fixed rules export dropping a file with <code>"a"</code>/<code>"b"</code> keys instead of
-  <code>"rules"</code>/<code>"voiceCommands"</code> on release builds.</li>
-</ul>
-
 <h2>Parameters (triggers &amp; conditions)</h2>
 <table><thead><tr><th>Parameter</th><th>Values</th></tr></thead><tbody>
 <tr><td>Device booted / app started (event)</td><td>1 = Event</td></tr>
@@ -665,24 +624,6 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <p>«همچنین حضور در منطقه لازم است»: شعاع را تعیین کنید، به محل بروید و موقعیت را ذخیره کنید.
 محرک خالی ← اجرا هنگام <strong>ورود</strong>؛ محرک تعیین‌شده ← ژئوفنس به‌عنوان شرط اضافی. برای کار در
 پس‌زمینه دسترسی موقعیت در پس‌زمینه لازم است.</p>
-
-<h2>تازه‌ها در این نسخه</h2>
-<ul>
-<li><strong>روشنایی صفحه</strong> — عملیات، عدد ۰ تا ۱۰۰٪. از نسخهٔ v1.02 روشنایی را از طریق همان
-  سرویسی می‌نویسد که منوی تنظیمات خود پلتفرم استفاده می‌کند — پیش‌تر روشنایی معمولی اندروید را
-  می‌نوشت که روی این هد‌یونیت هیچ اثری نداشت. دیگر به هیچ مجوز خاصی نیاز ندارد.</li>
-<li><strong>گرمکن نازل شیشه‌شور</strong> — عملیات جدید روشن/خاموش.</li>
-<li><strong>ماساژ صندلی‌های جلو</strong> — حالت اکنون «موج / گربه / کشش / مار / پروانه» است (تأیید
-  شده روی خودرو)، نه یک عدد خام. شدت شامل «خاموش / سطح ۱ / سطح ۲ / سطح ۳ (حداکثر)» است.</li>
-<li>رفع اشکال پنل شناور که تم روشن انتخاب‌شده در برنامه را نادیده می‌گرفت — همیشه با تم تیره
-  نمایش داده می‌شد، حتی وقتی بقیهٔ رابط کاربری روشن بود.</li>
-<li><strong>پنل شناور اجرای سریع</strong> — پنجره‌ای روی همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ (عمودی یا
-  افقی)، هرکدام قانون خودش را اجرا می‌کند. همان مجوز کنترل صوتی.</li>
-<li><strong>Car Rules ADB Grant</strong> — برنامه‌ای جداگانه برای گوشی که این مجوز را از طریق adb
-  بی‌سیم و بدون کامپیوتر اعطا می‌کند (به «چگونه مجوز را بگیریم» در بالا نگاه کنید).</li>
-<li>رفع اشکال برون‌بری قوانین که در نسخه‌های release فایلی با کلیدهای <code>"a"</code>/<code>"b"</code>
-  به‌جای <code>"rules"</code>/<code>"voiceCommands"</code> می‌ساخت.</li>
-</ul>
 
 <h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
 <table><thead><tr><th>پارامتر</th><th>مقادیر</th></tr></thead><tbody>
