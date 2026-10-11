@@ -320,180 +320,24 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
-<li><strong>Car Rules Voice v1.40</strong> — исправлен повторный краш ADB-авторизации (ClassCastException) на устройствах, где RSA-ключ генерируется без CRT-параметров вовсе; затрагивало выдачу прав и установку/включение VR-компаньона.</li>
-<li><strong>Car Rules Voice v1.39</strong> — для ещё 6 бинарных (вкл/выкл) свойств добавлена возможность «переключить» одним действием, как у «Циркуляция воздуха: переключить»: климат-контроль, обогрев заднего стекла, подогрев форсунок омывателя, лючок зарядки, авторазблокировка и автоблокировка при приближении/удалении.</li>
-<li><strong>Car Rules Voice v1.38</strong> — на загрузке ADB не включается, если VR-компаньон уже установлен и включён (проверка через PackageManager, без ADB); ADB задействуется только когда реально нужно что-то починить.</li>
-<li><strong>Car Rules Voice v1.37</strong> — исправлена ошибка ADB-авторизации (ClassCastException) на части устройств, из-за которой падала установка/включение VR-компаньона и выдача прав.</li>
-<li><strong>Car Rules Voice v1.36</strong> — VR-компаньон устанавливается/включается на перезагрузке только если выбран способ активации «Кнопка голосового помощника»; иначе на загрузке компаньон и ADB не трогаются.</li>
-<li><strong>Car Rules Voice v1.35</strong> — кнопка голосового помощника на руле теперь работает без отдельного приложения: VR-компаньон встроен и на перезагрузке (или сразу при выборе способа активации «Кнопка голосового помощника») автоматически устанавливается/включается через собственный adbd. Новый способ активации голоса — «Кнопка голосового помощника (на руле)».</li>
-<li><strong>Car Rules Voice v1.34</strong> — кнопка «Включить ADB и выдать права» перенесена на экран «Плавающая панель» (туда, где сообщается об отсутствии разрешения): обычное нажатие — автоматическая выдача, долгое нажатие — ручной путь в системные настройки.</li>
-<li><strong>Car Rules Voice v1.33</strong> — приложение теперь само включает ADB (штатной заводской диагностической процедурой) и выдаёт себе разрешение «Отображение поверх других окон» через собственный adbd — отдельный Car Rules ADB Grant для этого больше не нужен. Кнопка «Включить ADB и выдать права» в настройках приложения; при первом запуске один раз подтвердите системный диалог «Разрешить отладку».</li>
-<li><strong>Car Rules Voice v1.31</strong> — добавлена беспроводная зарядка телефона: условие/триггер «статус» (свободно/готово, заряжается, зарядка завершена, неисправность, посторонний предмет на площадке, выключено) и действие «вкл/выкл».</li>
-<li><strong>Car Rules Voice v1.30 / Car Rules v0.71</strong> — исправлены перепутанные местами подписи «Заблокировано/Разблокировано» у действий детского замка задних дверей. Реальная полярность (подтверждено декомпиляцией штатного переключателя в SeresSettings): 0 = заблокировано, 1 = разблокировано — в приложении было наоборот. Если у вас есть правило с этим действием — проверьте и при необходимости переключите значение.</li>
-<li><strong>Car Rules Voice v1.29</strong> — сторонние приложения теперь могут запускать сохранённые правила по запросу (по id или имени правила) и получать список правил — для интеграции с другими программами на устройстве. Доступ защищён новым разрешением.</li>
-<li><strong>Car Rules Voice v1.28</strong> — пауза медиа при активации голоса теперь настраивается по каналам отдельно: Яндекс Музыка, штатный плеер (Bluetooth), штатный плеер (USB). Также каждое окно (переднее левое/правое, заднее левое/правое) теперь можно указать отдельным действием в правилах и голосовых командах, в дополнение к действию «Окна: установить положение» для всех четырёх сразу.</li>
-<li><strong>Car Rules Voice v1.27</strong> — новая настройка «Вернуть управление в»: если включён режим «Поднимать приложение на экран при активации», можно выбрать приложение, на которое экран переключится обратно после завершения голосовой команды, вместо того чтобы оставаться на этом приложении.</li>
-<li><strong>Car Rules Voice v1.26</strong> — новое действие «Окна: установить положение»: одним действием можно закрыть все окна (0%), открыть все (100%) или открыть на заданный процент. Также убран вывод PM2.5 и датчика дождя (были нужны только для отладки).</li>
-<li><strong>Car Rules Voice v1.25</strong> — на главном экране у кнопок «Настройки» и «Импорт / экспорт» теперь есть текстовые подписи (раньше были только иконки).</li>
-<li><strong>Car Rules Voice v1.24</strong> — добавлена настройка «Включение экрана»: можно отключить автоматический вывод приложения на экран при включении зажигания/пробуждении экрана (раньше это происходило всегда).</li>
-<li><strong>Car Rules Voice v1.23</strong> — новое действие «Циркуляция воздуха: переключить» — одно правило вместо двух: читает текущее состояние (внутри/снаружи) и переключает на противоположное.</li>
-<li><strong>Car Rules Voice v1.22</strong> — датчик дождя (ID_RAIN_LEVEL) не привязан к конкретному CAN-фрейму, поэтому его изменения теперь пишутся в журнал вместо постоянной строки статуса. PM2.5 в салоне (ID_HVAC_PM25, с реальным CAN-фреймом) добавлен в карточку статуса на главном экране.</li>
-<li><strong>Car Rules Voice v1.21</strong> — на редизайненном (v1.19) экране редактора поле
-  «Параметр / событие» было слишком узким и обрезало длинные названия параметров — как в
-  самом поле, так и в выпадающем списке. Теперь оно занимает всю ширину строки.</li>
-<li><strong>Car Rules Voice v1.20</strong> — исправлена нечитаемая подпись у чекбоксов/радиокнопок
-  на редизайненном (v1.19) экране редактора правила: она рисовалась почти чёрным по чёрному
-  на новом тёмном фоне. Только это исправление, больше ничего не изменилось.</li>
-<li><strong>Car Rules Voice v1.19</strong> — редизайн экрана редактора правила: тёмная тема с
-  зелёным акцентом (только этот экран, остальные без изменений), двухколоночная раскладка
-  («Когда» слева, «Тогда» + «Настройки» справа), капсульный переключатель И/ИЛИ вместо
-  тумблера, номера у каждой строки триггера/условия/действия. Чисто визуальные изменения, без
-  новой функциональности. Также на сайт добавлена
-  <a href="guide.html">подробная инструкция со скриншотами</a>.</li>
-<li><strong>Car Rules v0.70</strong> — портированы из Car Rules Voice: действие «Управление
-  штатным медиаплеером» (play/pause/next/previous для Bluetooth/USB-аудио), яркость экрана и
-  авто-яркость, переключение приложения между приборной панелью и центральным экраном, лючок
-  бензобака и детский замок задних дверей как действия; статус зарядки (AC/DC), подключение
-  зарядного кабеля и уровень топлива как условия; режим движения / режим дорожного покрытия и
-  вентиляция сидений теперь доступны и как условия (раньше — только как действия); статус
-  автоблокировки/авторазблокировки как условие.</li>
-<li><strong>Car Rules Voice v1.18</strong> — новое действие «Управление штатным медиаплеером»:
-  play/pause/next/previous для Bluetooth- и USB-аудио через тот же вещательный механизм,
-  которым сама прошивка переключает источник с руля. В настройках голоса появилась опция
-  «Ставить медиа на паузу во время прослушивания»: глушит Яндекс Музыку и штатный плеер перед
-  открытием микрофона и включает обратно сразу после — независимо от того, распознана ли
-  команда.</li>
-<li><strong>Car Rules Voice v1.17</strong> — новый экран «Настройки»: можно отключить звуковой
-  сигнал при запуске программы и включить панель быстрого запуска на главном экране (до 8
-  кнопок в один ряд на всю ширину, каждая запускает выбранное правило) — доступна бесплатно,
-  без привязки к платной лицензии плавающей панели.</li>
-<li><strong>Car Rules Voice v1.16</strong> — вентиляция сидений (водитель/пассажир) теперь
-  доступна как условие/триггер в правилах, а не только как действие.</li>
-<li><strong>Car Rules Voice v1.15</strong> — «Открыть багажник» и «Закрыть багажник» теперь
-  срабатывают только когда машина в парковке (передача P); добавлены статусы AC/DC-зарядки,
-  подключения зарядного кабеля и уровня топлива, а также открытие лючка бака — в условия и
-  действия правил.</li>
-<li><strong>Car Rules Voice v1.14</strong> — в настройках плавающей панели добавлен вариант
-  с 2 кнопками (кроме 4/6/8) и отдельный переключатель «Уменьшить панель в 2 раза»: размер
-  кнопок и текста на панели можно вдвое уменьшить независимо от количества кнопок и формы.</li>
-<li><strong>Car Rules Voice v1.13</strong> — экран «Плавающая панель» переработан: настройки
-  панели (включение, количество кнопок, форма) перенесены в левую колонку — раньше после
-  активации лицензии там оставалось пустое место, потому что карточка активации к этому моменту
-  уже скрывалась. Правая колонка теперь целиком отдана списку слотов: крупнее текст, шире
-  отступы между строками.</li>
-<li><strong>Car Rules Voice v1.12</strong> — исправлена плавающая панель: после увеличения
-  шрифтов в v1.11 кнопки панели тоже незаметно подросли сверх заданного размера (из-за общей
-  темы приложения) — размер текста кнопок панели теперь зафиксирован отдельно и не зависит
-  от этой настройки. Также переделаны экраны «Голосовые команды» и «Настройки плавающей
-  панели»: список фраз и список слотов панели теперь показаны сеткой по 2 в ряд вместо
-  растянутых на весь экран строк с большим пустым промежутком до кнопок «Изменить»/«Удалить».</li>
-<li><strong>Car Rules ADB Grant v1.8</strong> — команда <code>appops set</code> на этой магнитоле
-  не даёт вообще никакого ответа, даже при успехе (в отличие от <code>appops get</code>); журнал
-  раньше 15 секунд ждал ответ и затем показывал это как ошибку чтения, хотя разрешение уже было
-  выдано. Теперь для таких команд короткое ожидание, а пустой ответ — это норма, а не сбой.</li>
-<li><strong>v1.11</strong> — увеличены шрифты и отступы на экранах приложения (список правил,
-  редактор правила, настройки плавающей панели и т. д.) — на приборной панели автомобиля текст
-  был мелким и оставалось много пустого места; плавающей панели это не касалось, она уже была
-  настроена правильно.</li>
-<li><strong>v1.10</strong> — новое действие «Перекинуть приложение: приборка / центральный
-  экран» — одним триггером переключает выбранное приложение (по умолчанию Яндекс.Навигатор,
-  можно выбрать любое) между приборной панелью и центральным экраном; работает и когда открыта
-  только плавающая панель, а самого приложения не видно на экране. Добавлено управление
-  детским замком задних дверей (левая/правая). «Режим вождения» и «Дорожный режим» теперь можно
-  использовать не только как действие, но и как условие/триггер правила.</li>
-<li><strong>v1.05</strong> — кнопка на плавающей панели теперь запускает правило сразу,
-  без проверки его условий и гео-зоны (раньше кнопка проверяла их так же, как обычный
-  автоматический триггер, и при несовпадении молча ничего не делала). Также добавлены
-  «Статус автоблокировки» и «Статус авторазблокировки» — состояние переключателей
-  «Автоблокировка при удалении» / «Авторазблокировка при приближении» теперь можно
-  использовать как условие или триггер правила.</li>
-<li><strong>v1.04</strong> — новое действие «Авто-яркость экрана» (вкл/выкл) — тот же
-  переключатель «Авто», что на экране настроек яркости в SeresSettings. В отличие от
-  действия «Яркость экрана» (уровень, через сервис подсветки), для этого действия снова
-  нужно разрешение «Изменение системных настроек» — выдаётся Car Rules ADB Grant v1.7+.</li>
-<li><strong>v1.03</strong> — настройки плавающей панели (включена ли, число кнопок, раскладка,
-  какое правило на какой кнопке, позиция на экране) теперь тоже входят в экспорт/импорт —
-  раньше при переносе на другое устройство или переустановке панель приходилось
-  настраивать заново.</li>
-<li><strong>v1.02</strong> — исправлена «Яркость экрана»: раньше действие писало обычную
-  Android-яркость (<code>Settings.System.SCREEN_BRIGHTNESS</code>), которая на этой магнитоле
-  ни на что не влияет — центральный экран управляется отдельным системным сервисом подсветки.
-  Действие переведено на него; разрешение «Изменение системных настроек» ему больше не
-  нужно.</li>
-<li><strong>Car Rules v0.69</strong> — исправлена кнопка «Тест» для действия «Голосовой
-  ассистент»: раньше она ничего не делала (уходила по неверному пути вместо вызова
-  ассистента).</li>
-<li><strong>Car Rules ADB Grant v1.7</strong> — снова выдаёт разрешение «Изменение системных
-  настроек» (наряду с «Отображение поверх других окон») — нужно новому действию
-  «Авто-яркость экрана» в Car Rules Voice v1.04.</li>
-<li><strong>Car Rules ADB Grant v1.6</strong> — исправлено «Проверить права»: кнопка не получала
-  ответ на <code>appops get</code>, упираясь в таймаут чтения. Причина — adbd магнитолы не
-  закрывает поток одноразовой shell-команды, а старое чтение ждало именно закрытия потока.
-  Теперь ответ читается по частям и считается полученным после короткой паузы после первого
-  байта, а не после закрытия потока.</li>
-<li><strong>Car Rules ADB Grant v1.5</strong> — из формы убрано поле «Порт»: adb-порт магнитолы
-  всегда 5555, вводить его вручную больше не нужно.</li>
-<li><strong>Car Rules ADB Grant v1.4</strong> — кнопка «Выдать права» больше не выдаёт
-  «Изменение системных настроек» (не нужно с v1.02, см. выше); новая кнопка «Проверить
-  права» — read-only, показывает в журнале текущее состояние разрешения через
-  <code>appops get</code>, не открывая системные настройки на самой магнитоле.</li>
-<li><strong>v1.00</strong> — новое действие «Яркость экрана» (0–100%, обычная Android-яркость,
-  не CAN-свойство). Требует разрешение «Изменение системных настроек» — <strong>Car Rules ADB
-  Grant</strong> обновлён (кнопка «Выдать права» теперь выдаёт оба разрешения за один проход).</li>
-<li><strong>v0.99</strong> — подтверждены названия режимов массажа передних сидений: «Волны /
-  Кошка / Растяжка / Змея / Бабочка» вместо номера. Добавлено действие «Подогрев форсунок
-  омывателя».</li>
-<li><strong>v0.98</strong> — исправлена плавающая панель: она всегда рисовалась в тёмной теме,
-  даже если в приложении выбрана светлая. Добавлено действие «Массаж передних сидений» (режим
-  и интенсивность, водитель/пассажир).</li>
-<li><strong>v0.95</strong> — добавлена настройка темы приложения: «Как в системе» / «Светлая» /
-  «Тёмная» (экран «Настройки») — полезно, если системная тема на этой магнитоле ведёт себя
-  непредсказуемо.</li>
-<li><strong>v0.94–v0.96</strong> — самостоятельная выдача разрешения «Отображение поверх других
-  окон» убрана из приложения — на этой магнитоле она стабильно не срабатывала. Теперь разрешение
-  выдаётся отдельным приложением для телефона — <strong>Car Rules ADB Grant</strong> (см. раздел
-  загрузки выше и «Как получить разрешение…»).</li>
-<li><strong>v0.89–v0.93</strong> — исправлена самостоятельная выдача разрешения через adb (команда
-  собиралась неправильно и почти никогда не срабатывала), убрана ложная ошибка при уже выданном
-  разрешении, IP-адрес и порт стали подставляться автоматически.</li>
-<li><strong>v0.88</strong> — исправлена опция «поднимать приложение на экран перед прослушиванием»
-  (из v0.87) — раньше она не работала в фоне.</li>
-<li><strong>v0.87</strong> — при занятом на миг микрофоне теперь делается несколько повторных
-  попыток вместо мгновенной ошибки. Добавлена опция «поднимать приложение на экран перед
-  прослушиванием» (по умолчанию выключена).</li>
-<li><strong>v0.86</strong> — сообщение «Микрофон недоступен» теперь показывает причину ошибки, что
-  упростило разбор жалоб пользователей.</li>
-<li><strong>v0.85</strong> — исправлен сбой самостоятельной выдачи разрешения на некоторых версиях
-  Android.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — списки параметров в редакторе правил теперь
-  отсортированы по алфавиту.</li>
-<li><strong>v0.83</strong> — экран «Панель» больше не показывает кнопку выдачи разрешения и
-  инструкцию по adb, если разрешение уже выдано.</li>
-<li><strong>v0.79–v0.82</strong> — добавлена <strong>плавающая панель быстрого запуска</strong>:
-  окно поверх всех приложений с 4/6/8 крупными кнопками, каждая запускает своё правило одним
-  нажатием. Та же лицензия, что и у голосового управления — один код активирует обе функции.</li>
-<li><strong>Car Rules v0.67</strong> — в обычную Car Rules добавлены три функции, которые раньше
-  были только в Voice: «Багажник: открыть/закрыть», «Обогрев заднего стекла» и кастомная кнопка
-  руля как триггер/условие.</li>
-<li><strong>v0.67–v0.78</strong> — несколько версий подряд ушло на то, чтобы довести экспорт/импорт
-  правил в файл до стабильной работы: сохранение файлов на этой магнитоле устроено не так, как на
-  обычном Android, и потребовало нескольких обходных решений — начиная с v0.78 работает надёжно.
-  Заодно добавлены: экспорт вместе с голосовыми командами (v0.74), действие «Температура климата»
-  водитель/пассажир (v0.77), действие «Дворники: сервисный режим» и чекбокс «без уведомления» для
-  отдельного правила (v0.72). Условие «Дворники: авто-режим» было ненадолго добавлено и снова
-  убрано (v0.72–v0.73) — этот статус на деле недоступен на этой машине.</li>
-<li><strong>v0.65</strong> — журнал стал компактнее: убраны записи о каждом нажатии кастомной кнопки
-  руля, а запуск правила голосовой командой теперь пишется как обычное срабатывание, а не
-  «тестовый запуск».</li>
-<li><strong>v0.64</strong> — импорт правил из приложения Car Rules; импорт/экспорт правил в файл.
-  На сайт добавлена версия Car Rules 0.56 без голоса.</li>
-<li><strong>v0.63</strong> — кастомная кнопка руля как активация голоса; убрана кнопка «Поддержать
-  автора».</li>
-<li><strong>v0.62</strong> — обогрев заднего стекла; кастомная кнопка руля как триггер; чистка
-  сервиса.</li>
-<li><strong>v0.60–0.61</strong> — действие «Багажник: открыть/закрыть».</li>
-<li><strong>v0.5x</strong> — офлайн-голосовое управление (Vosk); действие «Зеркала:
-  сложить/разложить».</li>
+<li><strong>v1.40</strong> — исправлен краш ADB-авторизации (ClassCastException) на устройствах, где RSA-ключ генерируется без CRT-параметров; затрагивало выдачу прав и установку VR-компаньона.</li>
+<li><strong>v1.39</strong> — действие «переключить» для ещё 6 вкл/выкл свойств: климат-контроль, обогрев заднего стекла, подогрев форсунок омывателя, лючок зарядки, авторазблокировка и автоблокировка.</li>
+<li><strong>v1.38</strong> — на загрузке ADB не включается, если VR-компаньон уже установлен и включён.</li>
+<li><strong>v1.37</strong> — исправлена ошибка ADB-авторизации (ClassCastException), из-за которой падали установка VR-компаньона и выдача прав.</li>
+<li><strong>v1.36</strong> — VR-компаньон ставится/включается на загрузке только при способе активации «Кнопка голосового помощника».</li>
+<li><strong>v1.35</strong> — кнопка голосового помощника на руле работает без отдельного приложения: VR-компаньон встроен и сам устанавливается/включается через собственный adbd. Новый способ активации голоса — «Кнопка голосового помощника (на руле)».</li>
+<li><strong>v1.34</strong> — кнопка «Включить ADB и выдать права» перенесена на экран «Плавающая панель» (нажатие — автовыдача, долгое — ручной путь в системные настройки).</li>
+<li><strong>v1.33</strong> — приложение само включает ADB (штатной заводской диагностикой) и выдаёт себе «Отображение поверх других окон»; отдельный Car Rules ADB Grant для этого больше не нужен. При первом запуске подтвердите системный диалог «Разрешить отладку».</li>
+<li><strong>v1.31</strong> — беспроводная зарядка телефона: статус как условие/триггер и действие вкл/выкл.</li>
+<li><strong>v1.30 / Car Rules v0.71</strong> — исправлены перепутанные подписи «Заблокировано/Разблокировано» у детского замка задних дверей: на самом деле 0 = заблокировано, 1 = разблокировано (подтверждено декомпиляцией штатного переключателя SeresSettings). Если у вас есть правило с этим действием — проверьте значение.</li>
+<li><strong>v1.23–v1.29</strong> — запуск правил сторонними приложениями по id/имени (v1.29); пауза медиа по каналам и отдельные действия для каждого окна (v1.28); настройка «Вернуть управление в» (v1.27); действие «Окна: установить положение» (v1.26); текстовые подписи у кнопок главного экрана (v1.25); настройка «Включение экрана» (v1.24); действие «Циркуляция воздуха: переключить» (v1.23).</li>
+<li><strong>v1.19–v1.22</strong> — редизайн экрана редактора правил (тёмная тема с зелёным акцентом, две колонки, переключатель И/ИЛИ, нумерация строк) и две правки его вёрстки (v1.20–v1.21); на сайт добавлена <a href="guide.html">подробная инструкция со скриншотами</a>.</li>
+<li><strong>v1.10–v1.18</strong> — действие «Управление штатным медиаплеером» и опция «Ставить медиа на паузу при прослушивании» (v1.18); экран «Настройки» и панель быстрого запуска на главном экране (v1.17); вентиляция сидений как условие (v1.16); багажник только в «P», статусы зарядки/топлива и лючок бака (v1.15); панель на 2 кнопки и «Уменьшить в 2 раза» (v1.14); переработаны экраны панели и голосовых команд (v1.12–v1.13); крупнее шрифты (v1.11); «Перекинуть приложение: приборка / центральный экран», детский замок задних дверей, режимы вождения как условие (v1.10).</li>
+<li><strong>v1.00–v1.05</strong> — «Яркость экрана» (v1.00; с v1.02 через системный сервис подсветки, разрешение не нужно) и «Авто-яркость экрана» (v1.04, нужно разрешение «Изменение системных настроек»); настройки плавающей панели входят в экспорт/импорт (v1.03); кнопка панели запускает правило без проверки условий и «Статус автоблокировки/авторазблокировки» (v1.05).</li>
+<li><strong>v0.79–v0.99</strong> — плавающая панель быстрого запуска (v0.79–v0.82); массаж передних сидений и подогрев форсунок омывателя (v0.98–v0.99); тема приложения «Как в системе / Светлая / Тёмная» (v0.95); самостоятельная выдача разрешения через adb (исправления v0.85–v0.93) заменена отдельным приложением Car Rules ADB Grant (v0.94–v0.96); повторные попытки при занятом микрофоне и причина ошибки в сообщении (v0.86–v0.88); сортировка списков параметров по алфавиту (v0.84).</li>
+<li><strong>v0.5x–v0.78</strong> — офлайн-голосовое управление (Vosk); действия «Зеркала: сложить/разложить», «Багажник: открыть/закрыть», «Обогрев заднего стекла», «Температура климата», «Дворники: сервисный режим»; кастомная кнопка руля как триггер и как активация голоса; импорт правил из Car Rules и экспорт/импорт в файл (стабильно с v0.78, экспорт включает голосовые команды); компактный журнал.</li>
+<li><strong>Car Rules v0.67–v0.70</strong> — в обычную Car Rules портированы функции Voice: багажник, обогрев заднего стекла, кастомная кнопка руля, управление штатным медиаплеером, яркость и авто-яркость, переключение приложения между приборкой и центральным экраном, лючок бака, детский замок, статусы зарядки/топлива и другие условия; исправлена кнопка «Тест» у действия «Голосовой ассистент» (v0.69).</li>
+<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — отдельное приложение для телефона, выдающее разрешения по Wi-Fi adb (с Voice v1.33 для этого больше не требуется): кнопка «Проверить права», убрано поле «Порт», исправлено чтение ответов <code>appops</code> на этой магнитоле, выдача «Изменение системных настроек» вернулась в v1.7.</li>
 </ul>
 </div>
 
@@ -697,169 +541,24 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
-<li><strong>Car Rules Voice v1.40</strong> — fixed another ADB authorization crash (ClassCastException) on devices whose RSA keys have no CRT parameters at all; affected permission granting and VR-companion install/enable.</li>
-<li><strong>Car Rules Voice v1.39</strong> — added a one-action "toggle" for 6 more binary (on/off) properties, matching the existing "Air recirculation: toggle": climate power, rear defroster, washer-nozzle heater, charge port, proximity auto-unlock and auto-lock.</li>
-<li><strong>Car Rules Voice v1.38</strong> — ADB is no longer enabled at boot when the VR companion is already installed and enabled (checked via PackageManager, no ADB needed); ADB is engaged only when something actually needs fixing.</li>
-<li><strong>Car Rules Voice v1.37</strong> — fixed an ADB authorization crash (ClassCastException) on some devices that broke VR-companion install/enable and permission granting.</li>
-<li><strong>Car Rules Voice v1.36</strong> — the VR companion is installed/enabled on boot only when the "voice-assistant button" activation mode is selected; otherwise the companion and ADB are left untouched at boot.</li>
-<li><strong>Car Rules Voice v1.35</strong> — the steering-wheel voice-assistant button now works without a separate app: the VR companion is bundled and, on reboot (or right when you pick the "voice-assistant button" activation mode), is auto-installed/enabled via the app's own adbd. New voice activation option: "voice-assistant button (steering wheel)".</li>
-<li><strong>Car Rules Voice v1.34</strong> — the "Enable ADB &amp; grant permissions" button moved to the Floating Panel screen (where the missing-permission notice appears): tap = automatic grant, long-press = manual fallback to system settings.</li>
-<li><strong>Car Rules Voice v1.33</strong> — the app can now enable ADB itself (via the factory diagnostic routine) and grant itself the "Display over other apps" permission through its own adbd — the separate Car Rules ADB Grant is no longer needed for this. "Enable ADB &amp; grant permissions" button in app settings; confirm the one-time "Allow debugging" system dialog on first run.</li>
-<li><strong>Car Rules Voice v1.31</strong> — added wireless phone charging: a "status" condition/trigger (idle/ready, charging, finished, fault, foreign object on pad, off) and an on/off action.</li>
-<li><strong>Car Rules Voice v1.30 / Car Rules v0.71</strong> — fixed swapped "Locked/Unlocked" labels on the rear child-lock actions. The real polarity (confirmed by decompiling SeresSettings' own child-lock toggle): 0 = locked, 1 = unlocked — the app had it backwards. If you have a rule using this action, check it and flip the value if needed.</li>
-<li><strong>Car Rules Voice v1.29</strong> — third-party apps can now run a saved rule on demand (by id or name) and list available rules — for integrating with other apps on the device. Access is gated by a new permission.</li>
-<li><strong>Car Rules Voice v1.28</strong> — pause-on-listen now has independent toggles per channel: Yandex Music, the stock player's Bluetooth source, and its USB source. Also, each side window (front/rear, left/right) can now be targeted as its own action in rules and voice commands, alongside the existing "set all four" action.</li>
-<li><strong>Car Rules Voice v1.27</strong> — new "Return control to" setting: with "Bring app to front on activation" enabled, pick an app to switch back to once the voice command is done, instead of staying on this app.</li>
-<li><strong>Car Rules Voice v1.26</strong> — new action "Windows: set position": close all windows (0%), open all (100%), or open to any percent in between, in one action. Also removed the debug-only PM2.5 and rain-sensor output.</li>
-<li><strong>Car Rules Voice v1.25</strong> — the Settings and Import/export buttons on the main screen now show text labels (previously icon-only).</li>
-<li><strong>Car Rules Voice v1.24</strong> — added a "Screen wake" setting: you can now disable automatically bringing the app to front when the ignition/screen turns on (previously this always happened).</li>
-<li><strong>Car Rules Voice v1.23</strong> — new "Air recirculation: toggle" action — one rule instead of two: reads the current state (internal/external) and flips it.</li>
-<li><strong>Car Rules Voice v1.22</strong> — the rain sensor (ID_RAIN_LEVEL) has no resolved CAN frame, so its changes are now logged instead of shown as a permanent status row. Cabin PM2.5 (ID_HVAC_PM25, which does have a real CAN frame) was added to the status card on the main screen.</li>
-<li><strong>Car Rules Voice v1.21</strong> — the "Parameter / event" field on the redesigned
-  (v1.19) editor screen was too narrow, truncating long parameter names both in the field
-  and its dropdown list. It now gets the full width of its row.</li>
-<li><strong>Car Rules Voice v1.20</strong> — fixed unreadable checkbox/radio button labels on
-  the redesigned (v1.19) rule editor screen — they rendered near-black on the new dark
-  background. Bug-fix only, nothing else changed.</li>
-<li><strong>Car Rules Voice v1.19</strong> — redesigned the rule editor screen: a dark theme
-  with a green accent (this one screen only, everything else unchanged), a two-column layout
-  ("When" on the left, "Then" + "Settings" on the right), a segmented AND/OR pill toggle
-  instead of a switch, and numbered rows on every trigger/condition/action. Pure visual
-  restyle, no new functionality. The site also gained a
-  <a href="guide.html">detailed illustrated guide</a>.</li>
-<li><strong>Car Rules v0.70</strong> — ported from Car Rules Voice: "Standard media player
-  control" action (play/pause/next/previous for Bluetooth/USB audio), screen brightness and
-  auto-brightness, toggling an app between the instrument cluster and center display, fuel
-  filler flap and rear child-lock controls; AC/DC charging status, charge cable connection, and
-  fuel level as conditions; drive mode/road mode and seat ventilation are now also selectable
-  as conditions (previously actions only); auto-lock/auto-unlock status as a condition.</li>
-<li><strong>Car Rules Voice v1.18</strong> — new "Standard media player control" action:
-  play/pause/next/previous for Bluetooth and USB audio, via the same broadcast mechanism the
-  firmware itself uses for steering-wheel source switching. Voice settings gained a "Pause
-  media while listening" option: mutes Yandex Music and the stock player right before the mic
-  opens and resumes both right after, regardless of whether a command was recognized.</li>
-<li><strong>Car Rules Voice v1.17</strong> — new "Settings" screen: turn off the program-start
-  sound and enable a quick-launch bar on the main screen (up to 8 buttons in a single
-  full-width row, each running a chosen rule) — free, not tied to the floating panel's paid
-  license.</li>
-<li><strong>Car Rules Voice v1.16</strong> — seat ventilation (driver/passenger) is now
-  available as a rule condition/trigger, not just an action.</li>
-<li><strong>Car Rules Voice v1.15</strong> — "Open trunk" / "Close trunk" now only run while the
-  car is in Park; added AC/DC charging status, charge-cable connection, and fuel-level as
-  condition sources, plus a fuel-flap open action.</li>
-<li><strong>Car Rules Voice v1.14</strong> — the floating panel settings now offer a 2-button
-  option (alongside 4/6/8), plus a separate "Half-size panel" switch: button and label size on
-  the panel can be halved independently of button count and shape.</li>
-<li><strong>Car Rules Voice v1.13</strong> — reworked the "Floating panel" screen: panel
-  settings (enable, button count, shape) moved to the left column — previously that column
-  went mostly empty once the license was activated, since the activation card disappears at
-  that point. The right column is now dedicated entirely to the slot list, with bigger text
-  and more spacing between rows.</li>
-<li><strong>Car Rules Voice v1.12</strong> — fixed the floating panel: after v1.11's larger
-  text, the panel's own buttons had quietly grown past their intended size too (a side effect
-  of the app's shared theme) — the panel's button text size is now pinned independently of
-  that setting. Also redesigned the "Voice commands" and "Floating panel settings" screens:
-  the phrase list and the panel's slot list are now shown as a two-per-row grid instead of
-  full-width rows with a large empty gap before the Edit/Delete buttons.</li>
-<li><strong>Car Rules ADB Grant v1.8</strong> — <code>appops set</code> on this head unit never
-  gives any reply at all, even on success (unlike <code>appops get</code>); the log used to wait
-  15 seconds and then show that as a read error, even though the permission had already been
-  granted. Those commands now get a short wait instead, and an empty reply is treated as expected,
-  not as a failure.</li>
-<li><strong>v1.11</strong> — larger text and spacing throughout the app's screens (rule list,
-  rule editor, floating-panel settings, etc.) — on the car's head-unit display the text was
-  small and a lot of the screen sat empty; the floating panel itself was unaffected, it was
-  already sized correctly.</li>
-<li><strong>v1.10</strong> — new "Move app: cluster / center display" action — a single
-  trigger toggles the chosen app (Yandex Navigator by default, any app selectable) between
-  the instrument cluster and the center display; works even when only the floating panel is
-  visible and no app window is on screen. Added rear-door child lock control (left/right).
-  "Drive mode" and "Road mode" can now be used as a rule condition/trigger too, not just an
-  action.</li>
-<li><strong>v1.05</strong> — a floating-panel button now runs the rule's targets immediately,
-  ignoring its conditions and geofence (it used to check them like an automatic trigger,
-  and could silently do nothing if they didn't hold). Also added "Auto-lock status" and
-  "Auto-unlock status" — the on/off state of the "Auto-lock on walk-away" / "Auto-unlock on
-  approach" switches can now be used as a rule condition or trigger.</li>
-<li><strong>v1.04</strong> — new "Auto brightness" action (on/off) — the same "Auto" switch
-  SeresSettings' own display-brightness screen has. Unlike "Screen brightness" (the level,
-  via the backlight service), this one needs the "Modify system settings" permission again —
-  granted by Car Rules ADB Grant v1.7+.</li>
-<li><strong>v1.03</strong> — floating-panel settings (whether it's shown, button count, layout,
-  which rule is on which button, on-screen position) are now included in export/import — moving
-  to a new device or reinstalling used to mean setting the panel up from scratch again.</li>
-<li><strong>v1.02</strong> — fixed "Screen brightness": it used to write plain Android brightness
-  (<code>Settings.System.SCREEN_BRIGHTNESS</code>), which does nothing on this head unit — the
-  center display is driven by a separate system backlight service instead. The action now uses
-  that service; the "Modify system settings" permission is no longer needed for it.</li>
-<li><strong>Car Rules v0.69</strong> — fixed the "Test" button for the "Voice Assistant" action:
-  it used to do nothing (took the wrong code path instead of calling the assistant).</li>
-<li><strong>Car Rules ADB Grant v1.7</strong> — grants "Modify system settings" again (alongside
-  "Display over other apps") — needed by the new "Auto brightness" action in Car Rules
-  Voice v1.04.</li>
-<li><strong>Car Rules ADB Grant v1.6</strong> — fixed "Check permissions": the button never got a
-  reply to <code>appops get</code>, hitting a read timeout every time. The head unit's adbd
-  turns out not to close a one-shot shell command's stream, and the old read waited for
-  exactly that close. Output is now read incrementally and treated as complete after a short
-  quiet period following the first byte, instead of waiting for the stream to close.</li>
-<li><strong>Car Rules ADB Grant v1.5</strong> — removed the "Port" field from the form: the head
-  unit's adb port is always 5555, so there's nothing left to type.</li>
-<li><strong>Car Rules ADB Grant v1.4</strong> — "Grant" no longer grants "Modify system
-  settings" (not needed since v1.02, see above); new "Check permissions" button — read-only,
-  shows the current on-device state in the log via <code>appops get</code>, without opening
-  system settings on the head unit itself.</li>
-<li><strong>v1.00</strong> — new "Screen brightness" action (0–100%, plain Android brightness, not
-  a CAN property). Requires the "Modify system settings" permission — Car Rules ADB Grant was
-  updated so the "Grant" button now grants both permissions in one pass.</li>
-<li><strong>v0.99</strong> — confirmed the front-seat massage mode names: "Waves / Cat / Stretch /
-  Snake / Butterfly" instead of a raw number. Added a "Washer nozzle heater" action.</li>
-<li><strong>v0.98</strong> — fixed the floating panel always rendering in dark theme, even when
-  Light was chosen in the app. Added a "Front-seat massage" action (mode and intensity,
-  driver/passenger).</li>
-<li><strong>v0.95</strong> — added an in-app theme setting ("Follow system" / "Light" / "Dark",
-  Settings screen) — useful since the platform's own theme setting isn't always reliable on this
-  head unit.</li>
-<li><strong>v0.94–v0.96</strong> — removed the wireless-adb self-grant for "Display over other
-  apps" — it never worked reliably on this head unit. The permission is now granted by a separate
-  phone app, <strong>Car Rules ADB Grant</strong> (see the download section above and "How to get
-  the ... permission").</li>
-<li><strong>v0.89–v0.93</strong> — fixed the wireless-adb self-grant (the command was built
-  incorrectly and almost never worked), removed a false error shown even when the permission was
-  already granted, and the IP/port now auto-fill.</li>
-<li><strong>v0.88</strong> — fixed the "raise app to foreground before listening" option (from
-  v0.87) — it didn't actually work in the background before.</li>
-<li><strong>v0.87</strong> — if the microphone is briefly busy, the app now retries a few times
-  instead of failing immediately. Added an experimental "raise app to foreground before listening"
-  option (off by default).</li>
-<li><strong>v0.86</strong> — the "Microphone unavailable" message now shows the underlying reason,
-  which made user reports much easier to diagnose.</li>
-<li><strong>v0.85</strong> — fixed the wireless-adb self-grant crashing on some Android versions.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — the rule editor's property lists are now sorted
-  alphabetically.</li>
-<li><strong>v0.83</strong> — the "Panel" screen no longer shows the grant-permission button and
-  adb instructions once the permission is already granted.</li>
-<li><strong>v0.79–v0.82</strong> — added the <strong>floating quick-launch panel</strong>: a window
-  on top of every app with 4/6/8 large buttons, each running its own rule with one tap. Same
-  license as voice control — one code activates both.</li>
-<li><strong>Car Rules v0.67</strong> — added three features to the plain Car Rules app that
-  previously existed only in Voice: "Trunk: open/close", "Rear-window heater", and the custom
-  wheel button as a trigger/condition.</li>
-<li><strong>v0.67–v0.78</strong> — several versions in a row went into making file export/import
-  reliable: this head unit handles file saving differently from stock Android and needed a number
-  of workarounds — solid since v0.78. Along the way: export started bundling voice commands too
-  (v0.74), a "Climate temperature" action was added (driver/passenger, v0.77), and a "Wipers:
-  service mode" action plus a per-rule "no notification" checkbox were added (v0.72). A "Wipers:
-  auto mode" condition was briefly added and removed again (v0.72–v0.73) — that status turns out
-  not to be available on this car.</li>
-<li><strong>v0.65</strong> — cleaned up the log: stopped logging every custom wheel button press,
-  and a rule fired by voice is now logged as a normal event instead of a "test run".</li>
-<li><strong>v0.64</strong> — import rules from the Car Rules app; import/export rules to a file.
-  Added the no-voice Car Rules 0.56 build to the site.</li>
-<li><strong>v0.63</strong> — custom wheel button as voice activation; removed the "Support the
-  author" button.</li>
-<li><strong>v0.62</strong> — rear-window heater; custom button as a trigger; service cleanup.</li>
-<li><strong>v0.60–0.61</strong> — "Trunk: open/close" action.</li>
-<li><strong>v0.5x</strong> — offline voice control (Vosk); "Mirrors: fold/unfold" action.</li>
+<li><strong>v1.40</strong> — fixed an ADB authorization crash (ClassCastException) on devices whose RSA keys have no CRT parameters; it affected permission granting and VR-companion install.</li>
+<li><strong>v1.39</strong> — a one-action "toggle" for 6 more on/off properties: climate power, rear defroster, washer-nozzle heater, charge port, proximity auto-unlock and auto-lock.</li>
+<li><strong>v1.38</strong> — ADB is no longer enabled at boot when the VR companion is already installed and enabled.</li>
+<li><strong>v1.37</strong> — fixed an ADB authorization crash (ClassCastException) that broke VR-companion install and permission granting.</li>
+<li><strong>v1.36</strong> — the VR companion is installed/enabled on boot only when the "voice-assistant button" activation mode is selected.</li>
+<li><strong>v1.35</strong> — the steering-wheel voice-assistant button works without a separate app: the VR companion is bundled and installs/enables itself via the app's own adbd. New voice activation option: "voice-assistant button (steering wheel)".</li>
+<li><strong>v1.34</strong> — the "Enable ADB &amp; grant permissions" button moved to the Floating Panel screen (tap = automatic grant, long-press = manual fallback to system settings).</li>
+<li><strong>v1.33</strong> — the app enables ADB itself (via the factory diagnostic routine) and grants itself "Display over other apps"; the separate Car Rules ADB Grant is no longer needed for this. Confirm the one-time "Allow debugging" system dialog on first run.</li>
+<li><strong>v1.31</strong> — wireless phone charging: a "status" condition/trigger and an on/off action.</li>
+<li><strong>v1.30 / Car Rules v0.71</strong> — fixed swapped "Locked/Unlocked" labels on the rear child-lock actions: the real polarity is 0 = locked, 1 = unlocked (confirmed by decompiling SeresSettings' own toggle). If you have a rule with this action, check its value.</li>
+<li><strong>v1.23–v1.29</strong> — third-party apps can run saved rules by id/name (v1.29); per-channel pause-on-listen and per-window actions (v1.28); "Return control to" setting (v1.27); "Windows: set position" action (v1.26); text labels on main-screen buttons (v1.25); "Screen wake" setting (v1.24); "Air recirculation: toggle" action (v1.23).</li>
+<li><strong>v1.19–v1.22</strong> — redesigned rule editor screen (dark theme with green accent, two columns, AND/OR pill, numbered rows) plus two layout fixes (v1.20–v1.21); the site gained a <a href="guide.html">detailed illustrated guide</a>.</li>
+<li><strong>v1.10–v1.18</strong> — "Standard media player control" action and "Pause media while listening" option (v1.18); "Settings" screen and quick-launch bar on the main screen (v1.17); seat ventilation as a condition (v1.16); trunk only in Park, charging/fuel status and fuel flap (v1.15); 2-button panel and "Half-size panel" (v1.14); reworked panel and voice-command screens (v1.12–v1.13); larger text (v1.11); "Move app: cluster / center display", rear child lock, drive/road mode as conditions (v1.10).</li>
+<li><strong>v1.00–v1.05</strong> — "Screen brightness" (v1.00; since v1.02 via the system backlight service, no permission needed) and "Auto brightness" (v1.04, needs "Modify system settings"); floating-panel settings included in export/import (v1.03); a panel button runs its rule without checking conditions, plus "Auto-lock / Auto-unlock status" (v1.05).</li>
+<li><strong>v0.79–v0.99</strong> — floating quick-launch panel (v0.79–v0.82); front-seat massage and washer-nozzle heater (v0.98–v0.99); app theme "Follow system / Light / Dark" (v0.95); the wireless-adb self-grant (fixes in v0.85–v0.93) replaced by the separate Car Rules ADB Grant app (v0.94–v0.96); microphone retries and error reasons (v0.86–v0.88); alphabetical property lists (v0.84).</li>
+<li><strong>v0.5x–v0.78</strong> — offline voice control (Vosk); actions "Mirrors: fold/unfold", "Trunk: open/close", "Rear-window heater", "Climate temperature", "Wipers: service mode"; custom wheel button as trigger and as voice activation; rule import from Car Rules and file export/import (stable since v0.78, export includes voice commands); compact log.</li>
+<li><strong>Car Rules v0.67–v0.70</strong> — Voice features ported into the plain app: trunk, rear-window heater, custom wheel button, standard media player control, brightness and auto-brightness, moving an app between cluster and center display, fuel flap, child lock, charging/fuel status and more conditions; fixed the "Test" button for the "Voice Assistant" action (v0.69).</li>
+<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — a separate phone app that grants permissions over wireless adb (no longer needed by Voice since v1.33): "Check permissions" button, "Port" field removed, fixed reading of this head unit's silent <code>appops</code> replies, and "Modify system settings" granting restored in v1.7.</li>
 </ul>
 </div>
 
@@ -1061,165 +760,24 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
-<li><strong>Car Rules Voice v1.40</strong> — خرابی دیگری در احراز هویت ADB (ClassCastException) روی دستگاه‌هایی که کلید RSA بدون پارامترهای CRT تولید می‌کنند برطرف شد؛ روی اعطای مجوزها و نصب/فعال‌سازی همراهِ VR اثر می‌گذاشت.</li>
-<li><strong>Car Rules Voice v1.39</strong> — برای ۶ ویژگی دوحالتی (روشن/خاموش) دیگر، مانند «گردش هوا: تعویض»، یک اقدام «تعویض» تک‌مرحله‌ای اضافه شد: روشن/خاموش تهویه، گرم‌کن شیشهٔ عقب، گرم‌کن نازل شوینده، درپوش شارژ، باز/قفل‌شدن خودکار بر اساس فاصله.</li>
-<li><strong>Car Rules Voice v1.38</strong> — هنگام بوت اگر همراهِ VR از قبل نصب و فعال باشد، ADB دیگر فعال نمی‌شود (بررسی از طریق PackageManager، بدون نیاز به ADB)؛ ADB فقط زمانی به‌کار می‌رود که واقعاً نیاز به اصلاح باشد.</li>
-<li><strong>Car Rules Voice v1.37</strong> — خطای احراز هویت ADB (ClassCastException) در برخی دستگاه‌ها برطرف شد که باعث خرابی نصب/فعال‌سازی همراهِ VR و اعطای مجوزها می‌شد.</li>
-<li><strong>Car Rules Voice v1.36</strong> — همراهِ VR فقط زمانی هنگام راه‌اندازی نصب/فعال می‌شود که حالت فعال‌سازی «دکمهٔ دستیار صوتی» انتخاب شده باشد؛ در غیر این صورت هنگام بوت همراه و ADB دست‌نخورده می‌مانند.</li>
-<li><strong>Car Rules Voice v1.35</strong> — دکمهٔ دستیار صوتی روی فرمان اکنون بدون برنامهٔ جداگانه کار می‌کند: همراهِ VR داخل برنامه گنجانده شده و هنگام راه‌اندازی مجدد (یا درست هنگام انتخاب حالت فعال‌سازی «دکمهٔ دستیار صوتی») به‌طور خودکار از طریق adbd خودِ برنامه نصب/فعال می‌شود. حالت جدید فعال‌سازی صدا: «دکمهٔ دستیار صوتی (روی فرمان)».</li>
-<li><strong>Car Rules Voice v1.34</strong> — دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» به صفحهٔ «پنل شناور» منتقل شد (همان‌جا که نبودِ مجوز اعلام می‌شود): لمس معمولی = اعطای خودکار، لمس طولانی = مسیر دستی به تنظیمات سیستم.</li>
-<li><strong>Car Rules Voice v1.33</strong> — برنامه اکنون می‌تواند خودش ADB را فعال کند (از طریق روال تشخیصی کارخانه) و مجوز «نمایش روی سایر برنامه‌ها» را از طریق adbd خودش به خودش اعطا کند — دیگر به برنامهٔ جداگانهٔ Car Rules ADB Grant برای این کار نیازی نیست. دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» در تنظیمات برنامه؛ در اولین اجرا یک‌بار پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی» را تأیید کنید.</li>
-<li><strong>Car Rules Voice v1.31</strong> — شارژ بی‌سیم گوشی اضافه شد: یک شرط/محرک «وضعیت» (آزاد/آماده، در حال شارژ، شارژ کامل، خرابی، جسم خارجی روی سطح، خاموش) و یک اقدام روشن/خاموش.</li>
-<li><strong>Car Rules Voice v1.30 / Car Rules v0.71</strong> — برچسب‌های جابه‌جاشدهٔ «قفل/باز» در اقدامات قفل کودک درهای عقب اصلاح شد. قطبیت واقعی (با دیکامپایل کردن کلید قفل کودک خود SeresSettings تأیید شد): ۰ = قفل، ۱ = باز — در برنامه برعکس بود. اگر قانونی با این اقدام دارید، آن را بررسی و در صورت نیاز مقدار را برعکس کنید.</li>
-<li><strong>Car Rules Voice v1.29</strong> — برنامه‌های شخص ثالث اکنون می‌توانند یک قانون ذخیره‌شده را در هر زمان (با شناسه یا نام) اجرا کنند و فهرست قوانین موجود را دریافت کنند — برای یکپارچه‌سازی با برنامه‌های دیگر روی دستگاه. دسترسی با یک مجوز جدید کنترل می‌شود.</li>
-<li><strong>Car Rules Voice v1.28</strong> — توقف موقت رسانه هنگام گوش دادن حالا برای هر کانال جداگانه قابل تنظیم است: یاندکس موزیک، پخش‌کننده استاندارد (بلوتوث) و پخش‌کننده استاندارد (USB). همچنین هر شیشه (جلو/عقب، چپ/راست) اکنون می‌تواند به‌عنوان یک اقدام جداگانه در قوانین و فرمان‌های صوتی هدف قرار گیرد، در کنار اقدام موجود «تنظیم هر چهار شیشه».</li>
-<li><strong>Car Rules Voice v1.27</strong> — تنظیم جدید «بازگرداندن کنترل به»: با فعال بودن «هنگام فعال‌سازی، برنامه را به جلو بیاور»، می‌توانید برنامه‌ای را انتخاب کنید که پس از پایان فرمان صوتی، صفحه به آن بازگردد به‌جای ماندن روی این برنامه.</li>
-<li><strong>Car Rules Voice v1.26</strong> — عمل جدید «شیشه‌ها: تنظیم موقعیت»: بستن همه شیشه‌ها (٪۰)، باز کردن همه (٪۱۰۰) یا باز کردن به هر درصد دلخواه، همه در یک عمل. همچنین خروجی PM2.5 و حسگر باران که فقط برای اشکال‌زدایی بودند حذف شد.</li>
-<li><strong>Car Rules Voice v1.25</strong> — دکمه‌های «تنظیمات» و «درون‌ریزی / برون‌بری» در صفحه اصلی اکنون برچسب متنی دارند (پیش‌تر فقط آیکون بودند).</li>
-<li><strong>Car Rules Voice v1.24</strong> — تنظیم «روشن شدن صفحه» اضافه شد: اکنون می‌توانید آوردن خودکار برنامه به جلو هنگام روشن شدن سوئیچ/صفحه را غیرفعال کنید (پیش‌تر این کار همیشه انجام می‌شد).</li>
-<li><strong>Car Rules Voice v1.23</strong> — عمل جدید «گردش هوا: تعویض» — یک قانون به‌جای دو قانون: وضعیت فعلی (داخلی/بیرونی) را می‌خواند و آن را معکوس می‌کند.</li>
-<li><strong>Car Rules Voice v1.22</strong> — حسگر باران (ID_RAIN_LEVEL) به هیچ فریم CAN مشخصی متصل نیست، بنابراین تغییرات آن اکنون در گزارش ثبت می‌شود نه به‌صورت یک ردیف دائمی در وضعیت. PM2.5 داخل کابین (ID_HVAC_PM25، که فریم CAN واقعی دارد) به کارت وضعیت در صفحهٔ اصلی اضافه شد.</li>
-<li><strong>Car Rules Voice v1.21</strong> — فیلد «پارامتر / رویداد» در صفحهٔ بازطراحی‌شدهٔ
-  ویرایشگر (v1.19) خیلی باریک بود و نام‌های طولانی پارامتر را هم در خود فیلد و هم در فهرست
-  کشویی کوتاه می‌کرد. اکنون کل عرض ردیف را در اختیار دارد.</li>
-<li><strong>Car Rules Voice v1.20</strong> — برچسب‌های ناخوانای چک‌باکس/دکمهٔ رادیویی در صفحهٔ
-  بازطراحی‌شدهٔ ویرایشگر قانون (v1.19) رفع شد — تقریباً مشکی روی مشکی روی پس‌زمینهٔ تیرهٔ جدید
-  نمایش داده می‌شدند. فقط همین رفع باگ، چیز دیگری تغییر نکرده است.</li>
-<li><strong>Car Rules Voice v1.19</strong> — بازطراحی صفحهٔ ویرایشگر قانون: تم تیره با رنگ
-  سبز (فقط همین صفحه، بقیه بدون تغییر)، چیدمان دو‌ستونی («هنگامی که» در چپ، «آنگاه» +
-  «تنظیمات» در راست)، کلید کپسولی و/یا به‌جای سوییچ، و شماره‌گذاری هر ردیف محرک/شرط/عملیات.
-  فقط تغییر ظاهری، بدون قابلیت جدید. همچنین
-  <a href="guide.html">راهنمای گام‌به‌گام مصور</a> به سایت اضافه شد.</li>
-<li><strong>Car Rules v0.70</strong> — از Car Rules Voice منتقل شد: عملکرد «کنترل پخش‌کننده
-  رسانه استاندارد» (play/pause/next/previous برای صوت بلوتوث/USB)، روشنایی صفحه و روشنایی
-  خودکار، جابجایی برنامه بین صفحه کلاستر و صفحه مرکزی، کنترل درب باک سوخت و قفل کودک درهای
-  عقب؛ وضعیت شارژ (AC/DC)، اتصال کابل شارژ و سطح سوخت به‌عنوان شرط؛ حالت رانندگی/حالت جاده و
-  تهویه صندلی اکنون به‌عنوان شرط نیز قابل انتخاب هستند (پیش‌تر فقط عملکرد بودند)؛ وضعیت قفل
-  خودکار/باز شدن خودکار به‌عنوان شرط.</li>
-<li><strong>Car Rules Voice v1.18</strong> — عملکرد جدید «کنترل پخش‌کننده رسانه استاندارد»:
-  play/pause/next/previous برای صوت بلوتوث و USB، از طریق همان روش پیام پخشی که خود سیستم برای
-  تعویض منبع از فرمان استفاده می‌کند. در تنظیمات صدا گزینهٔ «هنگام گوش دادن، رسانه را متوقف کن»
-  اضافه شد: پیش از باز شدن میکروفون یاندکس موزیک و پخش‌کننده استاندارد را متوقف، و بلافاصله پس
-  از آن دوباره پخش می‌کند — صرف‌نظر از اینکه فرمان شناسایی شد یا نه.</li>
-<li><strong>Car Rules Voice v1.17</strong> — صفحهٔ جدید «تنظیمات»: می‌توانید صدای شروع برنامه
-  را خاموش کنید و نوار دسترسی سریع را در صفحهٔ اصلی فعال کنید (حداکثر ۸ دکمه در یک ردیف به
-  عرض کامل صفحه، هر کدام یک قانون انتخابی را اجرا می‌کند) — رایگان و بدون نیاز به لایسنس
-  پولی پنل شناور.</li>
-<li><strong>Car Rules Voice v1.16</strong> — تهویهٔ صندلی (راننده/سرنشین) اکنون به‌عنوان شرط/محرک
-  در قوانین هم قابل استفاده است، نه فقط به‌عنوان یک عملکرد.</li>
-<li><strong>Car Rules Voice v1.15</strong> — «باز کردن صندوق عقب» و «بستن صندوق عقب» اکنون فقط
-  در حالت پارک (دنده P) اجرا می‌شوند؛ وضعیت شارژ AC/DC، اتصال کابل شارژ و سطح سوخت به‌عنوان
-  شرط، و بازکردن درب باک سوخت به‌عنوان یک عملکرد اضافه شد.</li>
-<li><strong>Car Rules Voice v1.14</strong> — در تنظیمات پنل شناور، گزینهٔ ۲ دکمه (علاوه بر
-  ۴/۶/۸) و کلید جداگانهٔ «پنل نصف‌اندازه» اضافه شد: اندازهٔ دکمه‌ها و متن پنل را می‌توان مستقل
-  از تعداد دکمه‌ها و شکل پنل، نصف کرد.</li>
-<li><strong>Car Rules Voice v1.13</strong> — صفحهٔ «پنل شناور» بازطراحی شد: تنظیمات پنل
-  (فعال‌سازی، تعداد دکمه‌ها، شکل) به ستون چپ منتقل شدند — قبلاً بعد از فعال‌سازی لایسنس آن ستون
-  تقریباً خالی می‌ماند، چون در آن مرحله کارت فعال‌سازی دیگر نمایش داده نمی‌شد. ستون راست اکنون
-  به‌طور کامل به فهرست جایگاه‌ها اختصاص دارد: متن بزرگ‌تر و فاصلهٔ بیشتر بین ردیف‌ها.</li>
-<li><strong>Car Rules Voice v1.12</strong> — پنل شناور اصلاح شد: بعد از بزرگ‌تر شدن متن‌ها در
-  v1.11، دکمه‌های خود پنل هم به‌طور نامحسوس از اندازهٔ در نظر گرفته‌شده بزرگ‌تر شده بودند (اثر
-  جانبی تم مشترک برنامه) — اندازهٔ متن دکمه‌های پنل اکنون مستقل از آن تنظیم، ثابت نگه داشته
-  می‌شود. صفحات «فرمان‌های صوتی» و «تنظیمات پنل شناور» هم بازطراحی شدند: فهرست عبارت‌ها و
-  فهرست جایگاه‌های پنل اکنون به‌صورت شبکهٔ دوتایی در هر ردیف نمایش داده می‌شوند، نه ردیف‌های
-  تمام‌عرض با فاصلهٔ خالی بزرگ پیش از دکمه‌های ویرایش/حذف.</li>
-<li><strong>Car Rules ADB Grant v1.8</strong> — دستور <code>appops set</code> روی این هد‌یونیت حتی
-  در صورت موفقیت هم هیچ پاسخی نمی‌دهد (برخلاف <code>appops get</code>)؛ گزارش قبلاً ۱۵ ثانیه منتظر
-  می‌ماند و سپس این را به‌عنوان خطای خواندن نشان می‌داد، در حالی‌که مجوز از قبل اعطا شده بود. اکنون
-  برای این دستورها انتظار کوتاه‌تری در نظر گرفته می‌شود و پاسخ خالی به‌عنوان امری طبیعی گزارش
-  می‌شود، نه خطا.</li>
-<li><strong>v1.11</strong> — متن‌ها و فاصله‌گذاری در صفحات برنامه (فهرست قوانین، ویرایشگر قانون،
-  تنظیمات پنل شناور و غیره) بزرگ‌تر شد — روی صفحهٔ نمایش خودرو متن ریز بود و بخش زیادی از صفحه
-  خالی می‌ماند؛ خود پنل شناور تغییری نکرد، چون از قبل به‌درستی اندازه‌گذاری شده بود.</li>
-<li><strong>v1.10</strong> — عملیات جدید «جابجایی برنامه: صفحه کلاستر / صفحه مرکزی» — با یک
-  محرک، برنامهٔ انتخاب‌شده (به‌طور پیش‌فرض Yandex Navigator، قابل انتخاب هر برنامه‌ای) بین
-  صفحهٔ کلاستر و صفحهٔ مرکزی جابجا می‌شود؛ حتی وقتی فقط پنل شناور نمایان است و پنجرهٔ برنامه
-  روی صفحه نیست هم کار می‌کند. کنترل قفل کودک درهای عقب (چپ/راست) اضافه شد. «حالت رانندگی» و
-  «حالت جاده» اکنون علاوه بر عملیات، به‌عنوان شرط/محرک قانون هم قابل استفاده‌اند.</li>
-<li><strong>v1.05</strong> — دکمهٔ روی پنل شناور اکنون هدف‌های قانون را بلافاصله اجرا می‌کند، بدون
-  بررسی شرایط و ژئوفنس آن (پیش‌تر مانند یک محرک خودکار آن‌ها را بررسی می‌کرد و در صورت برقرار
-  نبودن، بی‌صدا هیچ کاری انجام نمی‌داد). همچنین «وضعیت قفل خودکار» و «وضعیت باز شدن خودکار قفل»
-  اضافه شد — وضعیت کلیدهای «قفل خودکار هنگام دور شدن» / «باز شدن خودکار قفل هنگام نزدیک شدن»
-  اکنون می‌تواند به‌عنوان شرط یا محرک قانون استفاده شود.</li>
-<li><strong>v1.04</strong> — عملیات جدید «روشنایی خودکار» (روشن/خاموش) — همان کلید «خودکار» که در
-  صفحهٔ روشنایی SeresSettings وجود دارد. برخلاف «روشنایی صفحه» (سطح روشنایی، از طریق سرویس
-  پس‌زمینه)، این یکی دوباره به مجوز «تغییر تنظیمات سیستم» نیاز دارد — که با Car Rules ADB
-  Grant v1.7+ اعطا می‌شود.</li>
-<li><strong>v1.03</strong> — تنظیمات پنل شناور (فعال بودن، تعداد دکمه‌ها، چیدمان، اینکه کدام
-  قانون روی کدام دکمه است، موقعیت روی صفحه) اکنون در خروجی‌گیری/وارد کردن هم گنجانده شده‌اند —
-  پیش‌تر با انتقال به دستگاه دیگر یا نصب مجدد، پنل باید از نو تنظیم می‌شد.</li>
-<li><strong>v1.02</strong> — رفع اشکال «روشنایی صفحه»: پیش‌تر روشنایی معمولی اندروید
-  (<code>Settings.System.SCREEN_BRIGHTNESS</code>) را می‌نوشت که روی این هد‌یونیت هیچ اثری
-  نداشت — صفحهٔ مرکزی توسط یک سرویس روشنایی پس‌زمینهٔ جداگانه کنترل می‌شود. این عملیات اکنون از
-  همان سرویس استفاده می‌کند؛ دیگر به مجوز «تغییر تنظیمات سیستم» نیاز ندارد.</li>
-<li><strong>Car Rules v0.69</strong> — رفع اشکال دکمهٔ «آزمایش» برای عملیات «دستیار صوتی»: پیش‌تر
-  هیچ کاری انجام نمی‌داد (مسیر اشتباهی را طی می‌کرد به‌جای فراخوانی دستیار).</li>
-<li><strong>Car Rules ADB Grant v1.7</strong> — بار دیگر مجوز «تغییر تنظیمات سیستم» را (در کنار
-  «نمایش روی سایر برنامه‌ها») اعطا می‌کند — که عملیات جدید «روشنایی خودکار» در Car Rules
-  Voice v1.04 به آن نیاز دارد.</li>
-<li><strong>Car Rules ADB Grant v1.6</strong> — رفع اشکال «بررسی مجوزها»: این دکمه هرگز پاسخی از
-  <code>appops get</code> دریافت نمی‌کرد و همیشه به تایم‌اوت می‌خورد. مشخص شد adbd هد‌یونیت
-  جریان یک دستور shell یک‌باره را نمی‌بندد، و خواندن قدیمی دقیقاً منتظر همان بسته‌شدن بود.
-  اکنون خروجی به‌صورت تکه‌تکه خوانده می‌شود و پس از یک مکث کوتاه بعد از اولین بایت، کامل
-  در نظر گرفته می‌شود، نه پس از بسته‌شدن جریان.</li>
-<li><strong>Car Rules ADB Grant v1.5</strong> — فیلد «پورت» از فرم حذف شد: پورت adb هد‌یونیت
-  همیشه ۵۵۵۵ است، پس دیگر نیازی به واردکردن آن نیست.</li>
-<li><strong>Car Rules ADB Grant v1.4</strong> — «اعطای مجوز» دیگر «تغییر تنظیمات سیستم» را
-  اعطا نمی‌کند (از v1.02 لازم نیست، بالا را ببینید)؛ دکمهٔ جدید «بررسی مجوزها» — فقط خواندنی،
-  وضعیت فعلی روی دستگاه را از طریق <code>appops get</code> در گزارش نشان می‌دهد، بدون باز کردن
-  تنظیمات سیستم روی خود هد‌یونیت.</li>
-<li><strong>v1.00</strong> — عملیات جدید «روشنایی صفحه» (۰ تا ۱۰۰٪، روشنایی معمولی اندروید، نه یک
-  ویژگی CAN). به مجوز «تغییر تنظیمات سیستم» نیاز دارد — Car Rules ADB Grant به‌روزرسانی شد تا
-  دکمهٔ «اعطای مجوز» هر دو مجوز را در یک مرحله اعطا کند.</li>
-<li><strong>v0.99</strong> — نام‌های حالت ماساژ صندلی‌های جلو تأیید شد: «موج / گربه / کشش / مار /
-  پروانه» به‌جای یک عدد خام. عملیات جدید «گرمکن نازل شیشه‌شور» اضافه شد.</li>
-<li><strong>v0.98</strong> — رفع اشکال پنل شناور که همیشه با تم تیره نمایش داده می‌شد، حتی وقتی تم
-  روشن در برنامه انتخاب شده بود. عملیات «ماساژ صندلی‌های جلو» (حالت و شدت، راننده/سرنشین) اضافه
-  شد.</li>
-<li><strong>v0.95</strong> — تنظیم تم برنامه اضافه شد («مطابق سیستم» / «روشن» / «تیره»، صفحهٔ
-  تنظیمات) — مفید است چون تنظیم روشن/تیرهٔ خود سیستم روی این هد‌یونیت همیشه قابل اعتماد نیست.</li>
-<li><strong>v0.94–v0.96</strong> — اعطای خودکار مجوز «نمایش روی سایر برنامه‌ها» از برنامه حذف شد —
-  این روش روی این هد‌یونیت هیچ‌وقت پایدار کار نکرد. اکنون این مجوز با یک برنامهٔ جداگانه برای گوشی
-  اعطا می‌شود — <strong>Car Rules ADB Grant</strong> (بخش دانلود بالا و «چگونه مجوز را بگیریم» را
-  ببینید).</li>
-<li><strong>v0.89–v0.93</strong> — اشکال اعطای خودکار مجوز از طریق adb رفع شد (دستور به‌درستی ساخته
-  نمی‌شد و تقریباً هیچ‌وقت کار نمی‌کرد)، خطای کاذبی که حتی پس از اعطای موفق مجوز نمایش داده می‌شد
-  حذف شد، و آدرس IP/پورت اکنون به‌طور خودکار پر می‌شوند.</li>
-<li><strong>v0.88</strong> — رفع اشکال گزینهٔ «بالا آوردن برنامه پیش از شنیدن» (از v0.87) که در
-  پس‌زمینه کار نمی‌کرد.</li>
-<li><strong>v0.87</strong> — اگر میکروفون برای لحظه‌ای در اختیار برنامهٔ دیگری باشد، اکنون چند بار
-  دوباره تلاش می‌شود، به‌جای شکست فوری. گزینهٔ آزمایشی «بالا آوردن برنامه پیش از شنیدن» اضافه شد
-  (به‌طور پیش‌فرض خاموش).</li>
-<li><strong>v0.86</strong> — پیام «میکروفون در دسترس نیست» اکنون دلیل واقعی خطا را هم نشان می‌دهد،
-  که بررسی گزارش‌های کاربران را ساده‌تر کرد.</li>
-<li><strong>v0.85</strong> — رفع اشکال اعطای خودکار مجوز که در برخی نسخه‌های اندروید با خطا شکست
-  می‌خورد.</li>
-<li><strong>v0.84 / Car Rules v0.68</strong> — فهرست‌های پارامتر در ویرایشگر قانون اکنون به‌ترتیب
-  الفبا مرتب شده‌اند.</li>
-<li><strong>v0.83</strong> — صفحهٔ «پنل» دیگر دکمهٔ اعطای مجوز و راهنمای adb را نشان نمی‌دهد اگر
-  مجوز از قبل داده شده باشد.</li>
-<li><strong>v0.79–v0.82</strong> — <strong>پنل شناور اجرای سریع</strong> اضافه شد: پنجره‌ای روی
-  همهٔ برنامه‌ها با ۴/۶/۸ دکمهٔ بزرگ، هرکدام با یک ضربه قانون خودش را اجرا می‌کند. همان مجوز کنترل
-  صوتی — یک کد هر دو را فعال می‌کند.</li>
-<li><strong>Car Rules v0.67</strong> — سه قابلیت که پیش‌تر فقط در Car Rules Voice بود به نسخهٔ
-  ساده اضافه شد: «صندوق عقب: باز/بسته»، «گرمکن شیشهٔ عقب»، و دکمهٔ سفارشی فرمان به‌عنوان
-  شرط/محرک.</li>
-<li><strong>v0.67–v0.78</strong> — چند نسخهٔ پیاپی صرف پایدار کردن درون‌ریزی/برون‌بری قوانین به
-  فایل شد: ذخیرهٔ فایل روی این هد‌یونیت با اندروید معمولی فرق دارد و چند راه‌حل جایگزین لازم داشت —
-  از v0.78 به بعد پایدار است. در همین بازه: برون‌بری فرمان‌های صوتی را هم شامل شد (v0.74)، عملیات
-  «دمای تهویه مطبوع» اضافه شد (راننده/سرنشین، v0.77)، و عملیات «برف‌پاک‌کن: حالت سرویس» به‌همراه
-  گزینهٔ «بدون اعلان» برای یک قانون خاص اضافه شد (v0.72). شرط «برف‌پاک‌کن: حالت خودکار» برای
-  مدتی کوتاه اضافه و دوباره حذف شد (v0.72–v0.73) — این وضعیت در عمل روی این خودرو در دسترس
-  نیست.</li>
-<li><strong>v0.65</strong> — گزارش فشرده‌تر شد: ثبت هر فشردن دکمهٔ سفارشی فرمان متوقف شد، و اجرای
-  قانون با فرمان صوتی اکنون به‌صورت یک رویداد عادی ثبت می‌شود، نه «اجرای آزمایشی».</li>
-<li><strong>v0.64</strong> — درون‌ریزی قوانین از برنامهٔ Car Rules؛ درون‌ریزی/برون‌بری قوانین به
-  فایل. نسخهٔ بدون‌صدای Car Rules 0.56 به سایت افزوده شد.</li>
-<li><strong>v0.63</strong> — دکمهٔ سفارشی فرمان به‌عنوان فعال‌سازی صوتی؛ حذف دکمهٔ «حمایت از
-  سازنده».</li>
-<li><strong>v0.62</strong> — گرمکن شیشهٔ عقب؛ دکمهٔ سفارشی به‌عنوان محرک؛ پاک‌سازی سرویس.</li>
-<li><strong>v0.60–0.61</strong> — عملیات «درِ صندوق: باز/بسته».</li>
-<li><strong>v0.5x</strong> — کنترل صوتی آفلاین (Vosk)؛ عملیات «آینه‌ها: جمع/باز».</li>
+<li><strong>v1.40</strong> — خرابی احراز هویت ADB (ClassCastException) روی دستگاه‌هایی که کلید RSA بدون پارامترهای CRT تولید می‌کنند برطرف شد؛ روی اعطای مجوزها و نصب همراهِ VR اثر می‌گذاشت.</li>
+<li><strong>v1.39</strong> — اقدام «تعویض» برای ۶ ویژگی روشن/خاموش دیگر اضافه شد: تهویه مطبوع، گرم‌کن شیشهٔ عقب، گرم‌کن نازل شوینده، درپوش شارژ، باز شدن خودکار قفل و قفل خودکار.</li>
+<li><strong>v1.38</strong> — هنگام بوت اگر همراهِ VR از قبل نصب و فعال باشد، ADB فعال نمی‌شود.</li>
+<li><strong>v1.37</strong> — خطای احراز هویت ADB (ClassCastException) برطرف شد که باعث خرابی نصب همراهِ VR و اعطای مجوزها می‌شد.</li>
+<li><strong>v1.36</strong> — همراهِ VR هنگام بوت فقط در حالت فعال‌سازی «دکمهٔ دستیار صوتی» نصب/فعال می‌شود.</li>
+<li><strong>v1.35</strong> — دکمهٔ دستیار صوتی روی فرمان بدون برنامهٔ جداگانه کار می‌کند: همراهِ VR داخل برنامه گنجانده شده و خودکار از طریق adbd خودِ برنامه نصب/فعال می‌شود. حالت جدید فعال‌سازی صدا: «دکمهٔ دستیار صوتی (روی فرمان)».</li>
+<li><strong>v1.34</strong> — دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» به صفحهٔ «پنل شناور» منتقل شد (لمس = اعطای خودکار، لمس طولانی = مسیر دستی به تنظیمات سیستم).</li>
+<li><strong>v1.33</strong> — برنامه خودش ADB را فعال می‌کند (از طریق روال تشخیصی کارخانه) و مجوز «نمایش روی سایر برنامه‌ها» را به خودش اعطا می‌کند؛ دیگر به Car Rules ADB Grant برای این کار نیازی نیست. در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی» را یک‌بار تأیید کنید.</li>
+<li><strong>v1.31</strong> — شارژ بی‌سیم گوشی: «وضعیت» به‌عنوان شرط/محرک و اقدام روشن/خاموش.</li>
+<li><strong>v1.30 / Car Rules v0.71</strong> — برچسب‌های جابه‌جاشدهٔ «قفل/باز» در قفل کودک درهای عقب اصلاح شد: در واقع ۰ = قفل، ۱ = باز (با دیکامپایل کلید خود SeresSettings تأیید شد). اگر قانونی با این اقدام دارید، مقدار آن را بررسی کنید.</li>
+<li><strong>v1.23–v1.29</strong> — اجرای قوانین توسط برنامه‌های شخص ثالث با شناسه/نام (v1.29)؛ توقف موقت رسانه به تفکیک کانال و اقدام جداگانه برای هر شیشه (v1.28)؛ تنظیم «بازگرداندن کنترل به» (v1.27)؛ اقدام «شیشه‌ها: تنظیم موقعیت» (v1.26)؛ برچسب متنی دکمه‌های صفحهٔ اصلی (v1.25)؛ تنظیم «روشن شدن صفحه» (v1.24)؛ اقدام «گردش هوا: تعویض» (v1.23).</li>
+<li><strong>v1.19–v1.22</strong> — بازطراحی صفحهٔ ویرایشگر قانون (تم تیره با رنگ سبز، چیدمان دو‌ستونی، کلید کپسولی و/یا، شماره‌گذاری ردیف‌ها) و دو رفع ظاهری آن (v1.20–v1.21)؛ <a href="guide.html">راهنمای گام‌به‌گام مصور</a> به سایت اضافه شد.</li>
+<li><strong>v1.10–v1.18</strong> — اقدام «کنترل پخش‌کننده رسانه استاندارد» و گزینهٔ «هنگام گوش دادن، رسانه را متوقف کن» (v1.18)؛ صفحهٔ «تنظیمات» و نوار دسترسی سریع در صفحهٔ اصلی (v1.17)؛ تهویهٔ صندلی به‌عنوان شرط (v1.16)؛ صندوق عقب فقط در حالت پارک، وضعیت شارژ/سوخت و درب باک (v1.15)؛ پنل ۲ دکمه‌ای و «پنل نصف‌اندازه» (v1.14)؛ بازطراحی صفحات پنل شناور و فرمان‌های صوتی (v1.12–v1.13)؛ متن‌های بزرگ‌تر (v1.11)؛ «جابجایی برنامه: صفحه کلاستر / صفحه مرکزی»، قفل کودک درهای عقب و حالت رانندگی/جاده به‌عنوان شرط (v1.10).</li>
+<li><strong>v1.00–v1.05</strong> — «روشنایی صفحه» (v1.00؛ از v1.02 از طریق سرویس روشنایی سیستم، بدون نیاز به مجوز) و «روشنایی خودکار» (v1.04، نیازمند مجوز «تغییر تنظیمات سیستم»)؛ تنظیمات پنل شناور در برون‌بری/درون‌ریزی (v1.03)؛ دکمهٔ پنل قانون را بدون بررسی شرایط اجرا می‌کند و «وضعیت قفل خودکار/باز شدن خودکار قفل» (v1.05).</li>
+<li><strong>v0.79–v0.99</strong> — پنل شناور اجرای سریع (v0.79–v0.82)؛ ماساژ صندلی‌های جلو و گرم‌کن نازل شوینده (v0.98–v0.99)؛ تم برنامه «مطابق سیستم / روشن / تیره» (v0.95)؛ اعطای خودکار مجوز از طریق adb (رفع اشکال‌ها در v0.85–v0.93) با برنامهٔ جداگانهٔ Car Rules ADB Grant جایگزین شد (v0.94–v0.96)؛ تلاش مجدد هنگام اشغال بودن میکروفون و نمایش دلیل خطا (v0.86–v0.88)؛ مرتب‌سازی الفبایی فهرست پارامترها (v0.84).</li>
+<li><strong>v0.5x–v0.78</strong> — کنترل صوتی آفلاین (Vosk)؛ اقدام‌های «آینه‌ها: جمع/باز»، «صندوق عقب: باز/بسته»، «گرمکن شیشهٔ عقب»، «دمای تهویه مطبوع»، «برف‌پاک‌کن: حالت سرویس»؛ دکمهٔ سفارشی فرمان به‌عنوان محرک و فعال‌سازی صوتی؛ درون‌ریزی قوانین از Car Rules و برون‌بری/درون‌ریزی فایل (پایدار از v0.78، برون‌بری شامل فرمان‌های صوتی)؛ گزارش فشرده‌تر.</li>
+<li><strong>Car Rules v0.67–v0.70</strong> — قابلیت‌های Car Rules Voice به نسخهٔ ساده منتقل شد: صندوق عقب، گرمکن شیشهٔ عقب، دکمهٔ سفارشی فرمان، کنترل پخش‌کننده رسانه استاندارد، روشنایی و روشنایی خودکار، جابجایی برنامه بین کلاستر و صفحهٔ مرکزی، درب باک، قفل کودک، وضعیت شارژ/سوخت و چند شرط دیگر؛ دکمهٔ «آزمایش» اقدام «دستیار صوتی» اصلاح شد (v0.69).</li>
+<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — برنامهٔ جداگانه برای گوشی که مجوزها را از طریق adb بی‌سیم اعطا می‌کند (از Voice v1.33 به بعد برای این کار لازم نیست): دکمهٔ «بررسی مجوزها»، حذف فیلد «پورت»، اصلاح خواندن پاسخ‌های <code>appops</code> روی این هد‌یونیت، و بازگشت اعطای «تغییر تنظیمات سیستم» در v1.7.</li>
 </ul>
 </div>
 
