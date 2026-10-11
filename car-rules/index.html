@@ -81,9 +81,6 @@
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
   📦 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v0.71/CarRules-0.71-release.apk">CarRules-0.71-release.apk</a></p>
   <small>Оба приложения подписаны одним ключом — правила из Car Rules можно перенести в Voice при первом запуске или через меню «⋮». · Both apps share one signing key — rules from Car Rules can be imported into Voice on first launch or via the “⋮” menu. · هر دو برنامه با یک کلید امضا شده‌اند — قوانین Car Rules هنگام اولین اجرا یا از منوی «⋮» به Voice منتقل می‌شود.</small>
-  <p style="margin:.9rem 0 .2rem;"><strong>Car Rules ADB Grant</strong> — отдельное маленькое приложение для телефона: выдаёт магнитоле разрешение «Отображение поверх других окон» (для плавающей панели) и настраивает Huawei AppMarket, по Wi-Fi adb, без компьютера (инструкция — в разделе своего языка ниже) / a small standalone phone app that grants the head unit's "Display over other apps" permission (for the floating panel) and configures the Huawei AppMarket store, over Wi-Fi adb, no computer needed (instructions in the language section below) / برنامه‌ای کوچک و جداگانه برای گوشی: مجوز «نمایش روی سایر برنامه‌ها» (برای پنل شناور) را اعطا و فروشگاه Huawei AppMarket را پیکربندی می‌کند، از طریق adb بی‌سیم و بدون کامپیوتر (دستورالعمل در بخش زبان خودتان در پایین صفحه):<br>
-  📱 <a href="CarRulesAdbGrant-1.8-debug.apk">CarRulesAdbGrant-1.8-debug.apk</a></p>
-  <small>Устанавливается на обычный телефон (Android), не на магнитолу — не требует Android Automotive. · Installs on an ordinary phone (Android), not the head unit — no Android Automotive required. · روی یک گوشی معمولی اندروید نصب می‌شود، نه هد‌یونیت — نیازی به Android Automotive نیست.</small>
 </div>
 
 <!-- ================= VIDEO DEMO (shared) ================= -->
@@ -160,24 +157,16 @@ APK того языка, на котором будете говорить.</p>
 <li>Панель можно перетащить за верхнюю полоску в удобное место — позиция запоминается.</li>
 </ol>
 <h3>Как получить разрешение «Отображение поверх других окон»</h3>
-<p>На этой магнитоле системная кнопка «Открыть системные настройки» может не сработать (нужный
-экран недоступен), а само приложение больше не пытается выдать себе это разрешение — самоподключение
-к своему же adb на этой магнитоле стабильно не работает (см. историю изменений ниже). Разрешение
-выдаётся с обычного телефона, без компьютера, отдельным маленьким приложением
-<strong>Car Rules ADB Grant</strong> (ссылка — в разделе загрузки в начале страницы):</p>
-<ol>
-<li>На магнитоле должен уже быть включён adb по TCP (обычно так и есть — порт 5555, без паринга).</li>
-<li>Установите Car Rules ADB Grant на телефон и откройте его.</li>
-<li>Введите IP-адрес магнитолы (порт вводить не нужно — всегда 5555) и нажмите <strong>«Выдать права»</strong>.</li>
-<li>При первом подключении на экране магнитолы может появиться запрос «Разрешить отладку?» —
-  подтвердите его и нажмите кнопку в приложении на телефоне ещё раз.</li>
-<li>Раздел «Журнал ADB» в приложении показывает каждый шаг подключения (подключение, отправка
-  команды, чтение ответа) — полезно, если что-то не сработает.</li>
-</ol>
+<p>Откройте <strong>«Панель»</strong> и нажмите <strong>«Включить ADB и выдать права»</strong> (кнопка
+показывается, пока разрешения нет): приложение включит adb штатной заводской диагностикой, выдаст себе
+«Отображение поверх других окон» и «Изменение системных настроек» (нужно действию «Авто-яркость экрана»)
+и вернёт adb в прежнее состояние. При первом запуске один раз подтвердите системный диалог
+«Разрешить отладку?». Долгое нажатие на кнопку открывает системные настройки — для ручной выдачи.</p>
+
 <p>Действию «Яркость экрана» в правилах (см. таблицу действий ниже) это разрешение <strong>не
 нужно</strong> — начиная с v1.02 оно пишет яркость напрямую через системный сервис управления
 подсветкой, без каких-либо специальных разрешений.</p>
-<p>Тот же результат можно получить вручную с компьютера, если у вас есть adb:<br>
+<p>Вручную с компьютера, если у вас есть adb:<br>
 <code>adb connect &lt;IP магнитолы&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 <p>Действию «Авто-яркость экрана» нужно ещё одно разрешение — «Изменение системных настроек»:<br>
@@ -305,17 +294,16 @@ APK того языка, на котором будете говорить.</p>
 <li><strong>v1.36</strong> — VR-компаньон ставится/включается на загрузке только при способе активации «Кнопка голосового помощника».</li>
 <li><strong>v1.35</strong> — кнопка голосового помощника на руле работает без отдельного приложения: VR-компаньон встроен и сам устанавливается/включается через собственный adbd. Новый способ активации голоса — «Кнопка голосового помощника (на руле)».</li>
 <li><strong>v1.34</strong> — кнопка «Включить ADB и выдать права» перенесена на экран «Плавающая панель» (нажатие — автовыдача, долгое — ручной путь в системные настройки).</li>
-<li><strong>v1.33</strong> — приложение само включает ADB (штатной заводской диагностикой) и выдаёт себе «Отображение поверх других окон»; отдельный Car Rules ADB Grant для этого больше не нужен. При первом запуске подтвердите системный диалог «Разрешить отладку».</li>
+<li><strong>v1.33</strong> — приложение само включает ADB (штатной заводской диагностикой) и выдаёт себе «Отображение поверх других окон». При первом запуске подтвердите системный диалог «Разрешить отладку».</li>
 <li><strong>v1.31</strong> — беспроводная зарядка телефона: статус как условие/триггер и действие вкл/выкл.</li>
 <li><strong>v1.30 / Car Rules v0.71</strong> — исправлены перепутанные подписи «Заблокировано/Разблокировано» у детского замка задних дверей: на самом деле 0 = заблокировано, 1 = разблокировано (подтверждено декомпиляцией штатного переключателя SeresSettings). Если у вас есть правило с этим действием — проверьте значение.</li>
 <li><strong>v1.23–v1.29</strong> — запуск правил сторонними приложениями по id/имени (v1.29); пауза медиа по каналам и отдельные действия для каждого окна (v1.28); настройка «Вернуть управление в» (v1.27); действие «Окна: установить положение» (v1.26); текстовые подписи у кнопок главного экрана (v1.25); настройка «Включение экрана» (v1.24); действие «Циркуляция воздуха: переключить» (v1.23).</li>
 <li><strong>v1.19–v1.22</strong> — редизайн экрана редактора правил (тёмная тема с зелёным акцентом, две колонки, переключатель И/ИЛИ, нумерация строк) и две правки его вёрстки (v1.20–v1.21); на сайт добавлена <a href="guide.html">подробная инструкция со скриншотами</a>.</li>
 <li><strong>v1.10–v1.18</strong> — действие «Управление штатным медиаплеером» и опция «Ставить медиа на паузу при прослушивании» (v1.18); экран «Настройки» и панель быстрого запуска на главном экране (v1.17); вентиляция сидений как условие (v1.16); багажник только в «P», статусы зарядки/топлива и лючок бака (v1.15); панель на 2 кнопки и «Уменьшить в 2 раза» (v1.14); переработаны экраны панели и голосовых команд (v1.12–v1.13); крупнее шрифты (v1.11); «Перекинуть приложение: приборка / центральный экран», детский замок задних дверей, режимы вождения как условие (v1.10).</li>
 <li><strong>v1.00–v1.05</strong> — «Яркость экрана» (v1.00; с v1.02 через системный сервис подсветки, разрешение не нужно) и «Авто-яркость экрана» (v1.04, нужно разрешение «Изменение системных настроек»); настройки плавающей панели входят в экспорт/импорт (v1.03); кнопка панели запускает правило без проверки условий и «Статус автоблокировки/авторазблокировки» (v1.05).</li>
-<li><strong>v0.79–v0.99</strong> — плавающая панель быстрого запуска (v0.79–v0.82); массаж передних сидений и подогрев форсунок омывателя (v0.98–v0.99); тема приложения «Как в системе / Светлая / Тёмная» (v0.95); самостоятельная выдача разрешения через adb (исправления v0.85–v0.93) заменена отдельным приложением Car Rules ADB Grant (v0.94–v0.96); повторные попытки при занятом микрофоне и причина ошибки в сообщении (v0.86–v0.88); сортировка списков параметров по алфавиту (v0.84).</li>
+<li><strong>v0.79–v0.99</strong> — плавающая панель быстрого запуска (v0.79–v0.82); массаж передних сидений и подогрев форсунок омывателя (v0.98–v0.99); тема приложения «Как в системе / Светлая / Тёмная» (v0.95); повторные попытки при занятом микрофоне и причина ошибки в сообщении (v0.86–v0.88); сортировка списков параметров по алфавиту (v0.84).</li>
 <li><strong>v0.5x–v0.78</strong> — офлайн-голосовое управление (Vosk); действия «Зеркала: сложить/разложить», «Багажник: открыть/закрыть», «Обогрев заднего стекла», «Температура климата», «Дворники: сервисный режим»; кастомная кнопка руля как триггер и как активация голоса; импорт правил из Car Rules и экспорт/импорт в файл (стабильно с v0.78, экспорт включает голосовые команды); компактный журнал.</li>
 <li><strong>Car Rules v0.67–v0.70</strong> — в обычную Car Rules портированы функции Voice: багажник, обогрев заднего стекла, кастомная кнопка руля, управление штатным медиаплеером, яркость и авто-яркость, переключение приложения между приборкой и центральным экраном, лючок бака, детский замок, статусы зарядки/топлива и другие условия; исправлена кнопка «Тест» у действия «Голосовой ассистент» (v0.69).</li>
-<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — отдельное приложение для телефона, выдающее разрешения по Wi-Fi adb (с Voice v1.33 для этого больше не требуется): кнопка «Проверить права», убрано поле «Порт», исправлено чтение ответов <code>appops</code> на этой магнитоле, выдача «Изменение системных настроек» вернулась в v1.7.</li>
 </ul>
 </div>
 
@@ -363,24 +351,16 @@ switching to the app itself. Same paid license as voice control — one code act
 <li>Drag the panel by its top strip to reposition it — the position is remembered.</li>
 </ol>
 <h3>How to get the “Display over other apps” permission</h3>
-<p>On this head unit the built-in “Open system settings” button may not work (the screen it needs
-isn’t reachable), and the app no longer tries to grant itself this permission — connecting to its
-own adb on this head unit consistently fails (see the changelog below). The permission is granted
-from an ordinary phone instead, no computer needed, using a separate small companion app called
-<strong>Car Rules ADB Grant</strong> (link in the download section at the top of the page):</p>
-<ol>
-<li>The head unit needs TCP adb already enabled (usually already the case — port 5555, no pairing).</li>
-<li>Install Car Rules ADB Grant on your phone and open it.</li>
-<li>Enter the head unit's IP address (no port field — it's always 5555) and tap <strong>“Grant”</strong>.</li>
-<li>The first connection may show an “Allow debugging?” prompt on the head unit’s own screen —
-  confirm it, then tap the button in the phone app again.</li>
-<li>The “ADB log” section in the app shows every step of the connection (connect, send command,
-  read response) — useful if something doesn't work.</li>
-</ol>
+<p>Open <strong>“Panel”</strong> and tap <strong>“Enable ADB &amp; grant permissions”</strong> (the button is
+shown while the permission is missing): the app turns adb on via the factory diagnostic routine, grants
+itself “Display over other apps” and “Modify system settings” (needed by the “Auto brightness” action),
+and puts adb back as it was. On first run, confirm the one-time “Allow debugging?” system dialog.
+A long press on the button opens system settings for manual granting.</p>
+
 <p>The “Screen brightness” action in rules (see the actions table below) does <strong>not</strong> need
 this permission — as of v1.02 it writes brightness directly through the platform's own backlight
 service, no special permission required.</p>
-<p>The same result can also be reached manually from a computer, if you have adb:<br>
+<p>Manually, from a computer, if you have adb:<br>
 <code>adb connect &lt;head unit IP&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 <p>The "Auto brightness" action needs one more permission — "Modify system settings":<br>
@@ -507,17 +487,16 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li><strong>v1.36</strong> — the VR companion is installed/enabled on boot only when the "voice-assistant button" activation mode is selected.</li>
 <li><strong>v1.35</strong> — the steering-wheel voice-assistant button works without a separate app: the VR companion is bundled and installs/enables itself via the app's own adbd. New voice activation option: "voice-assistant button (steering wheel)".</li>
 <li><strong>v1.34</strong> — the "Enable ADB &amp; grant permissions" button moved to the Floating Panel screen (tap = automatic grant, long-press = manual fallback to system settings).</li>
-<li><strong>v1.33</strong> — the app enables ADB itself (via the factory diagnostic routine) and grants itself "Display over other apps"; the separate Car Rules ADB Grant is no longer needed for this. Confirm the one-time "Allow debugging" system dialog on first run.</li>
+<li><strong>v1.33</strong> — the app enables ADB itself (via the factory diagnostic routine) and grants itself "Display over other apps". Confirm the one-time "Allow debugging" system dialog on first run.</li>
 <li><strong>v1.31</strong> — wireless phone charging: a "status" condition/trigger and an on/off action.</li>
 <li><strong>v1.30 / Car Rules v0.71</strong> — fixed swapped "Locked/Unlocked" labels on the rear child-lock actions: the real polarity is 0 = locked, 1 = unlocked (confirmed by decompiling SeresSettings' own toggle). If you have a rule with this action, check its value.</li>
 <li><strong>v1.23–v1.29</strong> — third-party apps can run saved rules by id/name (v1.29); per-channel pause-on-listen and per-window actions (v1.28); "Return control to" setting (v1.27); "Windows: set position" action (v1.26); text labels on main-screen buttons (v1.25); "Screen wake" setting (v1.24); "Air recirculation: toggle" action (v1.23).</li>
 <li><strong>v1.19–v1.22</strong> — redesigned rule editor screen (dark theme with green accent, two columns, AND/OR pill, numbered rows) plus two layout fixes (v1.20–v1.21); the site gained a <a href="guide.html">detailed illustrated guide</a>.</li>
 <li><strong>v1.10–v1.18</strong> — "Standard media player control" action and "Pause media while listening" option (v1.18); "Settings" screen and quick-launch bar on the main screen (v1.17); seat ventilation as a condition (v1.16); trunk only in Park, charging/fuel status and fuel flap (v1.15); 2-button panel and "Half-size panel" (v1.14); reworked panel and voice-command screens (v1.12–v1.13); larger text (v1.11); "Move app: cluster / center display", rear child lock, drive/road mode as conditions (v1.10).</li>
 <li><strong>v1.00–v1.05</strong> — "Screen brightness" (v1.00; since v1.02 via the system backlight service, no permission needed) and "Auto brightness" (v1.04, needs "Modify system settings"); floating-panel settings included in export/import (v1.03); a panel button runs its rule without checking conditions, plus "Auto-lock / Auto-unlock status" (v1.05).</li>
-<li><strong>v0.79–v0.99</strong> — floating quick-launch panel (v0.79–v0.82); front-seat massage and washer-nozzle heater (v0.98–v0.99); app theme "Follow system / Light / Dark" (v0.95); the wireless-adb self-grant (fixes in v0.85–v0.93) replaced by the separate Car Rules ADB Grant app (v0.94–v0.96); microphone retries and error reasons (v0.86–v0.88); alphabetical property lists (v0.84).</li>
+<li><strong>v0.79–v0.99</strong> — floating quick-launch panel (v0.79–v0.82); front-seat massage and washer-nozzle heater (v0.98–v0.99); app theme "Follow system / Light / Dark" (v0.95); microphone retries and error reasons (v0.86–v0.88); alphabetical property lists (v0.84).</li>
 <li><strong>v0.5x–v0.78</strong> — offline voice control (Vosk); actions "Mirrors: fold/unfold", "Trunk: open/close", "Rear-window heater", "Climate temperature", "Wipers: service mode"; custom wheel button as trigger and as voice activation; rule import from Car Rules and file export/import (stable since v0.78, export includes voice commands); compact log.</li>
 <li><strong>Car Rules v0.67–v0.70</strong> — Voice features ported into the plain app: trunk, rear-window heater, custom wheel button, standard media player control, brightness and auto-brightness, moving an app between cluster and center display, fuel flap, child lock, charging/fuel status and more conditions; fixed the "Test" button for the "Voice Assistant" action (v0.69).</li>
-<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — a separate phone app that grants permissions over wireless adb (no longer needed by Voice since v1.33): "Check permissions" button, "Port" field removed, fixed reading of this head unit's silent <code>appops</code> replies, and "Modify system settings" granting restored in v1.7.</li>
 </ul>
 </div>
 
@@ -564,24 +543,17 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li>پنل را از نوار بالایی‌اش می‌توانید به هر جای دلخواه بکشید — موقعیت آن ذخیره می‌شود.</li>
 </ol>
 <h3>چگونه مجوز «نمایش روی سایر برنامه‌ها» را بگیریم</h3>
-<p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست)، و
-خود برنامه هم دیگر تلاش نمی‌کند این مجوز را به خودش بدهد — اتصال به adb خود هد‌یونیت روی همین دستگاه
-پیوسته شکست می‌خورد (به تاریخچهٔ تغییرات در پایین نگاه کنید). اکنون این مجوز از طریق یک گوشی معمولی
-و بدون کامپیوتر، با برنامهٔ کوچک و جداگانه‌ای به‌نام <strong>Car Rules ADB Grant</strong> اعطا می‌شود
-(لینک در بخش دانلود بالای صفحه):</p>
-<ol>
-<li>روی هد‌یونیت باید از قبل adb روی TCP فعال باشد (معمولاً همین‌طور است — پورت ۵۵۵۵، بدون جفت‌سازی).</li>
-<li>Car Rules ADB Grant را روی گوشی نصب کنید و آن را باز کنید.</li>
-<li>آدرس IP هد‌یونیت را وارد کنید (نیازی به وارد کردن پورت نیست — همیشه ۵۵۵۵ است) و روی <strong>«اعطای مجوز»</strong> بزنید.</li>
-<li>اولین اتصال ممکن است پیام «اجازهٔ اشکال‌زدایی؟» را روی صفحهٔ خود هد‌یونیت نشان دهد — آن را تأیید
-  کنید و دوباره دکمه را در برنامهٔ گوشی بزنید.</li>
-<li>بخش «گزارش ADB» در برنامه هر مرحلهٔ اتصال (اتصال، ارسال دستور، خواندن پاسخ) را نشان می‌دهد — اگر
-  چیزی کار نکرد مفید است.</li>
-</ol>
+<p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست)؛
+برای همین برنامه این مجوز را از طریق adbd خودش به خودش اعطا می‌کند. «پنل» را باز کنید و روی
+<strong>«فعال‌سازی ADB و اعطای مجوزها»</strong> بزنید (تا زمانی که مجوز نیست، دکمه نمایش داده می‌شود):
+برنامه ADB را با روال تشخیصی کارخانه روشن می‌کند، مجوزهای «نمایش روی سایر برنامه‌ها» و «تغییر تنظیمات
+سیستم» (برای عملیات «روشنایی خودکار») را به خودش می‌دهد و ADB را به حالت قبل برمی‌گرداند. در اولین اجرا
+پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی؟» را یک‌بار تأیید کنید. لمس طولانی دکمه تنظیمات سیستم را برای اعطای دستی باز می‌کند.</p>
+
 <p>عملیات «روشنایی صفحه» در قوانین (به جدول عملیات در پایین نگاه کنید) به این مجوز نیاز
 <strong>ندارد</strong> — از نسخهٔ v1.02 روشنایی را مستقیماً از طریق سرویس روشنایی پس‌زمینهٔ خود
 پلتفرم می‌نویسد، بدون نیاز به هیچ مجوز خاصی.</p>
-<p>همین نتیجه را می‌توان به‌صورت دستی از یک کامپیوتر هم گرفت، اگر adb دارید:<br>
+<p>به‌صورت دستی، از یک کامپیوتر، اگر adb دارید:<br>
 <code>adb connect &lt;آدرس IP هد‌یونیت&gt;:5555</code><br>
 <code>adb shell appops set --user 0 org.tsrman.carrules.voice SYSTEM_ALERT_WINDOW allow</code></p>
 <p>عملیات «روشنایی خودکار صفحه» به یک مجوز دیگر هم نیاز دارد — «تغییر تنظیمات سیستم»:<br>
@@ -708,17 +680,16 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li><strong>v1.36</strong> — همراهِ VR هنگام بوت فقط در حالت فعال‌سازی «دکمهٔ دستیار صوتی» نصب/فعال می‌شود.</li>
 <li><strong>v1.35</strong> — دکمهٔ دستیار صوتی روی فرمان بدون برنامهٔ جداگانه کار می‌کند: همراهِ VR داخل برنامه گنجانده شده و خودکار از طریق adbd خودِ برنامه نصب/فعال می‌شود. حالت جدید فعال‌سازی صدا: «دکمهٔ دستیار صوتی (روی فرمان)».</li>
 <li><strong>v1.34</strong> — دکمهٔ «فعال‌سازی ADB و اعطای مجوزها» به صفحهٔ «پنل شناور» منتقل شد (لمس = اعطای خودکار، لمس طولانی = مسیر دستی به تنظیمات سیستم).</li>
-<li><strong>v1.33</strong> — برنامه خودش ADB را فعال می‌کند (از طریق روال تشخیصی کارخانه) و مجوز «نمایش روی سایر برنامه‌ها» را به خودش اعطا می‌کند؛ دیگر به Car Rules ADB Grant برای این کار نیازی نیست. در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی» را یک‌بار تأیید کنید.</li>
+<li><strong>v1.33</strong> — برنامه خودش ADB را فعال می‌کند (از طریق روال تشخیصی کارخانه) و مجوز «نمایش روی سایر برنامه‌ها» را به خودش اعطا می‌کند. در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی» را یک‌بار تأیید کنید.</li>
 <li><strong>v1.31</strong> — شارژ بی‌سیم گوشی: «وضعیت» به‌عنوان شرط/محرک و اقدام روشن/خاموش.</li>
 <li><strong>v1.30 / Car Rules v0.71</strong> — برچسب‌های جابه‌جاشدهٔ «قفل/باز» در قفل کودک درهای عقب اصلاح شد: در واقع ۰ = قفل، ۱ = باز (با دیکامپایل کلید خود SeresSettings تأیید شد). اگر قانونی با این اقدام دارید، مقدار آن را بررسی کنید.</li>
 <li><strong>v1.23–v1.29</strong> — اجرای قوانین توسط برنامه‌های شخص ثالث با شناسه/نام (v1.29)؛ توقف موقت رسانه به تفکیک کانال و اقدام جداگانه برای هر شیشه (v1.28)؛ تنظیم «بازگرداندن کنترل به» (v1.27)؛ اقدام «شیشه‌ها: تنظیم موقعیت» (v1.26)؛ برچسب متنی دکمه‌های صفحهٔ اصلی (v1.25)؛ تنظیم «روشن شدن صفحه» (v1.24)؛ اقدام «گردش هوا: تعویض» (v1.23).</li>
 <li><strong>v1.19–v1.22</strong> — بازطراحی صفحهٔ ویرایشگر قانون (تم تیره با رنگ سبز، چیدمان دو‌ستونی، کلید کپسولی و/یا، شماره‌گذاری ردیف‌ها) و دو رفع ظاهری آن (v1.20–v1.21)؛ <a href="guide.html">راهنمای گام‌به‌گام مصور</a> به سایت اضافه شد.</li>
 <li><strong>v1.10–v1.18</strong> — اقدام «کنترل پخش‌کننده رسانه استاندارد» و گزینهٔ «هنگام گوش دادن، رسانه را متوقف کن» (v1.18)؛ صفحهٔ «تنظیمات» و نوار دسترسی سریع در صفحهٔ اصلی (v1.17)؛ تهویهٔ صندلی به‌عنوان شرط (v1.16)؛ صندوق عقب فقط در حالت پارک، وضعیت شارژ/سوخت و درب باک (v1.15)؛ پنل ۲ دکمه‌ای و «پنل نصف‌اندازه» (v1.14)؛ بازطراحی صفحات پنل شناور و فرمان‌های صوتی (v1.12–v1.13)؛ متن‌های بزرگ‌تر (v1.11)؛ «جابجایی برنامه: صفحه کلاستر / صفحه مرکزی»، قفل کودک درهای عقب و حالت رانندگی/جاده به‌عنوان شرط (v1.10).</li>
 <li><strong>v1.00–v1.05</strong> — «روشنایی صفحه» (v1.00؛ از v1.02 از طریق سرویس روشنایی سیستم، بدون نیاز به مجوز) و «روشنایی خودکار» (v1.04، نیازمند مجوز «تغییر تنظیمات سیستم»)؛ تنظیمات پنل شناور در برون‌بری/درون‌ریزی (v1.03)؛ دکمهٔ پنل قانون را بدون بررسی شرایط اجرا می‌کند و «وضعیت قفل خودکار/باز شدن خودکار قفل» (v1.05).</li>
-<li><strong>v0.79–v0.99</strong> — پنل شناور اجرای سریع (v0.79–v0.82)؛ ماساژ صندلی‌های جلو و گرم‌کن نازل شوینده (v0.98–v0.99)؛ تم برنامه «مطابق سیستم / روشن / تیره» (v0.95)؛ اعطای خودکار مجوز از طریق adb (رفع اشکال‌ها در v0.85–v0.93) با برنامهٔ جداگانهٔ Car Rules ADB Grant جایگزین شد (v0.94–v0.96)؛ تلاش مجدد هنگام اشغال بودن میکروفون و نمایش دلیل خطا (v0.86–v0.88)؛ مرتب‌سازی الفبایی فهرست پارامترها (v0.84).</li>
+<li><strong>v0.79–v0.99</strong> — پنل شناور اجرای سریع (v0.79–v0.82)؛ ماساژ صندلی‌های جلو و گرم‌کن نازل شوینده (v0.98–v0.99)؛ تم برنامه «مطابق سیستم / روشن / تیره» (v0.95)؛ تلاش مجدد هنگام اشغال بودن میکروفون و نمایش دلیل خطا (v0.86–v0.88)؛ مرتب‌سازی الفبایی فهرست پارامترها (v0.84).</li>
 <li><strong>v0.5x–v0.78</strong> — کنترل صوتی آفلاین (Vosk)؛ اقدام‌های «آینه‌ها: جمع/باز»، «صندوق عقب: باز/بسته»، «گرمکن شیشهٔ عقب»، «دمای تهویه مطبوع»، «برف‌پاک‌کن: حالت سرویس»؛ دکمهٔ سفارشی فرمان به‌عنوان محرک و فعال‌سازی صوتی؛ درون‌ریزی قوانین از Car Rules و برون‌بری/درون‌ریزی فایل (پایدار از v0.78، برون‌بری شامل فرمان‌های صوتی)؛ گزارش فشرده‌تر.</li>
 <li><strong>Car Rules v0.67–v0.70</strong> — قابلیت‌های Car Rules Voice به نسخهٔ ساده منتقل شد: صندوق عقب، گرمکن شیشهٔ عقب، دکمهٔ سفارشی فرمان، کنترل پخش‌کننده رسانه استاندارد، روشنایی و روشنایی خودکار، جابجایی برنامه بین کلاستر و صفحهٔ مرکزی، درب باک، قفل کودک، وضعیت شارژ/سوخت و چند شرط دیگر؛ دکمهٔ «آزمایش» اقدام «دستیار صوتی» اصلاح شد (v0.69).</li>
-<li><strong>Car Rules ADB Grant v1.4–v1.8</strong> — برنامهٔ جداگانه برای گوشی که مجوزها را از طریق adb بی‌سیم اعطا می‌کند (از Voice v1.33 به بعد برای این کار لازم نیست): دکمهٔ «بررسی مجوزها»، حذف فیلد «پورت»، اصلاح خواندن پاسخ‌های <code>appops</code> روی این هد‌یونیت، و بازگشت اعطای «تغییر تنظیمات سیستم» در v1.7.</li>
 </ul>
 </div>
 
