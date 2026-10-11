@@ -136,13 +136,34 @@
   <a href="mailto:tsrman@gmail.com">tsrman@gmail.com</a>, получите 16-значный код и введите его.</li>
 <li>Включите верхний переключатель <strong>«Голосовые команды»</strong>.</li>
 <li>Выберите <strong>кнопку активации</strong> на руле: двойное нажатие скролла вверх/вниз
-  (PAGE UP/PAGE DOWN) <strong>или одиночное нажатие кастомной кнопки руля</strong>.</li>
+  (PAGE UP/PAGE DOWN), одиночное нажатие кастомной кнопки руля <strong>или штатная кнопка
+  голосового помощника на руле</strong> (см. ниже).</li>
 <li>Кнопкой <strong>«Проверить распознавание»</strong> убедитесь, что микрофон работает.</li>
 <li>Задайте фразы: <strong>«+ Голосовая команда»</strong> → выберите правило → введите одну или
   несколько фраз-синонимов.</li>
 </ol>
 <p>Язык распознавания задаётся установленным APK (русский / английский / фарси). Ставьте
 APK того языка, на котором будете говорить.</p>
+
+<h3>Кнопка голосового помощника (на руле)</h3>
+<p>Штатная кнопка голосового помощника на руле тоже может активировать голос — без отдельного приложения.
+В Voice встроен компаньон, который подменяет отсутствующий голосовой клиент и передаёт нажатие приложению.
+Прошивка магнитолы отключает сторонние приложения при каждой перезагрузке, поэтому на загрузке Voice сам
+проверяет компаньона и при необходимости устанавливает или включает его через собственный adbd (adb
+включается штатной заводской диагностикой только когда это действительно нужно и возвращается в прежнее
+состояние). Это происходит только если выбран именно этот способ активации. Установить или включить
+компаньона можно и вручную — выбрав этот пункт на экране «Голосовые команды»; при первом запуске
+подтвердите системный диалог «Разрешить отладку?».</p>
+<h3>Дополнительные настройки голоса</h3>
+<ul>
+<li><strong>Ставить медиа на паузу во время прослушивания</strong> — перед открытием микрофона ставит на паузу Яндекс Музыку и
+  штатный плеер (Bluetooth и USB — каждый канал включается отдельно) и запускает снова сразу после, независимо
+  от того, распознана ли команда.</li>
+<li><strong>Поднимать приложение на экран при активации (экспериментально)</strong> — включите, если голос выдаёт «Микрофон недоступен» в фоне:
+  на некоторых магнитолах надёжный доступ к микрофону есть только у приложения на переднем плане.</li>
+<li><strong>Вернуть управление в</strong> — работает вместе с предыдущей опцией: после команды экран
+  переключится на выбранное приложение, а не останется на этом.</li>
+</ul>
 
 <h2>Плавающая панель (новое)</h2>
 <p>Окно поверх всех приложений с крупными кнопками — по одному нажатию запускает выбранное правило
@@ -152,8 +173,8 @@ APK того языка, на котором будете говорить.</p>
 <li>На главном экране откройте <strong>«Панель»</strong>.</li>
 <li>Сначала нужно разрешение <strong>«Отображение поверх других окон»</strong> — см. ниже, как его получить.</li>
 <li>После получения разрешения появится тот же экран активации (VIN + 16-значный код), что и для голоса.</li>
-<li>Выберите <strong>количество кнопок</strong> (4, 6 или 8) и <strong>форму панели</strong>
-  (вертикальная или горизонтальная), назначьте правило на каждую кнопку.</li>
+<li>Выберите <strong>количество кнопок</strong> (2, 4, 6 или 8) и <strong>форму панели</strong>
+  (вертикальная или горизонтальная), при необходимости включите «Уменьшить панель в 2 раза» и назначьте правило на каждую кнопку.</li>
 <li>Панель можно перетащить за верхнюю полоску в удобное место — позиция запоминается.</li>
 </ol>
 <h3>Как получить разрешение «Отображение поверх других окон»</h3>
@@ -188,6 +209,9 @@ APK того языка, на котором будете говорить.</p>
   «Изменить», «Удалить».</li>
 <li><strong>Состояние автомобиля</strong> — живые значения параметров.</li>
 <li><strong>Журнал срабатываний</strong> — что и когда сработало, включая ошибки и нажатия кнопок руля.</li>
+<li><strong>Кнопки</strong> — «Голос», «Панель», «Настройки», «Импорт / экспорт».</li>
+<li><strong>Панель быстрого запуска</strong> — ряд до 8 кнопок на главном экране, каждая запускает своё правило;
+  включается в «Настройки», лицензия не нужна.</li>
 </ul>
 
 <h2>Как создать правило</h2>
@@ -211,6 +235,32 @@ APK того языка, на котором будете говорить.</p>
 Пустой триггер → срабатывание при <strong>въезде</strong>; заданный триггер → геозона как доп. условие.
 Для работы в фоне нужен фоновый доступ к геолокации.</p>
 
+<h3>Уведомление при срабатывании</h3>
+<p>У правила есть галочка «Показывать всплывающее уведомление и звук при срабатывании» — снимите её для «тихих» правил (в списке они помечены 🔕).</p>
+
+<h2>Настройки программы</h2>
+<p>Кнопка <strong>«Настройки»</strong> на главном экране:</p>
+<ul>
+<li><strong>Звуковой сигнал при запуске программы</strong> — можно отключить.</li>
+<li><strong>Выводить приложение на экран при включении экрана</strong> — снимите галочку, если не хотите, чтобы приложение само выходило
+  на передний план при включении зажигания / пробуждении экрана.</li>
+<li><strong>Показывать панель быстрого запуска на главном экране</strong> — ряд до 8 кнопок; бесплатно, без привязки к лицензии плавающей панели.</li>
+</ul>
+<p>Тему оформления («Как в системе» / «Светлая» / «Тёмная») выбирают в меню
+«Импорт / экспорт» → «Тема оформления».</p>
+
+<h2>Импорт и экспорт</h2>
+<p>Кнопка <strong>«Импорт / экспорт»</strong> на главном экране открывает меню:</p>
+<ul>
+<li><strong>Экспорт правил (новый файл)</strong> — сохраняет правила, голосовые команды и настройки плавающей панели в
+  <code>Download/CarRulesVoice/</code>.</li>
+<li><strong>Импорт правил…</strong> — выберите файл из этой папки; текущие правила (и голосовые команды, если они
+  есть в файле) будут заменены — приложение спросит подтверждение.</li>
+<li><strong>Импорт из Car Rules</strong> — переносит правила из обычного приложения Car Rules (оба приложения подписаны
+  одним ключом); при первом запуске приложение само предложит это сделать.</li>
+<li><strong>Тема оформления</strong> — «Как в системе» / «Светлая» / «Тёмная».</li>
+</ul>
+
 <h2>Параметры (триггеры и условия)</h2>
 <table><thead><tr><th>Параметр</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Запуск устройства / приложения (событие)</td><td>1 = Событие</td></tr>
@@ -225,6 +275,7 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Передача (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
 <tr><td>Статус зарядки (AC / DC быстрая)</td><td>0 = Не заряжается, 1 = Термоподготовка, 2 = Заряжается, 3 = Завершена, 4 = На паузе, 5 = Остановлена</td></tr>
 <tr><td>Подключение зарядного кабеля</td><td>число (код зависит от типа разъёма — смотрите живое значение)</td></tr>
+<tr><td>Беспроводная зарядка телефона: статус</td><td>0 = Свободно / готово, 1 = Заряжается, 2 = Зарядка завершена, 3 = Неисправность, 4 = Посторонний предмет на площадке, 5 = Выключено</td></tr>
 <tr><td>Педаль тормоза</td><td>0 = Отпущена, 1 = Нажата</td></tr>
 <tr><td>Открыта любая дверь</td><td>0 = Все закрыты, 1 = Хотя бы одна открыта</td></tr>
 <tr><td>Руль: скролл вверх / PAGE UP</td><td>0 = Отпущена, 1 = Нажата</td></tr>
@@ -237,6 +288,7 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Режим вождения</td><td>1 = Спорт, 2 = Комфорт, 3 = Экономичный, 13 = Гоночный</td></tr>
 <tr><td>Дорожный режим</td><td>0 = Обычный, 1 = Скользко/мокро, 2 = Снег</td></tr>
 <tr><td>Вентиляция сидений (водитель, пассажир)</td><td>1 = Выкл, 2–4 = уровень</td></tr>
+<tr><td>Циркуляция воздуха</td><td>1 = Рециркуляция (внутренний воздух), 2 = Свежий воздух (снаружи), 3 = Авто, 4 = Авто (снаружи)</td></tr>
 <tr><td>Статус зеркал</td><td>0 = Разложены, 1 = Сложены</td></tr>
 <tr><td>Статус багажника</td><td>0 = Закрыт, 1 = Открыт, 5 = Не закрыт до конца</td></tr>
 <tr><td>Статус автоблокировки (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
@@ -246,6 +298,7 @@ APK того языка, на котором будете говорить.</p>
 <h2>Действия (что можно включать)</h2>
 <table><thead><tr><th>Действие</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Климат-контроль (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Циркуляция воздуха</td><td>1 = Рециркуляция (внутренний воздух), 2 = Свежий воздух (снаружи), 3 = Авто, 4 = Авто (снаружи)</td></tr>
 <tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Температура климата (водитель, пассажир)</td><td>17.5 = Lo, 18.0–32.0 (шаг 0.5 °C), 32.5 = Hi</td></tr>
 <tr><td>Подогрев сидений (водитель, пассажир, задние Л/П)</td><td>1 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
@@ -254,8 +307,9 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Массаж сиденья, интенсивность (водитель, пассажир)</td><td>0 = Выкл, 2 = 1, 3 = 2, 4 = 3 (макс)</td></tr>
 <tr><td>Подогрев руля</td><td>0 = Выкл, 1 = 1, 2 = 2, 3 = 3</td></tr>
 <tr><td>Подогрев форсунок омывателя</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Беспроводная зарядка телефона: вкл/выкл</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Замок дверей (централизованный)</td><td>1 = Разблокировано, 2 = Заблокировано</td></tr>
-<tr><td>Детский замок (задняя левая / правая дверь)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Детский замок (задняя левая / правая дверь)</td><td>0 = Заблокировано, 1 = Разблокировано</td></tr>
 <tr><td>Авторазблокировка при приближении</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Автоблокировка при удалении</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Лючок зарядки (откр./закр.)</td><td>0 = Закрыт, 1 = Открыт</td></tr>
@@ -265,13 +319,16 @@ APK того языка, на котором будете говорить.</p>
 <tr><td>Режим гибрида (приоритет электро/бензин)</td><td>2 = Сначала электро, 3 = Авто, 4 = Сначала бензин</td></tr>
 <tr><td>Дворники: сервисный режим (замена щёток)</td><td>поднимает щётки (вернуть можно только вручную рычагом стеклоочистителя)</td></tr>
 <tr><td>Зеркала: сложить / разложить</td><td>Сложить / Разложить</td></tr>
-<tr><td>Багажник: открыть / закрыть</td><td>Открыть / Закрыть</td></tr>
+<tr><td>Багажник: открыть / закрыть</td><td>Открыть / Закрыть (только когда передача P)</td></tr>
+<tr><td>Окна: установить положение</td><td>число 0–100, % (0 = закрыть все, 100 = открыть все)</td></tr>
+<tr><td>Окно: переднее левое / переднее правое / заднее левое / заднее правое</td><td>число 0–100, % (0 = закрыто, 100 = полностью открыто)</td></tr>
 <tr><td>Запустить приложение</td><td>выбор из установленных</td></tr>
 <tr><td>Перекинуть приложение: приборка / центральный экран</td><td>выбор из установленных (переключается при каждом срабатывании)</td></tr>
 <tr><td>Управление Яндекс Музыкой</td><td>Играть, Пауза, Играть/Пауза, Следующий, Предыдущий</td></tr>
 <tr><td>Управление штатным медиаплеером</td><td>Bluetooth-аудио / USB-аудио × Играть, Пауза, Продолжить, Следующий, Предыдущий</td></tr>
 <tr><td>Яркость экрана</td><td>число 0–100, %</td></tr>
 <tr><td>Авто-яркость экрана</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>«…: переключить» — для циркуляции воздуха, климат-контроля, обогрева заднего стекла, подогрева форсунок омывателя, лючка зарядки, авторазблокировки и автоблокировки</td><td>без значения: читает текущее состояние и переключает на противоположное (циркуляция — между «внутри» и «снаружи»)</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>Про кнопки руля.</strong> Одиночное и двойное нажатие скролла разведены: одиночный
@@ -332,12 +389,32 @@ phrases to any rule; when the app hears them, the rule runs.</p>
   get a 16-digit code and enter it.</li>
 <li>Turn on the top <strong>“Voice commands”</strong> switch.</li>
 <li>Pick the <strong>activation button</strong> on the wheel: double-press the scroll rocker up/down
-  (PAGE UP/PAGE DOWN) <strong>or a single press of the custom wheel button</strong>.</li>
+  (PAGE UP/PAGE DOWN), a single press of the custom wheel button, <strong>or the stock voice-assistant
+  button on the wheel</strong> (see below).</li>
 <li>Use <strong>“Test recognition”</strong> to confirm the microphone works.</li>
 <li>Add phrases: <strong>“+ Voice command”</strong> → pick a rule → enter one or more synonym phrases.</li>
 </ol>
 <p>The recognition language is set by the installed APK (Russian / English / Persian). Install
 the APK for the language you will speak.</p>
+
+<h3>Voice-assistant button (steering wheel)</h3>
+<p>The stock voice-assistant button on the steering wheel can activate voice too — without a separate app.
+Voice bundles a companion that stands in for the missing voice client and passes the button press to the app.
+The head unit's firmware disables third-party apps on every reboot, so at boot Voice checks the companion itself
+and, if needed, installs or enables it through its own adbd (adb is switched on via the factory diagnostic
+routine only when really needed and put back as it was). This only happens when this activation mode is
+selected. You can also install/enable the companion manually by picking this option on the “Voice commands”
+screen; on first run, confirm the one-time “Allow debugging?” system dialog.</p>
+<h3>More voice settings</h3>
+<ul>
+<li><strong>Pause media while listening</strong> — pauses Yandex Music and the stock player (Bluetooth and USB, each
+  channel toggled separately) right before the microphone opens and resumes them right after, whether or not a
+  command was recognized.</li>
+<li><strong>Bring app to front on activation (experimental)</strong> — turn it on if voice reports “Microphone unavailable” in the
+  background: on some head units only the foreground app has reliable microphone access.</li>
+<li><strong>Return control to</strong> — works together with the previous option: after the command the
+  screen switches to the chosen app instead of staying on this one.</li>
+</ul>
 
 <h2>Floating panel (new)</h2>
 <p>A window on top of every other app with large buttons — one tap runs the chosen rule without
@@ -346,8 +423,8 @@ switching to the app itself. Same paid license as voice control — one code act
 <li>Open <strong>“Panel”</strong> from the main screen.</li>
 <li>It needs the <strong>“Display over other apps”</strong> permission first — see below for how to get it.</li>
 <li>Once granted, the same activation screen (VIN + 16-digit code) as voice control appears.</li>
-<li>Choose the <strong>number of buttons</strong> (4, 6, or 8) and the <strong>panel shape</strong>
-  (vertical or horizontal), then assign a rule to each button.</li>
+<li>Choose the <strong>number of buttons</strong> (2, 4, 6, or 8) and the <strong>panel shape</strong>
+  (vertical or horizontal), optionally turn on “Half-size panel”, then assign a rule to each button.</li>
 <li>Drag the panel by its top strip to reposition it — the position is remembered.</li>
 </ol>
 <h3>How to get the “Display over other apps” permission</h3>
@@ -381,6 +458,9 @@ service, no special permission required.</p>
 <li><strong>Rules</strong> — each with an on/off switch and “Check”, “Edit”, “Delete”.</li>
 <li><strong>Vehicle state</strong> — live parameter values.</li>
 <li><strong>Firing log</strong> — what fired and when, including errors and wheel-button presses.</li>
+<li><strong>Buttons</strong> — “Voice”, “Panel”, “Settings”, “Import / export”.</li>
+<li><strong>Quick-launch bar</strong> — a row of up to 8 buttons on the main screen, each running its own rule;
+  turn it on in “Settings”, no license needed.</li>
 </ul>
 
 <h2>Creating a rule</h2>
@@ -404,6 +484,32 @@ matches. It won’t fire twice per trip (re-armed when power is cut or after 4 h
 Empty trigger → fires on <strong>entering</strong>; a set trigger → the geofence acts as an extra
 condition. Background location access is needed to fire while the app is closed.</p>
 
+<h3>Notification on fire</h3>
+<p>Each rule has a “Show a toast + sound when this rule fires” checkbox — clear it for “silent” rules (they are marked 🔕 in the list).</p>
+
+<h2>App settings</h2>
+<p>The <strong>“Settings”</strong> button on the main screen:</p>
+<ul>
+<li><strong>Play a sound on program start</strong> — can be turned off.</li>
+<li><strong>Bring the app to front when the screen turns on</strong> — clear it if you don't want the app to come to the front by
+  itself when the ignition turns on / the screen wakes.</li>
+<li><strong>Show quick-launch bar on the main screen</strong> — a row of up to 8 buttons; free, not tied to the floating panel's license.</li>
+</ul>
+<p>The theme (“Follow system” / “Light” / “Dark”) is chosen in the
+“Import / export” menu → “Theme”.</p>
+
+<h2>Import and export</h2>
+<p>The <strong>“Import / export”</strong> button on the main screen opens a menu:</p>
+<ul>
+<li><strong>Export rules (new file)</strong> — saves rules, voice commands and floating-panel settings to
+  <code>Download/CarRulesVoice/</code>.</li>
+<li><strong>Import rules…</strong> — pick a file from that folder; the current rules (and voice commands, if the
+  file has them) are replaced — the app asks for confirmation first.</li>
+<li><strong>Import from Car Rules</strong> — copies the rules over from the plain Car Rules app (both apps share one signing
+  key); the app also offers this by itself on first launch.</li>
+<li><strong>Theme</strong> — “Follow system” / “Light” / “Dark”.</li>
+</ul>
+
 <h2>Parameters (triggers &amp; conditions)</h2>
 <table><thead><tr><th>Parameter</th><th>Values</th></tr></thead><tbody>
 <tr><td>Device booted / app started (event)</td><td>1 = Event</td></tr>
@@ -418,6 +524,7 @@ condition. Background location access is needed to fire while the app is closed.
 <tr><td>Gear (P/R/N/D)</td><td>0 = P, 1 = R, 2 = N, 3 = D</td></tr>
 <tr><td>Charging status (AC / DC fast charge)</td><td>0 = Not charging, 1 = Pre-charge thermal conditioning, 2 = Charging, 3 = Finished, 4 = Paused, 5 = Stopped</td></tr>
 <tr><td>Charge cable connection</td><td>number (code depends on connector type — check the live value)</td></tr>
+<tr><td>Wireless phone charging: status</td><td>0 = Idle / ready, 1 = Charging, 2 = Fully charged, 3 = Fault, 4 = Foreign object on pad, 5 = Off</td></tr>
 <tr><td>Brake pedal</td><td>0 = Released, 1 = Pressed</td></tr>
 <tr><td>Any door open</td><td>0 = All closed, 1 = At least one open</td></tr>
 <tr><td>Steering wheel: scroll up / PAGE UP</td><td>0 = Released, 1 = Pressed</td></tr>
@@ -430,6 +537,7 @@ condition. Background location access is needed to fire while the app is closed.
 <tr><td>Drive mode</td><td>1 = Sport, 2 = Comfort, 3 = Eco, 13 = Race</td></tr>
 <tr><td>Road mode</td><td>0 = Normal, 1 = Wet/slippery, 2 = Snow</td></tr>
 <tr><td>Seat ventilation (driver, passenger)</td><td>1 = Off, 2–4 = level</td></tr>
+<tr><td>Air recirculation</td><td>1 = Recirculate (internal), 2 = Fresh air (external), 3 = Auto, 4 = Auto (external)</td></tr>
 <tr><td>Mirror status</td><td>0 = Unfolded, 1 = Folded</td></tr>
 <tr><td>Trunk status</td><td>0 = Closed, 1 = Open, 5 = Not fully closed</td></tr>
 <tr><td>Auto-lock status (on/off)</td><td>0 = Off, 1 = On</td></tr>
@@ -439,6 +547,7 @@ condition. Background location access is needed to fire while the app is closed.
 <h2>Actions (what you can control)</h2>
 <table><thead><tr><th>Action</th><th>Values</th></tr></thead><tbody>
 <tr><td>Climate control (on/off)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Air recirculation</td><td>1 = Recirculate (internal), 2 = Fresh air (external), 3 = Auto, 4 = Auto (external)</td></tr>
 <tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Climate temperature (driver, passenger)</td><td>17.5 = Lo, 18.0-32.0 (0.5°C steps), 32.5 = Hi</td></tr>
 <tr><td>Seat heater (driver, passenger, rear L/R)</td><td>1 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
@@ -447,8 +556,9 @@ condition. Background location access is needed to fire while the app is closed.
 <tr><td>Seat massage intensity (driver, passenger)</td><td>0 = Off, 2 = 1, 3 = 2, 4 = 3 (max)</td></tr>
 <tr><td>Steering-wheel heater</td><td>0 = Off, 1 = 1, 2 = 2, 3 = 3</td></tr>
 <tr><td>Washer nozzle heater</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Wireless phone charging: on/off</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Door lock (central)</td><td>1 = Unlocked, 2 = Locked</td></tr>
-<tr><td>Child lock (rear left / right door)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Child lock (rear left / right door)</td><td>0 = Locked, 1 = Unlocked</td></tr>
 <tr><td>Auto-unlock on approach</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Auto-lock on leaving</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Charge port flap (open/closed)</td><td>0 = Closed, 1 = Open</td></tr>
@@ -458,13 +568,16 @@ condition. Background location access is needed to fire while the app is closed.
 <tr><td>Vehicle mode (EV/fuel priority)</td><td>2 = EV-first, 3 = Auto, 4 = Fuel-first</td></tr>
 <tr><td>Wipers: service mode (blade replacement)</td><td>raises the blades (can only be exited by hand)</td></tr>
 <tr><td>Mirrors: fold / unfold</td><td>Fold / Unfold</td></tr>
-<tr><td>Trunk: open / close</td><td>Open / Close</td></tr>
+<tr><td>Trunk: open / close</td><td>Open / Close (only in gear P)</td></tr>
+<tr><td>Windows: set position</td><td>number 0–100, % (0 = close all, 100 = open all)</td></tr>
+<tr><td>Window: front left / front right / rear left / rear right</td><td>number 0–100, % (0 = closed, 100 = fully open)</td></tr>
 <tr><td>Launch app</td><td>pick an installed app</td></tr>
 <tr><td>Toggle app: cluster / center display</td><td>pick an installed app (toggles display each time it fires)</td></tr>
 <tr><td>Yandex Music control</td><td>Play, Pause, Play/Pause, Next, Previous</td></tr>
 <tr><td>Standard media player control</td><td>Bluetooth audio / USB audio × Play, Pause, Resume, Next, Previous</td></tr>
 <tr><td>Screen brightness</td><td>number 0–100, %</td></tr>
 <tr><td>Auto brightness</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>“…: toggle” — for air recirculation, climate control, rear-window heater, washer nozzle heater, charge port flap, auto-unlock and auto-lock</td><td>no value: reads the current state and flips it (recirculation flips between “internal” and “external”)</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>About wheel buttons.</strong> Single and double scroll presses are separated: the single
@@ -524,12 +637,31 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
   <a href="mailto:tsrman@gmail.com">tsrman@gmail.com</a> ایمیل کنید، یک کد ۱۶ رقمی بگیرید و وارد کنید.</li>
 <li>کلید بالای <strong>«فرمان‌های صوتی»</strong> را روشن کنید.</li>
 <li><strong>دکمهٔ فعال‌سازی</strong> روی فرمان را انتخاب کنید: دو بار فشردن دکمهٔ پیمایش بالا/پایین
-  (PAGE UP/PAGE DOWN) <strong>یا یک بار فشردن دکمهٔ سفارشی فرمان</strong>.</li>
+  (PAGE UP/PAGE DOWN)، یک بار فشردن دکمهٔ سفارشی فرمان <strong>یا دکمهٔ استاندارد دستیار صوتی روی
+  فرمان</strong> (در ادامه ببینید).</li>
 <li>با <strong>«آزمایش تشخیص»</strong> از کارکرد میکروفون مطمئن شوید.</li>
 <li>افزودن عبارت‌ها: <strong>«+ فرمان صوتی»</strong> ← انتخاب قانون ← وارد کردن یک یا چند عبارت هم‌معنا.</li>
 </ol>
 <p>زبان تشخیص با APK نصب‌شده تعیین می‌شود (روسی / انگلیسی / فارسی). APK زبانی را که با آن صحبت
 می‌کنید نصب کنید.</p>
+
+<h3>دکمهٔ دستیار صوتی (روی فرمان)</h3>
+<p>دکمهٔ استاندارد دستیار صوتی روی فرمان هم می‌تواند کنترل صوتی را فعال کند — بدون برنامهٔ جداگانه. داخل Voice
+یک همراه (companion) گنجانده شده که جای کلاینت صوتی غایب را می‌گیرد و فشردن دکمه را به برنامه می‌رساند.
+سیستم‌عامل هد‌یونیت در هر راه‌اندازی مجدد برنامه‌های خارجی را غیرفعال می‌کند؛ بنابراین هنگام بوت، Voice خودش
+همراه را بررسی می‌کند و در صورت نیاز آن را از طریق adbd خودش نصب یا فعال می‌کند (ADB با روال تشخیصی کارخانه
+فقط در صورت نیاز روشن می‌شود و به حالت قبل برمی‌گردد). این کار فقط وقتی انجام می‌شود که همین حالت فعال‌سازی
+انتخاب شده باشد. همراه را می‌توانید دستی هم نصب/فعال کنید: همین گزینه را در صفحهٔ «فرمان‌های صوتی» انتخاب
+کنید؛ در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی؟» را یک‌بار تأیید کنید.</p>
+<h3>تنظیمات بیشتر صدا</h3>
+<ul>
+<li><strong>هنگام گوش دادن، رسانه را متوقف کن</strong> — پیش از باز شدن میکروفون، یاندکس موزیک و پخش‌کنندهٔ استاندارد (بلوتوث و
+  USB — هر کانال جداگانه) را متوقف و بلافاصله پس از آن دوباره پخش می‌کند، صرف‌نظر از اینکه فرمان شناسایی شد یا نه.</li>
+<li><strong>هنگام فعال‌سازی، برنامه را به جلو بیاور (آزمایشی)</strong> — اگر صدا در پس‌زمینه «میکروفون در دسترس نیست» می‌دهد، روشنش کنید:
+  روی برخی هد‌یونیت‌ها فقط برنامهٔ پیش‌زمینه به میکروفون دسترسی مطمئن دارد.</li>
+<li><strong>بازگرداندن کنترل به</strong> — همراه گزینهٔ قبلی کار می‌کند: پس از فرمان، صفحه به برنامهٔ انتخابی
+  برمی‌گردد، نه اینکه روی این برنامه بماند.</li>
+</ul>
 
 <h2>پنل شناور (جدید)</h2>
 <p>پنجره‌ای روی همهٔ برنامه‌های دیگر با دکمه‌های بزرگ — با یک ضربه قانون انتخاب‌شده را اجرا می‌کند،
@@ -538,8 +670,8 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li>از صفحهٔ اصلی <strong>«پنل»</strong> را باز کنید.</li>
 <li>ابتدا به مجوز <strong>«نمایش روی سایر برنامه‌ها»</strong> نیاز دارد — نحوهٔ دریافت آن را در ادامه ببینید.</li>
 <li>پس از دریافت مجوز، همان صفحهٔ فعال‌سازی (VIN + کد ۱۶ رقمی) کنترل صوتی ظاهر می‌شود.</li>
-<li><strong>تعداد دکمه‌ها</strong> (۴، ۶ یا ۸) و <strong>شکل پنل</strong> (عمودی یا افقی) را انتخاب کنید و
-  یک قانون به هر دکمه اختصاص دهید.</li>
+<li><strong>تعداد دکمه‌ها</strong> (۲، ۴، ۶ یا ۸) و <strong>شکل پنل</strong> (عمودی یا افقی) را انتخاب کنید، در صورت
+  نیاز «پنل نصف‌اندازه» را روشن کنید و یک قانون به هر دکمه اختصاص دهید.</li>
 <li>پنل را از نوار بالایی‌اش می‌توانید به هر جای دلخواه بکشید — موقعیت آن ذخیره می‌شود.</li>
 </ol>
 <h3>چگونه مجوز «نمایش روی سایر برنامه‌ها» را بگیریم</h3>
@@ -574,6 +706,9 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <li><strong>قوانین</strong> — هرکدام با کلید روشن/خاموش و دکمه‌های «بررسی»، «ویرایش»، «حذف».</li>
 <li><strong>وضعیت خودرو</strong> — مقادیر زندهٔ پارامترها.</li>
 <li><strong>گزارش اجرا</strong> — چه چیزی و چه زمانی اجرا شد، شامل خطاها و فشردن دکمه‌های فرمان.</li>
+<li><strong>دکمه‌ها</strong> — «صدا»، «پنل»، «تنظیمات»، «درون‌ریزی / برون‌بری».</li>
+<li><strong>نوار دسترسی سریع</strong> — ردیفی تا ۸ دکمه در صفحهٔ اصلی که هرکدام قانون خودش را اجرا می‌کند؛ در
+  «تنظیمات» روشن می‌شود و به لایسنس نیازی ندارد.</li>
 </ul>
 
 <h2>ساخت یک قانون</h2>
@@ -597,6 +732,31 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 محرک خالی ← اجرا هنگام <strong>ورود</strong>؛ محرک تعیین‌شده ← ژئوفنس به‌عنوان شرط اضافی. برای کار در
 پس‌زمینه دسترسی موقعیت در پس‌زمینه لازم است.</p>
 
+<h3>اعلان هنگام اجرا</h3>
+<p>هر قانون گزینهٔ «هنگام اجرای این قانون، پیام و صدا نمایش داده شود» دارد — برای قوانین «بی‌صدا» آن را بردارید (در فهرست با 🔕 مشخص می‌شوند).</p>
+
+<h2>تنظیمات برنامه</h2>
+<p>دکمهٔ <strong>«تنظیمات»</strong> در صفحهٔ اصلی:</p>
+<ul>
+<li><strong>پخش صدا هنگام شروع برنامه</strong> — قابل خاموش کردن است.</li>
+<li><strong>هنگام روشن شدن صفحه، برنامه را به جلو بیاور</strong> — اگر نمی‌خواهید برنامه هنگام روشن شدن سوئیچ / بیدار شدن صفحه
+  خودش به جلو بیاید، آن را بردارید.</li>
+<li><strong>نمایش نوار دسترسی سریع در صفحهٔ اصلی</strong> — ردیفی تا ۸ دکمه؛ رایگان و بدون وابستگی به لایسنس پنل شناور.</li>
+</ul>
+<p>پوسته («پیروی از سیستم» / «روشن» / «تیره») از منوی «درون‌ریزی / برون‌بری» ← «پوسته» انتخاب می‌شود.</p>
+
+<h2>درون‌ریزی و برون‌بری</h2>
+<p>دکمهٔ <strong>«درون‌ریزی / برون‌بری»</strong> در صفحهٔ اصلی منویی باز می‌کند:</p>
+<ul>
+<li><strong>برون‌بری قوانین (فایل جدید)</strong> — قوانین، فرمان‌های صوتی و تنظیمات پنل شناور را در
+  <code>Download/CarRulesVoice/</code> ذخیره می‌کند.</li>
+<li><strong>درون‌ریزی قوانین…</strong> — فایلی از همان پوشه را انتخاب کنید؛ قوانین فعلی (و فرمان‌های صوتی، اگر در فایل
+  باشند) جایگزین می‌شوند — برنامه ابتدا تأیید می‌گیرد.</li>
+<li><strong>درون‌ریزی از Car Rules</strong> — قوانین را از برنامهٔ ساده Car Rules منتقل می‌کند (هر دو برنامه با یک کلید
+  امضا شده‌اند)؛ برنامه در اولین اجرا هم خودش این کار را پیشنهاد می‌دهد.</li>
+<li><strong>پوسته</strong> — «پیروی از سیستم» / «روشن» / «تیره».</li>
+</ul>
+
 <h2>پارامترها (محرک‌ها و شرط‌ها)</h2>
 <table><thead><tr><th>پارامتر</th><th>مقادیر</th></tr></thead><tbody>
 <tr><td>روشن شدن دستگاه / شروع برنامه (رویداد)</td><td>۱ = رویداد</td></tr>
@@ -611,6 +771,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <tr><td>دنده (P/R/N/D)</td><td>۰ = P، ۱ = R، ۲ = N، ۳ = D</td></tr>
 <tr><td>وضعیت شارژ (AC / DC سریع)</td><td>۰ = در حال شارژ نیست، ۱ = تنظیم دمایی پیش از شارژ، ۲ = در حال شارژ، ۳ = شارژ کامل شد، ۴ = متوقف‌شده (موقت)، ۵ = متوقف شد</td></tr>
 <tr><td>اتصال کابل شارژ</td><td>عدد (کد بسته به نوع رابط متفاوت است — مقدار زنده را بررسی کنید)</td></tr>
+<tr><td>شارژ بی‌سیم گوشی: وضعیت</td><td>۰ = آزاد / آماده، ۱ = در حال شارژ، ۲ = شارژ کامل شد، ۳ = خرابی، ۴ = جسم خارجی روی سطح، ۵ = خاموش</td></tr>
 <tr><td>پدال ترمز</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
 <tr><td>باز بودن هر در</td><td>۰ = همه بسته، ۱ = حداقل یکی باز</td></tr>
 <tr><td>فرمان: پیمایش به بالا / PAGE UP</td><td>۰ = رها شده، ۱ = فشرده شده</td></tr>
@@ -623,6 +784,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <tr><td>حالت رانندگی</td><td>۱ = اسپرت، ۲ = راحت، ۳ = اقتصادی، ۱۳ = مسابقه</td></tr>
 <tr><td>حالت جاده</td><td>۰ = عادی، ۱ = خیس/لغزنده، ۲ = برف</td></tr>
 <tr><td>تهویه صندلی (راننده، سرنشین)</td><td>۱ = خاموش، ۲ تا ۴ = سطح</td></tr>
+<tr><td>گردش هوا</td><td>۱ = گردش داخلی (بازچرخانی)، ۲ = هوای تازه (بیرون)، ۳ = خودکار، ۴ = خودکار (بیرون)</td></tr>
 <tr><td>وضعیت آینه</td><td>۰ = بازشده، ۱ = جمع‌شده</td></tr>
 <tr><td>وضعیت صندوق عقب</td><td>۰ = بسته، ۱ = باز، ۵ = کاملاً بسته نشده</td></tr>
 <tr><td>وضعیت قفل خودکار (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
@@ -632,6 +794,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <h2>عملیات (چه چیزهایی قابل کنترل است)</h2>
 <table><thead><tr><th>عملیات</th><th>مقادیر</th></tr></thead><tbody>
 <tr><td>تهویه مطبوع (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>گردش هوا</td><td>۱ = گردش داخلی (بازچرخانی)، ۲ = هوای تازه (بیرون)، ۳ = خودکار، ۴ = خودکار (بیرون)</td></tr>
 <tr><td>گرمکن شیشه عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>دمای تهویه مطبوع (راننده، سرنشین)</td><td>۱۷٫۵ = Lo، ۱۸٫۰ تا ۳۲٫۰ (گام ۰٫۵ درجه)، ۳۲٫۵ = Hi</td></tr>
 <tr><td>گرمکن صندلی (راننده، سرنشین، عقب چپ/راست)</td><td>۱ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)</td></tr>
@@ -640,8 +803,9 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <tr><td>ماساژ صندلی، شدت (راننده، سرنشین)</td><td>۰ = خاموش، ۲ = سطح ۱، ۳ = سطح ۲، ۴ = سطح ۳ (حداکثر)</td></tr>
 <tr><td>گرمکن فرمان</td><td>۰ = خاموش، ۱ = ۱، ۲ = ۲، ۳ = ۳</td></tr>
 <tr><td>گرمکن نازل شیشه‌شور</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>شارژ بی‌سیم گوشی: روشن/خاموش</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>قفل در (قفل مرکزی)</td><td>۱ = باز، ۲ = قفل</td></tr>
-<tr><td>قفل کودک (درب عقب چپ / راست)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>قفل کودک (درب عقب چپ / راست)</td><td>۰ = قفل، ۱ = باز</td></tr>
 <tr><td>باز شدن خودکار قفل هنگام نزدیک شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>قفل خودکار هنگام دور شدن</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>دریچه محل شارژ (باز/بسته)</td><td>۰ = بسته، ۱ = باز</td></tr>
@@ -651,13 +815,16 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <tr><td>حالت خودرو (اولویت برقی/سوخت)</td><td>۲ = اولویت برقی، ۳ = خودکار، ۴ = اولویت سوخت</td></tr>
 <tr><td>برف‌پاک‌کن: حالت سرویس (تعویض تیغه)</td><td>تیغه‌ها را بالا می‌برد (خروج فقط با دست ممکن است)</td></tr>
 <tr><td>آینه‌ها: جمع کردن / باز کردن</td><td>جمع کردن / باز کردن</td></tr>
-<tr><td>صندوق عقب: باز کردن / بستن</td><td>باز کردن / بستن</td></tr>
+<tr><td>صندوق عقب: باز کردن / بستن</td><td>باز کردن / بستن (فقط در دندهٔ P)</td></tr>
+<tr><td>شیشه‌ها: تنظیم موقعیت</td><td>عدد ۰ تا ۱۰۰، ٪ (۰ = بستن همه، ۱۰۰ = باز کردن همه)</td></tr>
+<tr><td>شیشه: جلو چپ / جلو راست / عقب چپ / عقب راست</td><td>عدد ۰ تا ۱۰۰، ٪ (۰ = بسته، ۱۰۰ = کاملاً باز)</td></tr>
 <tr><td>اجرای برنامه</td><td>انتخاب از برنامه‌های نصب‌شده</td></tr>
 <tr><td>جابجایی برنامه: صفحه کلاستر / صفحه مرکزی</td><td>انتخاب از برنامه‌های نصب‌شده (هر بار اجرا جابجا می‌شود)</td></tr>
 <tr><td>کنترل یاندکس موزیک</td><td>پخش، توقف، پخش/توقف، قطعه بعدی، قطعه قبلی</td></tr>
 <tr><td>کنترل پخش‌کننده رسانه استاندارد</td><td>صوت بلوتوث / صوت USB × پخش، توقف، ادامه، قطعه بعدی، قطعه قبلی</td></tr>
 <tr><td>روشنایی صفحه</td><td>عدد ۰ تا ۱۰۰، ٪</td></tr>
 <tr><td>روشنایی خودکار صفحه</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>«…: تعویض» — برای گردش هوا، تهویه مطبوع، گرمکن شیشهٔ عقب، گرمکن نازل شیشه‌شور، دریچهٔ شارژ، باز شدن خودکار قفل و قفل خودکار</td><td>بدون مقدار: وضعیت فعلی را می‌خواند و آن را معکوس می‌کند (گردش هوا — بین «داخلی» و «بیرونی»)</td></tr>
 </tbody></table>
 
 <blockquote><p><strong>دربارهٔ دکمه‌های فرمان.</strong> فشار یک‌باره و دوباره جدا هستند: محرک یک‌باره با ۰٫۴ ثانیه
