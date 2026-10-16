@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.41</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.42</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.41/CarRulesVoice-1.41-ru-release.apk">CarRulesVoice-1.41-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.41/CarRulesVoice-1.41-en-release.apk">CarRulesVoice-1.41-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.41/CarRulesVoice-1.41-fa-release.apk">CarRulesVoice-1.41-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-ru-release.apk">CarRulesVoice-1.42-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-en-release.apk">CarRulesVoice-1.42-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-fa-release.apk">CarRulesVoice-1.42-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -345,6 +345,7 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.42</strong> — новый параметр «Температура в салоне» (число, °C): доступен как триггер и условие в правилах.</li>
 <li><strong>v1.41</strong> — на загрузке перед проверкой VR-компаньона и включением ADB теперь пауза 60 с (прошивка успевает закончить свой проход, который отключает сторонние приложения). Экспорт теперь включает все настройки: программы (звук, экран, панель быстрого запуска), голоса и тему; лицензия голоса не экспортируется.</li>
 <li><strong>v1.40</strong> — исправлен краш ADB-авторизации (ClassCastException) на устройствах, где RSA-ключ генерируется без CRT-параметров; затрагивало выдачу прав и установку VR-компаньона.</li>
 <li><strong>v1.39</strong> — действие «переключить» для ещё 6 вкл/выкл свойств: климат-контроль, обогрев заднего стекла, подогрев форсунок омывателя, лючок зарядки, авторазблокировка и автоблокировка.</li>
@@ -596,6 +597,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.42</strong> — new "Cabin temperature" parameter (number, °C): available as a rule trigger and condition.</li>
 <li><strong>v1.41</strong> — a 60 s pause at boot before checking the VR companion and enabling ADB (the firmware gets to finish its pass that disables third-party apps). Export now carries all settings: app (sound, screen wake, quick-launch bar), voice and theme; the voice license is not exported.</li>
 <li><strong>v1.40</strong> — fixed an ADB authorization crash (ClassCastException) on devices whose RSA keys have no CRT parameters; it affected permission granting and VR-companion install.</li>
 <li><strong>v1.39</strong> — a one-action "toggle" for 6 more on/off properties: climate power, rear defroster, washer-nozzle heater, charge port, proximity auto-unlock and auto-lock.</li>
@@ -845,6 +847,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.42</strong> — پارامتر جدید «دمای داخل کابین» (عدد، °C): به‌عنوان محرک و شرط در قوانین قابل استفاده است.</li>
 <li><strong>v1.41</strong> — هنگام بوت، پیش از بررسی همراهِ VR و روشن کردن ADB، ۶۰ ثانیه مکث انجام می‌شود (سیستم‌عامل فرصت می‌کند مرحلهٔ غیرفعال‌سازی برنامه‌های خارجی را تمام کند). برون‌بری اکنون همهٔ تنظیمات را شامل می‌شود: برنامه (صدا، روشن شدن صفحه، نوار دسترسی سریع)، صدا و پوسته؛ لایسنس صدا برون‌بری نمی‌شود.</li>
 <li><strong>v1.40</strong> — خرابی احراز هویت ADB (ClassCastException) روی دستگاه‌هایی که کلید RSA بدون پارامترهای CRT تولید می‌کنند برطرف شد؛ روی اعطای مجوزها و نصب همراهِ VR اثر می‌گذاشت.</li>
 <li><strong>v1.39</strong> — اقدام «تعویض» برای ۶ ویژگی روشن/خاموش دیگر اضافه شد: تهویه مطبوع، گرم‌کن شیشهٔ عقب، گرم‌کن نازل شوینده، درپوش شارژ، باز شدن خودکار قفل و قفل خودکار.</li>
