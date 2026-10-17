@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.42</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.43</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-ru-release.apk">CarRulesVoice-1.42-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-en-release.apk">CarRulesVoice-1.42-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.42/CarRulesVoice-1.42-fa-release.apk">CarRulesVoice-1.42-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.43/CarRulesVoice-1.43-ru-release.apk">CarRulesVoice-1.43-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.43/CarRulesVoice-1.43-en-release.apk">CarRulesVoice-1.43-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.43/CarRulesVoice-1.43-fa-release.apk">CarRulesVoice-1.43-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -299,6 +299,10 @@ APK того языка, на котором будете говорить.</p>
 <h2>Действия (что можно включать)</h2>
 <table><thead><tr><th>Действие</th><th>Значения</th></tr></thead><tbody>
 <tr><td>Климат-контроль (вкл/выкл)</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Кондиционер (A/C), климат AUTO</td><td>0 = Выкл, 1 = Вкл</td></tr>
+<tr><td>Скорость вентилятора</td><td>1 = Выкл, 2–8 = скорость 1–7</td></tr>
+<tr><td>Направление воздуха</td><td>1 = В лицо, 2 = В ноги, 4 = В лицо и ноги, 5 = В ноги и на стекло</td></tr>
+<tr><td>Обдув лобового стекла</td><td>1 = Вкл, 4 = Выкл</td></tr>
 <tr><td>Циркуляция воздуха</td><td>1 = Рециркуляция (внутренний воздух), 2 = Свежий воздух (снаружи), 3 = Авто, 4 = Авто (снаружи)</td></tr>
 <tr><td>Обогрев заднего стекла</td><td>0 = Выкл, 1 = Вкл</td></tr>
 <tr><td>Температура климата (водитель, пассажир)</td><td>17.5 = Lo, 18.0–32.0 (шаг 0.5 °C), 32.5 = Hi</td></tr>
@@ -345,6 +349,7 @@ APK того языка, на котором будете говорить.</p>
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.43</strong> — цели климата: кондиционер (A/C), режим AUTO, скорость вентилятора, направление воздуха, обдув лобового стекла; действие «Личный режим вождения»; температура в салоне в карточке состояния. Кнопочные ключи климата (питание, A/C, AUTO) не переключаются «не в ту сторону»: запись пропускается, если состояние уже совпадает (в том числе в таймере автоотключения). Тёмные выпадающие списки в редакторе правил.</li>
 <li><strong>v1.42</strong> — новый параметр «Температура в салоне» (число, °C): доступен как триггер и условие в правилах.</li>
 <li><strong>v1.41</strong> — на загрузке перед проверкой VR-компаньона и включением ADB теперь пауза 60 с (прошивка успевает закончить свой проход, который отключает сторонние приложения). Экспорт теперь включает все настройки: программы (звук, экран, панель быстрого запуска), голоса и тему; лицензия голоса не экспортируется.</li>
 <li><strong>v1.40</strong> — исправлен краш ADB-авторизации (ClassCastException) на устройствах, где RSA-ключ генерируется без CRT-параметров; затрагивало выдачу прав и установку VR-компаньона.</li>
@@ -551,6 +556,10 @@ condition. Background location access is needed to fire while the app is closed.
 <h2>Actions (what you can control)</h2>
 <table><thead><tr><th>Action</th><th>Values</th></tr></thead><tbody>
 <tr><td>Climate control (on/off)</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Air conditioning (A/C), climate AUTO</td><td>0 = Off, 1 = On</td></tr>
+<tr><td>Fan speed</td><td>1 = Off, 2–8 = speed 1–7</td></tr>
+<tr><td>Airflow direction</td><td>1 = Face, 2 = Feet, 4 = Face and feet, 5 = Feet and windshield</td></tr>
+<tr><td>Windshield defrost</td><td>1 = On, 4 = Off</td></tr>
 <tr><td>Air recirculation</td><td>1 = Recirculate (internal), 2 = Fresh air (external), 3 = Auto, 4 = Auto (external)</td></tr>
 <tr><td>Rear-window heater</td><td>0 = Off, 1 = On</td></tr>
 <tr><td>Climate temperature (driver, passenger)</td><td>17.5 = Lo, 18.0-32.0 (0.5°C steps), 32.5 = Hi</td></tr>
@@ -597,6 +606,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.43</strong> — climate targets: A/C, AUTO mode, fan speed, airflow direction, windshield defrost; "Personal drive mode" action; cabin temperature in the state card. Button-type climate keys (power, A/C, AUTO) no longer flip the wrong way: the write is skipped when the state already matches (auto-off timer included). Dark dropdowns in the rule editor.</li>
 <li><strong>v1.42</strong> — new "Cabin temperature" parameter (number, °C): available as a rule trigger and condition.</li>
 <li><strong>v1.41</strong> — a 60 s pause at boot before checking the VR companion and enabling ADB (the firmware gets to finish its pass that disables third-party apps). Export now carries all settings: app (sound, screen wake, quick-launch bar), voice and theme; the voice license is not exported.</li>
 <li><strong>v1.40</strong> — fixed an ADB authorization crash (ClassCastException) on devices whose RSA keys have no CRT parameters; it affected permission granting and VR-companion install.</li>
@@ -801,6 +811,10 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <h2>عملیات (چه چیزهایی قابل کنترل است)</h2>
 <table><thead><tr><th>عملیات</th><th>مقادیر</th></tr></thead><tbody>
 <tr><td>تهویه مطبوع (روشن/خاموش)</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>کولر (A/C)، کلیما AUTO</td><td>۰ = خاموش، ۱ = روشن</td></tr>
+<tr><td>سرعت فن</td><td>۱ = خاموش، ۲ تا ۸ = سرعت ۱ تا ۷</td></tr>
+<tr><td>جهت جریان هوا</td><td>۱ = صورت، ۲ = پا، ۴ = صورت و پا، ۵ = پا و شیشه</td></tr>
+<tr><td>دیفراست شیشه جلو</td><td>۱ = روشن، ۴ = خاموش</td></tr>
 <tr><td>گردش هوا</td><td>۱ = گردش داخلی (بازچرخانی)، ۲ = هوای تازه (بیرون)، ۳ = خودکار، ۴ = خودکار (بیرون)</td></tr>
 <tr><td>گرمکن شیشه عقب</td><td>۰ = خاموش، ۱ = روشن</td></tr>
 <tr><td>دمای تهویه مطبوع (راننده، سرنشین)</td><td>۱۷٫۵ = Lo، ۱۸٫۰ تا ۳۲٫۰ (گام ۰٫۵ درجه)، ۳۲٫۵ = Hi</td></tr>
@@ -847,6 +861,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.43</strong> — اهداف کلیما: کولر (A/C)، حالت AUTO، سرعت فن، جهت جریان هوا، دیفراست شیشه جلو؛ عمل «حالت رانندگی شخصی»؛ دمای کابین در کارت وضعیت. کلیدهای دکمه‌ای کلیما (روشن/خاموش، A/C، AUTO) دیگر به سمت اشتباه تغییر نمی‌کنند: اگر وضعیت از پیش مطابق باشد، نوشتن رد می‌شود (از جمله در تایمر خاموشی خودکار). لیست‌های کشویی تیره در ویرایشگر قوانین.</li>
 <li><strong>v1.42</strong> — پارامتر جدید «دمای داخل کابین» (عدد، °C): به‌عنوان محرک و شرط در قوانین قابل استفاده است.</li>
 <li><strong>v1.41</strong> — هنگام بوت، پیش از بررسی همراهِ VR و روشن کردن ADB، ۶۰ ثانیه مکث انجام می‌شود (سیستم‌عامل فرصت می‌کند مرحلهٔ غیرفعال‌سازی برنامه‌های خارجی را تمام کند). برون‌بری اکنون همهٔ تنظیمات را شامل می‌شود: برنامه (صدا، روشن شدن صفحه، نوار دسترسی سریع)، صدا و پوسته؛ لایسنس صدا برون‌بری نمی‌شود.</li>
 <li><strong>v1.40</strong> — خرابی احراز هویت ADB (ClassCastException) روی دستگاه‌هایی که کلید RSA بدون پارامترهای CRT تولید می‌کنند برطرف شد؛ روی اعطای مجوزها و نصب همراهِ VR اثر می‌گذاشت.</li>
