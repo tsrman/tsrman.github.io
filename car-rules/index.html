@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.46</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.47</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-ru-release.apk">CarRulesVoice-1.46-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-en-release.apk">CarRulesVoice-1.46-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-fa-release.apk">CarRulesVoice-1.46-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-ru-release.apk">CarRulesVoice-1.47-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-en-release.apk">CarRulesVoice-1.47-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-fa-release.apk">CarRulesVoice-1.47-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -225,8 +225,8 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 <h2>Как создать правило</h2>
 <ol>
 <li>Нажмите <strong>«Правило»</strong>, введите название.</li>
-<li><strong>«Когда (триггер)»</strong>: параметр/событие, переход («Стало равно», «Изменилось»,
-  «Возросло», «Уменьшилось») и значение. Под полем видно живое значение параметра.
+<li><strong>«Когда (триггер)»</strong>: параметр/событие, переход («Стало равно», «Стало больше»,
+  «Стало меньше») и значение. Под полем видно живое значение параметра.
   Кнопка «Триггер» добавляет ещё один (сработает по <strong>любому</strong> — ИЛИ).</li>
 <li><strong>«И если» (условия)</strong>: по умолчанию нужны все (И), переключателем — любое (ИЛИ).</li>
 <li><strong>«То выполнить» (действия)</strong>: что включить и на какое значение. «Минут» — автовыключение
@@ -236,7 +236,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>Полезные опции</h2>
 <h3>«Срабатывать при старте»</h3>
-<p>Для перехода «Стало равно»: правило дополнительно сработает при запуске, если значение
+<p>Для переходов «Стало равно», «Стало больше» и «Стало меньше»: правило дополнительно сработает при запуске, если значение
 уже нужное. Не срабатывает дважды за поездку (перевзвод — при снятии питания или через 4 часа).</p>
 <h3>Геозоны</h3>
 <p>«Также требовать нахождение в зоне»: задайте радиус, доедьте до места и сохраните координаты.
@@ -358,6 +358,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.47</strong> — новые переходы триггера «Стало больше» и «Стало меньше» числового значения (срабатывают при пересечении порога, работают и в «Срабатывать при старте»); в выборе остались «Стало равно», «Стало больше», «Стало меньше», а «Изменилось», «Возросло», «Уменьшилось» убраны (у сохранённых правил продолжают работать).</li>
 <li><strong>v1.46</strong> — кнопка голосового помощника после обновления: команда больше не теряется, если Android не даёт запустить foreground-сервис из фона; в журнале появилась строка «Кнопка голосового помощника: команда …»; компаньон 1.3 (тестовая кнопка в компаньоне слала на старый пакет — исправлено).</li>
 <li><strong>v1.45</strong> — исправлено: кнопка голосового помощника на руле иногда срабатывала только со 2–3 нажатия. Компаньон 1.2 всегда сообщает прошивке «голос не активен», поэтому каждое короткое нажатие запускает голос; встроенный компаньон обновляется поверх старой версии автоматически.</li>
 <li><strong>v1.44</strong> — пауза на загрузке перед проверкой VR-компаньона сокращена до 10 с; ручная установка компаньона не включает ADB, если он уже установлен и включён (решение по PackageManager); новое действие «Массаж: выключить (оба передних сиденья)»; компаньон выложен отдельным файлом.</li>
@@ -494,8 +495,8 @@ service, no special permission required.</p>
 <h2>Creating a rule</h2>
 <ol>
 <li>Tap <strong>“Rule”</strong>, enter a name.</li>
-<li><strong>“When (trigger)”</strong>: parameter/event, transition (“Became equal”, “Changed”,
-  “Increased”, “Decreased”) and value. The live value is shown under the field. “Trigger”
+<li><strong>“When (trigger)”</strong>: parameter/event, transition (“Became equal”, “Rose above”,
+  “Fell below”) and value. The live value is shown under the field. “Trigger”
   adds another (fires on <strong>any</strong> — OR).</li>
 <li><strong>“And if” (conditions)</strong>: all required by default (AND); a switch makes it any (OR).</li>
 <li><strong>“Then do” (actions)</strong>: what to turn on and to which value. “Minutes” — auto-off (survives
@@ -505,7 +506,7 @@ service, no special permission required.</p>
 
 <h2>Useful options</h2>
 <h3>“Fire on start”</h3>
-<p>For the “Became equal” transition: the rule also fires at startup if the value already
+<p>For the “Became equal”, “Rose above” and “Fell below” transitions: the rule also fires at startup if the value already
 matches. It won’t fire twice per trip (re-armed when power is cut or after 4 hours).</p>
 <h3>Geofences</h3>
 <p>“Also require being in a zone”: set a radius, drive to the spot and save the position.
@@ -627,6 +628,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.47</strong> — new trigger transitions “Rose above” and “Fell below” a numeric value (fire when the threshold is crossed; also honoured by “Fire on start”); the choice is now “Became equal”, “Rose above”, “Fell below” — “Changed”, “Increased”, “Decreased” were removed (saved rules keep working).</li>
 <li><strong>v1.46</strong> — voice-assistant button after an update: the command is no longer lost when Android refuses to start a foreground service from the background; the journal now shows "VR button: command …"; companion 1.3 (its test button targeted the old package — fixed).</li>
 <li><strong>v1.45</strong> — fixed: the steering-wheel voice-assistant button sometimes worked only on the 2nd–3rd press. Companion 1.2 always reports "voice not active" to the firmware, so every short press starts voice; the bundled companion is upgraded over an older one automatically.</li>
 <li><strong>v1.44</strong> — the boot pause before the VR companion check is now 10 s; manual companion install no longer switches ADB on when it is already installed and enabled (decided via PackageManager); new "Massage: switch off (both front seats)" action; the companion is published as a separate file.</li>
@@ -762,8 +764,8 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 <h2>ساخت یک قانون</h2>
 <ol>
 <li>روی <strong>«قانون»</strong> بزنید و نامی وارد کنید.</li>
-<li><strong>«وقتی (محرک)»</strong>: پارامتر/رویداد، نوع گذار («برابر شد»، «تغییر کرد»، «افزایش یافت»،
-  «کاهش یافت») و مقدار. مقدار زنده زیر فیلد نمایش داده می‌شود. دکمهٔ «محرک» یکی دیگر اضافه
+<li><strong>«وقتی (محرک)»</strong>: پارامتر/رویداد، نوع گذار («برابر شد»، «بیشتر شد از»،
+  «کمتر شد از») و مقدار. مقدار زنده زیر فیلد نمایش داده می‌شود. دکمهٔ «محرک» یکی دیگر اضافه
   می‌کند (با <strong>هر کدام</strong> اجرا می‌شود — یا).</li>
 <li><strong>«و اگر» (شرط‌ها)</strong>: به‌طور پیش‌فرض همه لازم‌اند (و)؛ با کلید می‌توان «هر کدام» (یا) کرد.</li>
 <li><strong>«آنگاه انجام بده» (عملیات)</strong>: چه چیزی و با چه مقداری. «دقیقه» — خاموشی خودکار (پس از
@@ -894,6 +896,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.47</strong> — گذارهای جدید محرک «بیشتر شد از» و «کمتر شد از» یک مقدار عددی (هنگام عبور از آستانه اجرا می‌شوند؛ در «اجرا هنگام شروع» هم لحاظ می‌شوند)؛ در انتخاب فقط «برابر شد»، «بیشتر شد از»، «کمتر شد از» مانده و «تغییر کرد»، «افزایش یافت»، «کاهش یافت» حذف شدند (قوانین ذخیره‌شده همچنان کار می‌کنند).</li>
 <li><strong>v1.46</strong> — دکمهٔ دستیار صوتی پس از به‌روزرسانی: اگر اندروید اجازهٔ شروع سرویس foreground از پس‌زمینه را ندهد، فرمان دیگر گم نمی‌شود؛ در گزارش خط «دکمهٔ دستیار صوتی: فرمان …» نمایش داده می‌شود؛ همراه ۱٫۳ (دکمهٔ آزمایش همراه به بستهٔ قدیمی می‌فرستاد — اصلاح شد).</li>
 <li><strong>v1.45</strong> — رفع اشکال: دکمهٔ دستیار صوتی روی فرمان گاهی فقط در فشار دوم یا سوم کار می‌کرد. همراه ۱٫۲ همیشه به سیستم‌عامل «صدا فعال نیست» را گزارش می‌دهد، پس هر فشار کوتاه صدا را شروع می‌کند؛ همراه داخلی به‌صورت خودکار روی نسخهٔ قدیمی به‌روزرسانی می‌شود.</li>
 <li><strong>v1.44</strong> — مکث هنگام بوت پیش از بررسی همراهِ VR به ۱۰ ثانیه کاهش یافت؛ نصب دستی همراه اگر از پیش نصب و فعال باشد ADB را روشن نمی‌کند (تصمیم بر اساس PackageManager)؛ عمل جدید «ماساژ: خاموش (هر دو صندلی جلو)»؛ همراه به‌صورت فایل جداگانه منتشر شد.</li>

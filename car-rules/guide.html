@@ -72,8 +72,7 @@
 <p>Любое правило — это:</p>
 <blockquote><p><strong>КОГДА</strong> что-то произошло (триггер) → <strong>И ЕСЛИ</strong>
 выполняются условия → <strong>ТО</strong> выполнить действия.</p></blockquote>
-<p><strong>Триггер</strong> — это переход («стало равно», «изменилось», «возросло»,
-«уменьшилось»): срабатывает один раз, в момент смены значения. <strong>Условие</strong> —
+<p><strong>Триггер</strong> — это переход («стало равно», «стало больше», «стало меньше»): срабатывает один раз, в момент смены значения или пересечения порога. <strong>Условие</strong> —
 это то, что должно быть верно <em>прямо сейчас</em>, в момент срабатывания триггера
 («температура ниже −5°C» верно или нет здесь и сейчас, а не когда-то). Экран редактора
 разделён по этому же принципу: слева — «КОГДА» (триггеры + условия), справа — «ТОГДА»
@@ -278,8 +277,7 @@ page</a>; this page is pure hands-on practice.</p>
 <p>Every rule is:</p>
 <blockquote><p><strong>WHEN</strong> something happens (a trigger) → <strong>AND IF</strong>
 conditions hold → <strong>THEN</strong> run actions.</p></blockquote>
-<p>A <strong>trigger</strong> is a transition ("became equal", "changed", "increased",
-"decreased") — it fires once, at the moment the value changes. A <strong>condition</strong>
+<p>A <strong>trigger</strong> is a transition ("became equal", "rose above", "fell below") — it fires once, at the moment the value changes or crosses the threshold. A <strong>condition</strong>
 is something that must be true <em>right now</em>, at the moment the trigger fires
 ("outside temperature is below −5°C" is either true or false at that instant, not some
 other time). The editor screen mirrors this split: the left column is "WHEN" (triggers +
@@ -486,8 +484,8 @@ passed by the time the app restarts. If that's genuinely not happening, it looks
 <p>هر قانون این‌گونه است:</p>
 <blockquote><p><strong>هنگامی که</strong> اتفاقی رخ می‌دهد (محرک) ← <strong>و اگر</strong>
 شرط‌ها برقرار باشند ← <strong>آنگاه</strong> عملیات اجرا شود.</p></blockquote>
-<p><strong>محرک</strong> یک گذار است («برابر شد»، «تغییر کرد»، «افزایش یافت»، «کاهش یافت»)
-— فقط یک‌بار، در لحظهٔ تغییر مقدار اجرا می‌شود. <strong>شرط</strong> چیزی است که باید
+<p><strong>محرک</strong> یک گذار است («برابر شد»، «بیشتر شد از»، «کمتر شد از»)
+— فقط یک‌بار، در لحظهٔ تغییر مقدار یا عبور از آستانه اجرا می‌شود. <strong>شرط</strong> چیزی است که باید
 <em>همین الان</em>، در لحظهٔ اجرای محرک، درست باشد («دمای بیرون کمتر از −۵ درجه» یا درست
 است یا نه، دقیقاً همان لحظه). صفحهٔ ویرایشگر هم دقیقاً همین تقسیم‌بندی را دارد: ستون چپ
 «هنگامی که» (محرک‌ها + شرط‌ها)، ستون راست «آنگاه» (عملیات) به‌همراه تنظیمات خود قانون.</p>
