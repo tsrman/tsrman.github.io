@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.45</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.46</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.45/CarRulesVoice-1.45-ru-release.apk">CarRulesVoice-1.45-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.45/CarRulesVoice-1.45-en-release.apk">CarRulesVoice-1.45-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.45/CarRulesVoice-1.45-fa-release.apk">CarRulesVoice-1.45-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-ru-release.apk">CarRulesVoice-1.46-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-en-release.apk">CarRulesVoice-1.46-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.46/CarRulesVoice-1.46-fa-release.apk">CarRulesVoice-1.46-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -155,9 +155,9 @@ APK того языка, на котором будете говорить.</p>
 компаньона можно и вручную — выбрав этот пункт на экране «Голосовые команды»; при первом запуске
 подтвердите системный диалог «Разрешить отладку?».</p>
 <p><strong>Компаньон отдельным файлом.</strong> Если нужно поставить его самостоятельно:
-<a href="CarRulesCompanion-1.2.apk">CarRulesCompanion-1.2.apk</a> (пакет <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>0945694e22660e60eed55e9e2f6f361860b17439fda152f26aab4b0a81adfc1f</code>). Через adb:
-<code>adb install -r -d CarRulesCompanion-1.2.apk</code>, затем
+<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (пакет <code>com.iflytek.cutefly.speechclient.hmi</code>,
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Через adb:
+<code>adb install -r -d CarRulesCompanion-1.3.apk</code>, затем
 <code>adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> и
 <code>adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
 На некоторых прошивках установка через adb заблокирована, а после каждой перезагрузки прошивка отключает компаньон снова —
@@ -358,6 +358,7 @@ SHA-256 <code>0945694e22660e60eed55e9e2f6f361860b17439fda152f26aab4b0a81adfc1f</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.46</strong> — кнопка голосового помощника после обновления: команда больше не теряется, если Android не даёт запустить foreground-сервис из фона; в журнале появилась строка «Кнопка голосового помощника: команда …»; компаньон 1.3 (тестовая кнопка в компаньоне слала на старый пакет — исправлено).</li>
 <li><strong>v1.45</strong> — исправлено: кнопка голосового помощника на руле иногда срабатывала только со 2–3 нажатия. Компаньон 1.2 всегда сообщает прошивке «голос не активен», поэтому каждое короткое нажатие запускает голос; встроенный компаньон обновляется поверх старой версии автоматически.</li>
 <li><strong>v1.44</strong> — пауза на загрузке перед проверкой VR-компаньона сокращена до 10 с; ручная установка компаньона не включает ADB, если он уже установлен и включён (решение по PackageManager); новое действие «Массаж: выключить (оба передних сиденья)»; компаньон выложен отдельным файлом.</li>
 <li><strong>v1.43</strong> — цели климата: кондиционер (A/C), режим AUTO, скорость вентилятора, направление воздуха, обдув лобового стекла; действие «Личный режим вождения»; температура в салоне в карточке состояния. Кнопочные ключи климата (питание, A/C, AUTO) не переключаются «не в ту сторону»: запись пропускается, если состояние уже совпадает (в том числе в таймере автоотключения). Тёмные выпадающие списки в редакторе правил.</li>
@@ -425,9 +426,9 @@ routine only when really needed and put back as it was). This only happens when 
 selected. You can also install/enable the companion manually by picking this option on the “Voice commands”
 screen; on first run, confirm the one-time “Allow debugging?” system dialog.</p>
 <p><strong>The companion as a separate file.</strong> To install it yourself:
-<a href="CarRulesCompanion-1.2.apk">CarRulesCompanion-1.2.apk</a> (package <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>0945694e22660e60eed55e9e2f6f361860b17439fda152f26aab4b0a81adfc1f</code>). Via adb:
-<code>adb install -r -d CarRulesCompanion-1.2.apk</code>, then
+<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (package <code>com.iflytek.cutefly.speechclient.hmi</code>,
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Via adb:
+<code>adb install -r -d CarRulesCompanion-1.3.apk</code>, then
 <code>adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> and
 <code>adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
 On some firmwares installing via adb is blocked, and the firmware disables the companion again after every reboot —
@@ -626,6 +627,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.46</strong> — voice-assistant button after an update: the command is no longer lost when Android refuses to start a foreground service from the background; the journal now shows "VR button: command …"; companion 1.3 (its test button targeted the old package — fixed).</li>
 <li><strong>v1.45</strong> — fixed: the steering-wheel voice-assistant button sometimes worked only on the 2nd–3rd press. Companion 1.2 always reports "voice not active" to the firmware, so every short press starts voice; the bundled companion is upgraded over an older one automatically.</li>
 <li><strong>v1.44</strong> — the boot pause before the VR companion check is now 10 s; manual companion install no longer switches ADB on when it is already installed and enabled (decided via PackageManager); new "Massage: switch off (both front seats)" action; the companion is published as a separate file.</li>
 <li><strong>v1.43</strong> — climate targets: A/C, AUTO mode, fan speed, airflow direction, windshield defrost; "Personal drive mode" action; cabin temperature in the state card. Button-type climate keys (power, A/C, AUTO) no longer flip the wrong way: the write is skipped when the state already matches (auto-off timer included). Dark dropdowns in the rule editor.</li>
@@ -692,9 +694,9 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 انتخاب شده باشد. همراه را می‌توانید دستی هم نصب/فعال کنید: همین گزینه را در صفحهٔ «فرمان‌های صوتی» انتخاب
 کنید؛ در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی؟» را یک‌بار تأیید کنید.</p>
 <p><strong>همراه به‌صورت فایل جداگانه.</strong> برای نصب دستی:
-<a href="CarRulesCompanion-1.2.apk">CarRulesCompanion-1.2.apk</a> (بستهٔ <code dir="ltr">com.iflytek.cutefly.speechclient.hmi</code>،
-SHA-256 <code dir="ltr">0945694e22660e60eed55e9e2f6f361860b17439fda152f26aab4b0a81adfc1f</code>). با adb:
-<code dir="ltr">adb install -r -d CarRulesCompanion-1.2.apk</code>، سپس
+<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (بستهٔ <code dir="ltr">com.iflytek.cutefly.speechclient.hmi</code>،
+SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). با adb:
+<code dir="ltr">adb install -r -d CarRulesCompanion-1.3.apk</code>، سپس
 <code dir="ltr">adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> و
 <code dir="ltr">adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
 در برخی سیستم‌عامل‌ها نصب با adb مسدود است و سیستم‌عامل پس از هر راه‌اندازی مجدد همراه را دوباره غیرفعال می‌کند؛
@@ -892,6 +894,7 @@ SHA-256 <code dir="ltr">0945694e22660e60eed55e9e2f6f361860b17439fda152f26aab4b0a
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.46</strong> — دکمهٔ دستیار صوتی پس از به‌روزرسانی: اگر اندروید اجازهٔ شروع سرویس foreground از پس‌زمینه را ندهد، فرمان دیگر گم نمی‌شود؛ در گزارش خط «دکمهٔ دستیار صوتی: فرمان …» نمایش داده می‌شود؛ همراه ۱٫۳ (دکمهٔ آزمایش همراه به بستهٔ قدیمی می‌فرستاد — اصلاح شد).</li>
 <li><strong>v1.45</strong> — رفع اشکال: دکمهٔ دستیار صوتی روی فرمان گاهی فقط در فشار دوم یا سوم کار می‌کرد. همراه ۱٫۲ همیشه به سیستم‌عامل «صدا فعال نیست» را گزارش می‌دهد، پس هر فشار کوتاه صدا را شروع می‌کند؛ همراه داخلی به‌صورت خودکار روی نسخهٔ قدیمی به‌روزرسانی می‌شود.</li>
 <li><strong>v1.44</strong> — مکث هنگام بوت پیش از بررسی همراهِ VR به ۱۰ ثانیه کاهش یافت؛ نصب دستی همراه اگر از پیش نصب و فعال باشد ADB را روشن نمی‌کند (تصمیم بر اساس PackageManager)؛ عمل جدید «ماساژ: خاموش (هر دو صندلی جلو)»؛ همراه به‌صورت فایل جداگانه منتشر شد.</li>
 <li><strong>v1.43</strong> — اهداف کلیما: کولر (A/C)، حالت AUTO، سرعت فن، جهت جریان هوا، دیفراست شیشه جلو؛ عمل «حالت رانندگی شخصی»؛ دمای کابین در کارت وضعیت. کلیدهای دکمه‌ای کلیما (روشن/خاموش، A/C، AUTO) دیگر به سمت اشتباه تغییر نمی‌کنند: اگر وضعیت از پیش مطابق باشد، نوشتن رد می‌شود (از جمله در تایمر خاموشی خودکار). لیست‌های کشویی تیره در ویرایشگر قوانین.</li>
