@@ -147,21 +147,15 @@ APK того языка, на котором будете говорить.</p>
 
 <h3>Кнопка голосового помощника (на руле)</h3>
 <p>Штатная кнопка голосового помощника на руле тоже может активировать голос — без отдельного приложения.
-В Voice встроен компаньон, который подменяет отсутствующий голосовой клиент и передаёт нажатие приложению.
-Прошивка магнитолы отключает сторонние приложения при каждой перезагрузке, поэтому на загрузке Voice сам
-проверяет компаньона и при необходимости устанавливает или включает его через собственный adbd (adb
-включается штатной заводской диагностикой только когда это действительно нужно и возвращается в прежнее
-состояние). Это происходит только если выбран именно этот способ активации. Установить или включить
-компаньона можно и вручную — выбрав этот пункт на экране «Голосовые команды»; при первом запуске
-подтвердите системный диалог «Разрешить отладку?».</p>
-<p><strong>Компаньон отдельным файлом.</strong> Если нужно поставить его самостоятельно:
-<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (пакет <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Через adb:
-<code>adb install -r -d CarRulesCompanion-1.3.apk</code>, затем
-<code>adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> и
-<code>adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
-На некоторых прошивках установка через adb заблокирована, а после каждой перезагрузки прошивка отключает компаньон снова —
-поэтому штатный путь — встроенная установка из Voice.</p>
+В Voice используется компаньон — небольшое приложение, которое подменяет отсутствующий голосовой клиент и передаёт нажатие Voice.
+<strong>Компаньон нужно установить самому</strong>: установка APK через ADB заблокирована прошивкой, поэтому Voice его не ставит.
+Файл: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (пакет <code>com.iflytek.cutefly.speechclient.hmi</code>,
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Поставьте его любым доступным вам способом.
+Прошивка магнитолы отключает сторонние приложения при каждой перезагрузке, поэтому на загрузке Voice проверяет, что компаньон
+установлен, и если он отключён — включает его командой <code>pm enable</code> через собственный adbd (adb включается штатной
+заводской диагностикой только когда это действительно нужно и возвращается в прежнее состояние). Если компаньона нет, Voice ничего
+не делает и ADB не включает. Это происходит только если выбран именно этот способ активации. Проверить и включить компаньон
+можно и вручную — выбрав этот пункт на экране «Голосовые команды»; при первом запуске подтвердите системный диалог «Разрешить отладку?».</p>
 <h3>Дополнительные настройки голоса</h3>
 <ul>
 <li><strong>Ставить медиа на паузу во время прослушивания</strong> — перед открытием микрофона ставит на паузу Яндекс Музыку и
@@ -420,20 +414,15 @@ the APK for the language you will speak.</p>
 
 <h3>Voice-assistant button (steering wheel)</h3>
 <p>The stock voice-assistant button on the steering wheel can activate voice too — without a separate app.
-Voice bundles a companion that stands in for the missing voice client and passes the button press to the app.
-The head unit's firmware disables third-party apps on every reboot, so at boot Voice checks the companion itself
-and, if needed, installs or enables it through its own adbd (adb is switched on via the factory diagnostic
-routine only when really needed and put back as it was). This only happens when this activation mode is
-selected. You can also install/enable the companion manually by picking this option on the “Voice commands”
-screen; on first run, confirm the one-time “Allow debugging?” system dialog.</p>
-<p><strong>The companion as a separate file.</strong> To install it yourself:
-<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (package <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Via adb:
-<code>adb install -r -d CarRulesCompanion-1.3.apk</code>, then
-<code>adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> and
-<code>adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
-On some firmwares installing via adb is blocked, and the firmware disables the companion again after every reboot —
-so the built-in install from Voice is the intended route.</p>
+Voice uses a companion — a small app that stands in for the missing voice client and passes the button press to Voice.
+<strong>You have to install the companion yourself</strong>: installing an APK through ADB is blocked by the firmware, so Voice does not install it.
+File: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (package <code>com.iflytek.cutefly.speechclient.hmi</code>,
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Install it by whatever means you have.
+The head unit's firmware disables third-party apps on every reboot, so at boot Voice checks that the companion is installed and,
+if it is disabled, enables it with <code>pm enable</code> through its own adbd (adb is switched on via the factory diagnostic routine
+only when really needed and put back as it was). If the companion is missing, Voice does nothing and does not switch adb on.
+This only happens when this activation mode is selected. You can also check and enable the companion manually by picking this option
+on the “Voice commands” screen; on first run, confirm the one-time “Allow debugging?” system dialog.</p>
 <h3>More voice settings</h3>
 <ul>
 <li><strong>Pause media while listening</strong> — pauses Yandex Music and the stock player (Bluetooth and USB, each
@@ -688,21 +677,14 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 می‌کنید نصب کنید.</p>
 
 <h3>دکمهٔ دستیار صوتی (روی فرمان)</h3>
-<p>دکمهٔ استاندارد دستیار صوتی روی فرمان هم می‌تواند کنترل صوتی را فعال کند — بدون برنامهٔ جداگانه. داخل Voice
-یک همراه (companion) گنجانده شده که جای کلاینت صوتی غایب را می‌گیرد و فشردن دکمه را به برنامه می‌رساند.
-سیستم‌عامل هد‌یونیت در هر راه‌اندازی مجدد برنامه‌های خارجی را غیرفعال می‌کند؛ بنابراین هنگام بوت، Voice خودش
-همراه را بررسی می‌کند و در صورت نیاز آن را از طریق adbd خودش نصب یا فعال می‌کند (ADB با روال تشخیصی کارخانه
-فقط در صورت نیاز روشن می‌شود و به حالت قبل برمی‌گردد). این کار فقط وقتی انجام می‌شود که همین حالت فعال‌سازی
-انتخاب شده باشد. همراه را می‌توانید دستی هم نصب/فعال کنید: همین گزینه را در صفحهٔ «فرمان‌های صوتی» انتخاب
-کنید؛ در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی؟» را یک‌بار تأیید کنید.</p>
-<p><strong>همراه به‌صورت فایل جداگانه.</strong> برای نصب دستی:
-<a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (بستهٔ <code dir="ltr">com.iflytek.cutefly.speechclient.hmi</code>،
-SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). با adb:
-<code dir="ltr">adb install -r -d CarRulesCompanion-1.3.apk</code>، سپس
-<code dir="ltr">adb shell pm enable com.iflytek.cutefly.speechclient.hmi</code> و
-<code dir="ltr">adb shell am start-foreground-service com.iflytek.cutefly.speechclient.hmi/com.iflytek.auto.speechclient.sdk.SpeechClientService</code>.
-در برخی سیستم‌عامل‌ها نصب با adb مسدود است و سیستم‌عامل پس از هر راه‌اندازی مجدد همراه را دوباره غیرفعال می‌کند؛
-بنابراین راه اصلی، نصب داخلی از خود Voice است.</p>
+<p>دکمهٔ استاندارد دستیار صوتی روی فرمان هم می‌تواند کنترل صوتی را فعال کند — بدون برنامهٔ جداگانه. Voice از یک همراه (companion) استفاده می‌کند — برنامه‌ای کوچک که جای کلاینت صوتی غایب را می‌گیرد و فشردن دکمه را به Voice می‌رساند.
+<strong>همراه را باید خودتان نصب کنید</strong>: نصب APK از طریق ADB توسط سیستم‌عامل مسدود است، بنابراین Voice آن را نصب نمی‌کند.
+فایل: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (بستهٔ <code dir="ltr">com.iflytek.cutefly.speechclient.hmi</code>،
+SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). آن را به هر روشی که در دسترس دارید نصب کنید.
+سیستم‌عامل هد‌یونیت در هر راه‌اندازی مجدد برنامه‌های خارجی را غیرفعال می‌کند؛ بنابراین هنگام بوت، Voice بررسی می‌کند که همراه نصب باشد و
+اگر غیرفعال بود، آن را با <code dir="ltr">pm enable</code> از طریق adbd خودش فعال می‌کند (ADB با روال تشخیصی کارخانه فقط در صورت نیاز روشن می‌شود و به حالت قبل برمی‌گردد).
+اگر همراه نصب نباشد، Voice کاری نمی‌کند و ADB را روشن نمی‌کند. این کار فقط وقتی انجام می‌شود که همین حالت فعال‌سازی انتخاب شده باشد.
+همراه را می‌توانید دستی هم بررسی و فعال کنید: همین گزینه را در صفحهٔ «فرمان‌های صوتی» انتخاب کنید؛ در اولین اجرا پنجرهٔ سیستمی «اجازهٔ اشکال‌زدایی؟» را یک‌بار تأیید کنید.</p>
 <h3>تنظیمات بیشتر صدا</h3>
 <ul>
 <li><strong>هنگام گوش دادن، رسانه را متوقف کن</strong> — پیش از باز شدن میکروفون، یاندکس موزیک و پخش‌کنندهٔ استاندارد (بلوتوث و
