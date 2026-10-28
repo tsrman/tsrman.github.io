@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.47</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.48</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-ru-release.apk">CarRulesVoice-1.47-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-en-release.apk">CarRulesVoice-1.47-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.47/CarRulesVoice-1.47-fa-release.apk">CarRulesVoice-1.47-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.48/CarRulesVoice-1.48-ru-release.apk">CarRulesVoice-1.48-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.48/CarRulesVoice-1.48-en-release.apk">CarRulesVoice-1.48-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.48/CarRulesVoice-1.48-fa-release.apk">CarRulesVoice-1.48-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -150,7 +150,7 @@ APK того языка, на котором будете говорить.</p>
 В Voice используется компаньон — небольшое приложение, которое подменяет отсутствующий голосовой клиент и передаёт нажатие Voice.
 <strong>Компаньон нужно установить самому</strong>: установка APK через ADB заблокирована прошивкой, поэтому Voice его не ставит.
 Файл: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (пакет <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Поставьте его любым доступным вам способом.
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Поставьте его любым доступным вам способом и после установки один раз откройте приложение «VR Stub» (или перезагрузите магнитолу), чтобы запустился его сервис.
 Прошивка магнитолы отключает сторонние приложения при каждой перезагрузке, поэтому на загрузке Voice проверяет, что компаньон
 установлен, и если он отключён — включает его командой <code>pm enable</code> через собственный adbd (adb включается штатной
 заводской диагностикой только когда это действительно нужно и возвращается в прежнее состояние). Если компаньона нет, Voice ничего
@@ -352,6 +352,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.48</strong> — компаньон больше не устанавливается из приложения (установка APK через ADB заблокирована прошивкой): приложение проверяет его наличие и при необходимости включает (pm enable), устанавливать компаньон нужно самому; если компаньон уже включён, приложение на загрузке само запускает его сервис.</li>
 <li><strong>v1.47</strong> — новые переходы триггера «Стало больше» и «Стало меньше» числового значения (срабатывают при пересечении порога, работают и в «Срабатывать при старте»); в выборе остались «Стало равно», «Стало больше», «Стало меньше», а «Изменилось», «Возросло», «Уменьшилось» убраны (у сохранённых правил продолжают работать).</li>
 <li><strong>v1.46</strong> — кнопка голосового помощника после обновления: команда больше не теряется, если Android не даёт запустить foreground-сервис из фона; в журнале появилась строка «Кнопка голосового помощника: команда …»; компаньон 1.3 (тестовая кнопка в компаньоне слала на старый пакет — исправлено).</li>
 <li><strong>v1.45</strong> — исправлено: кнопка голосового помощника на руле иногда срабатывала только со 2–3 нажатия. Компаньон 1.2 всегда сообщает прошивке «голос не активен», поэтому каждое короткое нажатие запускает голос; встроенный компаньон обновляется поверх старой версии автоматически.</li>
@@ -417,7 +418,7 @@ the APK for the language you will speak.</p>
 Voice uses a companion — a small app that stands in for the missing voice client and passes the button press to Voice.
 <strong>You have to install the companion yourself</strong>: installing an APK through ADB is blocked by the firmware, so Voice does not install it.
 File: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (package <code>com.iflytek.cutefly.speechclient.hmi</code>,
-SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Install it by whatever means you have.
+SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). Install it by whatever means you have, then open the “VR Stub” app once (or reboot the head unit) so its service starts.
 The head unit's firmware disables third-party apps on every reboot, so at boot Voice checks that the companion is installed and,
 if it is disabled, enables it with <code>pm enable</code> through its own adbd (adb is switched on via the factory diagnostic routine
 only when really needed and put back as it was). If the companion is missing, Voice does nothing and does not switch adb on.
@@ -617,6 +618,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.48</strong> — the app no longer installs the companion (installing an APK through ADB is blocked by the firmware): it checks that it is present and enables it (pm enable) if needed — you install the companion yourself; if the companion is already enabled, the app starts its service at boot.</li>
 <li><strong>v1.47</strong> — new trigger transitions “Rose above” and “Fell below” a numeric value (fire when the threshold is crossed; also honoured by “Fire on start”); the choice is now “Became equal”, “Rose above”, “Fell below” — “Changed”, “Increased”, “Decreased” were removed (saved rules keep working).</li>
 <li><strong>v1.46</strong> — voice-assistant button after an update: the command is no longer lost when Android refuses to start a foreground service from the background; the journal now shows "VR button: command …"; companion 1.3 (its test button targeted the old package — fixed).</li>
 <li><strong>v1.45</strong> — fixed: the steering-wheel voice-assistant button sometimes worked only on the 2nd–3rd press. Companion 1.2 always reports "voice not active" to the firmware, so every short press starts voice; the bundled companion is upgraded over an older one automatically.</li>
@@ -680,7 +682,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 <p>دکمهٔ استاندارد دستیار صوتی روی فرمان هم می‌تواند کنترل صوتی را فعال کند — بدون برنامهٔ جداگانه. Voice از یک همراه (companion) استفاده می‌کند — برنامه‌ای کوچک که جای کلاینت صوتی غایب را می‌گیرد و فشردن دکمه را به Voice می‌رساند.
 <strong>همراه را باید خودتان نصب کنید</strong>: نصب APK از طریق ADB توسط سیستم‌عامل مسدود است، بنابراین Voice آن را نصب نمی‌کند.
 فایل: <a href="CarRulesCompanion-1.3.apk">CarRulesCompanion-1.3.apk</a> (بستهٔ <code dir="ltr">com.iflytek.cutefly.speechclient.hmi</code>،
-SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). آن را به هر روشی که در دسترس دارید نصب کنید.
+SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</code>). آن را به هر روشی که در دسترس دارید نصب کنید و پس از نصب یک‌بار برنامهٔ «VR Stub» را باز کنید (یا هد‌یونیت را ری‌استارت کنید) تا سرویس آن اجرا شود.
 سیستم‌عامل هد‌یونیت در هر راه‌اندازی مجدد برنامه‌های خارجی را غیرفعال می‌کند؛ بنابراین هنگام بوت، Voice بررسی می‌کند که همراه نصب باشد و
 اگر غیرفعال بود، آن را با <code dir="ltr">pm enable</code> از طریق adbd خودش فعال می‌کند (ADB با روال تشخیصی کارخانه فقط در صورت نیاز روشن می‌شود و به حالت قبل برمی‌گردد).
 اگر همراه نصب نباشد، Voice کاری نمی‌کند و ADB را روشن نمی‌کند. این کار فقط وقتی انجام می‌شود که همین حالت فعال‌سازی انتخاب شده باشد.
@@ -878,6 +880,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.48</strong> — برنامه دیگر همراه را نصب نمی‌کند (نصب APK از طریق ADB توسط سیستم‌عامل مسدود است): فقط وجود آن را بررسی می‌کند و در صورت نیاز فعالش می‌کند (pm enable) — همراه را باید خودتان نصب کنید؛ اگر همراه از پیش فعال باشد، برنامه هنگام بوت سرویس آن را اجرا می‌کند.</li>
 <li><strong>v1.47</strong> — گذارهای جدید محرک «بیشتر شد از» و «کمتر شد از» یک مقدار عددی (هنگام عبور از آستانه اجرا می‌شوند؛ در «اجرا هنگام شروع» هم لحاظ می‌شوند)؛ در انتخاب فقط «برابر شد»، «بیشتر شد از»، «کمتر شد از» مانده و «تغییر کرد»، «افزایش یافت»، «کاهش یافت» حذف شدند (قوانین ذخیره‌شده همچنان کار می‌کنند).</li>
 <li><strong>v1.46</strong> — دکمهٔ دستیار صوتی پس از به‌روزرسانی: اگر اندروید اجازهٔ شروع سرویس foreground از پس‌زمینه را ندهد، فرمان دیگر گم نمی‌شود؛ در گزارش خط «دکمهٔ دستیار صوتی: فرمان …» نمایش داده می‌شود؛ همراه ۱٫۳ (دکمهٔ آزمایش همراه به بستهٔ قدیمی می‌فرستاد — اصلاح شد).</li>
 <li><strong>v1.45</strong> — رفع اشکال: دکمهٔ دستیار صوتی روی فرمان گاهی فقط در فشار دوم یا سوم کار می‌کرد. همراه ۱٫۲ همیشه به سیستم‌عامل «صدا فعال نیست» را گزارش می‌دهد، پس هر فشار کوتاه صدا را شروع می‌کند؛ همراه داخلی به‌صورت خودکار روی نسخهٔ قدیمی به‌روزرسانی می‌شود.</li>
