@@ -297,7 +297,11 @@ secret in the Hermes namespace (<code>skillSandbox.imagePullSecrets</code> names
 <code>web.networkPolicy</code> exclusion lists intact: Hermes reuses them as its list of private
 ranges.</li>
 <li><code>internalPackageHosts</code> and <code>internalDestinations</code> together, if sandboxes should reach an
-internal package mirror: NetworkPolicy knows addresses, not names.</li>
+internal package mirror: NetworkPolicy knows addresses and labels, not names. Describe a
+mirror inside the cluster by labels (<code>namespaceSelector</code> with <code>podSelector</code>), and one
+outside it by its <code>cidr</code>. Do <strong>not</strong> use the address of a Service: the policy sees the
+Pod after the Service's translation, so such an entry lets nothing through. Selectors take
+<code>matchLabels</code> only and may not select the Hermes or the release namespace.</li>
 <li>Kubernetes has no per-Pod process limit. Point <code>hermes.sandbox.runtimeClassName</code> at a
 RuntimeClass whose nodes set one, or accept the limit of the node.</li>
 </ul>
