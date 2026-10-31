@@ -303,7 +303,12 @@ outside it by its <code>cidr</code>. Do <strong>not</strong> use the address of 
 Pod after the Service's translation, so such an entry lets nothing through. Selectors take
 <code>matchLabels</code> only and may not select the Hermes or the release namespace.</li>
 <li>Kubernetes has no per-Pod process limit. Point <code>hermes.sandbox.runtimeClassName</code> at a
-RuntimeClass whose nodes set one, or accept the limit of the node.</li>
+RuntimeClass whose nodes set one (<code>scheduling.nodeSelector</code> on labelled nodes whose
+kubelet runs with <code>--pod-max-pids</code>), or accept the limit of the node.</li>
+<li>Sandboxes live on one node each. If it is lost, the session starts again on another from
+its last snapshot (work since is lost). The first sandbox on a node pulls the 2.4 GB
+image, which took under a minute from a local registry: allow more
+(<code>hermes.sandbox.podStartTimeoutSeconds</code>) behind a slow one.</li>
 </ul>
 <p>For previews set <code>hermes.preview.enabled</code>, <code>origin</code> (for example
 <code>https://{preview}.preview.example.org</code>) and <code>host</code> (<code>*.preview.example.org</code>); the chart
