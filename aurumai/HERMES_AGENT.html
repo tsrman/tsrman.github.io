@@ -513,7 +513,7 @@ phase 4, the first caller of the route.</p>
 expiry with revocation and its conversation-only billing with the bound turn's
 workflow correlation.</p>
 <p>Compose passes <code>APP_HERMES_ENABLED</code> with the <code>docker-compose.hermes.yml</code>
-overlay; the Helm chart does not yet. Like the runner route, the Hermes route always streams
+overlay and the Helm chart with <code>hermes.enabled</code>. Like the runner route, the Hermes route always streams
 and ignores <code>stream: false</code>.</p>
 </li>
 <li>
@@ -535,9 +535,15 @@ guard (a <code>hermes</code> mode of the web-egress image) and the stdlib proxy,
 backend's per-connection check and organization setting, accepted at runtime
 by <code>./smoke-test-hermes-egress.sh</code>. The forward proxy accepts <code>CONNECT</code> only;
 its journal is structured log lines. Docker's embedded DNS answers no external
-names on the internal sandbox network (checked by the acceptance). Still
-open: Kubernetes (Helm, NetworkPolicies, and no kube-dns for sandbox pods so
-CoreDNS cannot become a DNS channel) and the Admin UI control (phase 4);</li>
+names on the internal sandbox network (checked by the acceptance). The Admin
+UI control belongs to phase 4. Kubernetes (2b-ii) is implemented in the Helm
+chart: a restricted namespace, the guard running the proxy without nftables,
+default-deny NetworkPolicies in which a sandbox Pod reaches only the guard,
+and no DNS at all for sandbox Pods (<code>dnsPolicy: None</code> with an unanswered
+resolver and a <code>hostAliases</code> entry for the guard), so CoreDNS cannot become a
+DNS channel. Accepted on k3d, whose policy controller enforces it: from a
+sandbox only the guard answers, and the guard reaches only DNS, the backend
+and public addresses;</li>
 <li>2c-i, implemented for Docker: the <code>hermes-sandbox</code> image and long-lived
 sandboxes in <code>skill-executor</code> (create, re-adopt, run, events, stop, close,
 idle and absolute lifetimes, guard reconnection), each on its own internal
@@ -551,7 +557,7 @@ each run id in the workspace and a retried run attaches to it (kept with
 0.22, whose idempotency store would also do);</li>
 <li>ownership is in Docker labels only; linking a sandbox to its
 <code>hermes_sessions</code> row is phase 4's, because skill-executor has no database;</li>
-<li>the Kubernetes runtime refuses Hermes sandboxes explicitly;</li>
+<li>Kubernetes sandboxes arrived with 2d (below);</li>
 <li>known window: the relay records a run id only after Hermes accepts the
 run, so a relay that dies in between can make a retry start a second run;</li>
 <li>attaching to a run was expected to replay its events from the start.
@@ -614,6 +620,44 @@ snapshot, so the last snapshot that fit stays the latest;</li>
 creations wait for it.</li>
 </ul>
 </li>
+</ul>
+</li>
+<li>2d, implemented: Hermes sandboxes on Kubernetes (<code>src/hermes_kubernetes.py</code>).
+The lifecycle (capacity, adoption, the relay, snapshots, reaping) is shared
+with Docker through a base class; Kubernetes supplies the primitives. Accepted
+on k3d with the real image: create, upload and download files, the preview
+byte pipe, the network from inside the Pod, a snapshot of the running Pod,
+retire, restore into a new Pod, and re-adoption by a new executor. Deviations
+from Docker:
+<ul>
+<li>a sandbox is one Pod in the chart's Hermes namespace, labelled for the
+NetworkPolicies and for adoption; skill-executor's Role covers Pods,
+<code>pods/exec</code> and the guard Service (read for its address, which the Pod
+names through <code>hostAliases</code>), and the Pod mounts no service-account token;</li>
+<li>every file goes in and out through <code>pods/exec</code>: tar over stdin for the
+platform's files, uploads and a restore, tar over stdout for a snapshot,
+and <code>hermes-relay connect</code> as the preview's byte pipe;</li>
+<li>the workspace is an emptyDir (memory-backed in tmpfs mode, charged to the
+Pod's memory limit). The soft limit is checked with <code>du</code> in each Pod; the
+volume's own limit is a hard backstop at 1.5 times it, and the kubelet
+evicts a Pod that reaches it;</li>
+<li>a Pod cannot be stopped and kept, so a retired sandbox is snapshotted from
+its running Pod and the Pod deleted, and removal waits until the Pod is
+gone (a Terminating Pod still holds its name). A sandbox whose snapshot
+fails stays running but refuses work, is retried, and is never resumed
+with its old token: the next create retires it and starts a new Pod;</li>
+<li>Kubernetes has no per-Pod PID limit, so operators name a RuntimeClass whose
+nodes set one (<code>hermes.sandbox.runtimeClassName</code>); orphaned processes are
+reaped through a shared process namespace instead of Docker's init;</li>
+<li>a restart of skill-executor adopts live Pods from their labels; one
+replica only, as sandboxes are tracked in memory.
+The chart also deploys the preview service (<code>hermes.preview</code>): a Deployment and
+Service in the release namespace, one Secret for both credentials, a wildcard
+Ingress rule for the preview origin and an executor ingress policy that lets
+only the preview service and tool-worker in. <code>./smoke-test-hermes-k8s.sh</code> is
+the acceptance on a disposable k3d cluster: the guard under Pod Security
+<code>restricted</code>, the platform paths, who reaches whom, the preview service, and
+the runtime end to end with the real image.</li>
 </ul>
 </li>
 </ul>

@@ -95,8 +95,12 @@ meant to be reachable from browsers.</li>
 <h2 id="hermes-agent">Hermes Agent</h2>
 <p>Hermes runs model-chosen commands, so its boundary is stricter than the others:</p>
 <ul>
-<li><strong>Each sandbox has its own internal network.</strong> Its only way out is the <code>hermes-egress</code>
-guard. The backend never joins a sandbox network and sandboxes never share one.</li>
+<li><strong>A sandbox's only way out is the <code>hermes-egress</code> guard.</strong> On Docker each sandbox has its
+own internal network, which the backend never joins and sandboxes never share. On
+Kubernetes a default-deny NetworkPolicy lets a sandbox Pod reach only the guard (no DNS,
+no peer Pod, no platform service, no node, no cluster API) and lets only sandbox Pods
+reach the guard; this needs a CNI that enforces egress policy, and the sandbox Pod
+mounts no service-account token.</li>
 <li><strong>Egress is a mode</strong>, <code>none</code>, <code>packages</code> or <code>public</code>, chosen by the organization within
 the operator's maximum (<code>HERMES_EGRESS_MAX_MODE</code>). Choose the lowest that does the job.</li>
 <li><strong>No provider credentials</strong> reach the sandbox: only a session token that names a person.

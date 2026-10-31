@@ -69,7 +69,9 @@ image generation and editing, skills it is granted, and questions to you.</li>
 <li><strong>Be a workflow node</strong>, running inside a larger workflow.</li>
 </ul>
 <h2 id="set-it-up">Set it up</h2>
-<p>You need Docker 28 or newer on the host: every sandbox gets its own internal network.</p>
+<p>On Docker you need version 28 or newer on the host: every sandbox gets its own internal
+network. On Kubernetes see <a href="deployment.html#hermes-agent-on-kubernetes">Hermes on Kubernetes</a>
+instead of steps 1 and 2 below; steps 3 and 4 are the same.</p>
 <ol>
 <li>
 <p>Create the secrets. In <code>.env</code>:</p>
@@ -99,7 +101,7 @@ grant the <code>agents.hermes</code> capability to the right group.</p>
 </li>
 </ol>
 <p>Hermes needs <code>tool-worker</code> and <code>skill-executor</code> running (<code>skill-executor</code> is in the
-<code>skills-exec</code> profile). It is not part of the Helm chart.</p>
+<code>skills-exec</code> profile on Compose, and part of the chart on Kubernetes).</p>
 <h3 id="previews-of-running-apps-optional">Previews of running apps (optional)</h3>
 <p>Previews let a person open an app Hermes is running. They are off until you give them
 their own origin:</p>
@@ -115,8 +117,9 @@ the service. Use a domain that is <strong>not</strong> the platform's own and no
 a preview runs agent-written code in the viewer's browser, and a page on a shared
 parent domain can set cookies for that parent. See the
 <a href="../reference/security.html#previews">security model</a>.</p>
-<p>For local trials set the origin to <code>http://{preview}.preview.localhost:8095</code>, which
-browsers resolve to the machine itself. Connection limits and timeouts are in the
+<p>On Kubernetes the chart's <code>hermes.preview</code> block does the same and adds a wildcard
+Ingress rule. For local trials with Compose set the origin to
+<code>http://{preview}.preview.localhost:8095</code>, which browsers resolve to the machine itself. Connection limits and timeouts are in the
 <a href="../CONFIGURATION.html#hermes-agent">configuration reference</a>.</p>
 <h2 id="administration">Administration</h2>
 <p>Everything is in the Admin app.</p>
