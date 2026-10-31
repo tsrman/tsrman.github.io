@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation starter tools · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="installation-starter-tools">Installation starter tools</h1>
+<p>The installation entry point starts the ordinary Compose platform, the existing
+isolated code-skill executor, and the pinned reference MCP utilities server. It
+registers four operator-owned global skills:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Type</th>
+<th>Function</th>
+<th>Input</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CSV statistics</td>
+<td>Code, offline</td>
+<td>Count, missing values, sum, mean, minimum and maximum for numeric columns</td>
+<td>A UTF-8 CSV file supplied by the user</td>
+</tr>
+<tr>
+<td>JSON validation and formatting</td>
+<td>Code, offline</td>
+<td>Validate JSON and print sorted, indented JSON</td>
+<td>A UTF-8 JSON file supplied by the user</td>
+</tr>
+<tr>
+<td>Calculator (MCP)</td>
+<td>SSE MCP</td>
+<td>Add two numbers with <code>get-sum</code></td>
+<td><code>a</code> and <code>b</code>, both numbers</td>
+</tr>
+<tr>
+<td>Text round-trip (MCP)</td>
+<td>SSE MCP</td>
+<td>Return supplied text with <code>echo</code></td>
+<td><code>message</code>, a string</td>
+</tr>
+</tbody>
+</table></div>
+<p>The code bundles use only Python's standard library and have <code>network_policy=none</code>.
+CSV input is limited to 1 MiB, 10,000 data rows and 100 columns. Empty numeric
+cells are excluded from statistics. Mixed text/numeric columns are reported as
+nonnumeric; duplicate or blank headers, malformed rows and nonfinite numbers fail
+validation. JSON input is limited to 1 MiB; duplicate keys and nonfinite numbers
+fail validation. Formatting preserves values and does not overwrite the input.</p>
+<p>These tools do not fetch URLs, access external accounts, or enable <code>web.access</code>.
+The wrapper starts only <code>mcp-everything</code> from the MCP profile; it does not start
+<code>mcp-fetch</code>. The reference server package is pinned in
+<a href="https://github.com/tsrman/AurumAI/tree/main/mcp/everything/Dockerfile">its Dockerfile</a>. The calculator and echo definitions
+select only those two tools from that server.</p>
+<h2 id="install-with-compose">Install with Compose</h2>
+<p>Configure the ordinary stack environment first, following the
+<a href="https://github.com/tsrman/AurumAI/blob/main/README.md">README</a> and <a href="CONFIGURATION.html">configuration guide</a>. For a fresh
+local development stack, the existing <code>scripts/bootstrap-dev-env.sh</code> command can
+create the initial environment. On an existing stack, retain its current <code>.env</code>,
+<code>APP_SECRET_KEY</code>, database credentials and storage credentials. This installer
+does not generate or rotate secrets. Model/provider configuration remains an
+operator task.</p>
+<p>Review the commands without running Docker or writing anything:</p>
+<pre><code class="language-bash">./install-platform.sh
+</code></pre>
+<p>Start the platform and install the global catalog:</p>
+<pre><code class="language-bash">./install-platform.sh --apply
+</code></pre>
+<p>To give existing organizations initial read access to these four tools only,
+name each target explicitly:</p>
+<pre><code class="language-bash">./install-platform.sh --apply --org-id &lt;organization-uuid&gt; --org-id &lt;another-organization-uuid&gt;
+</code></pre>
+<p>The wrapper builds the conversation-runner and skill-sandbox images, starts
+ordinary services with a bounded Compose wait, then starts <code>mcp-everything</code> and
+<code>skill-executor</code> before applying the catalog through the backend container.
+It uses the repository's ordinary <code>docker-compose.yml</code> and clears inherited
+<code>COMPOSE_PROFILES</code> for this invocation so optional archive, maintenance, RAG or
+fetch services are not added. It preserves the existing Compose project and
+secret environment. Run this entry point separately from acceptance wrappers
+that mutate organizations.</p>
+<p>If the platform already runs and its backend image includes this source,
+review or apply just the catalog through the operator CLI:</p>
+<pre><code class="language-bash">docker compose exec -T backend python -m src.cli.install_starter_tools
+docker compose exec -T backend python -m src.cli.install_starter_tools --apply --org-id &lt;organization-uuid&gt;
+</code></pre>
+<p>For a backend development environment, use <code>uv run python -m src.cli.install_starter_tools</code> from <code>business-backend/</code>. The CLI dry-run is offline:
+it prints deterministic IDs and bundle checksums without opening a database or
+object-storage connection. Apply uses <code>APP_DATABASE_URL</code> and the backend's normal
+<code>APP_S3_*</code> settings. It rejects superuser, RLS-bypass and schema-owner connections;
+use the runtime role. It never reads a migration URL or escalates a database role.</p>
+<h2 id="idempotence-and-authorization">Idempotence and authorization</h2>
+<p>Each catalog entry has a stable UUIDv5 identity and a reserved <code>workflow_type</code>
+ownership marker, <code>aurum-starter-v1:&lt;catalog-key&gt;</code>. The marker is metadata for
+code/MCP entries and does not select a Temporal workflow. Keep it when editing
+operator-owned definitions. A same-ID resource without the marker, a tenant-owned
+resource or a conversation-owned resource is a collision and stops installation.
+Same-named resources with different identities remain untouched.</p>
+<p>Reruns preserve all fields of existing owned definitions, including names,
+instructions, schemas, bundle pointers, endpoints and credentials. They do not
+upgrade bundles or move existing endpoints. New bundle ZIPs use sorted source
+paths, fixed timestamps and SHA-256 content-addressed storage keys. Object writes
+are create-only; an existing object must contain identical bytes. The operation
+runs in one database transaction with a catalog advisory lock. A failed or
+uncertain storage write may leave a content-addressed object but cannot publish a
+partially registered catalog or grants. Retain such objects for reconciliation;
+no destructive cleanup is attempted.</p>
+<p>The optional <code>--org-id</code> targets receive only organization-level skill read grants,
+through the existing RLS-scoped provisioning helper. No model grants,
+capabilities, defaults, groups or memberships change. New organizations use the
+existing global-skill provisioning contract. Existing organizations receive no
+automatic backfill unless explicitly targeted.</p>
+<p>First provisioning of each tool to a named organization records a deterministic
+<code>starter_provision</code> event in <code>authorization_audit_events</code> in the same transaction.
+The event's fixed actor UUID identifies this operator installer; its payload holds
+only safe permission metadata. These receipts are scoped by organization and
+remain independent of access grants. A later run skips a receipt already present,
+so an administrator's deleted grant stays deleted. Preserve these receipts as
+authorization history, including across backup and restore; do not remove them as
+fixture metadata. They are not conversation payload rows and are not rewritten by
+the conversation archive lifecycle. If a tool needs access again after revocation,
+use the ordinary explicit resource-grant administration flow.</p>
+<p>An alternate credential-free SSE endpoint can be supplied for initial creation:</p>
+<pre><code class="language-bash">./install-platform.sh --mcp-endpoint https://mcp.example.org/sse
+</code></pre>
+<p>Append <code>--apply</code> to execute. User information, URL query parameters and fragments
+are rejected. The endpoint must be reachable from tool-worker. Existing tools keep
+their saved endpoint and token even when this flag changes. An operator changing
+an endpoint must review the definition and provide replacement credentials
+explicitly through the established administration mechanism.</p>
+<h2 id="use-the-tools">Use the tools</h2>
+<p>After installation, grant the relevant skill resources to the organization/user
+as needed, configure an authorized model and select the skills on an agent. A
+newly installed catalog alone does not grant model access or chat capabilities.
+Examples to send to an agent configured with the corresponding tool:</p>
+<pre><code class="language-text">Use CSV statistics on this data and explain the missing value:
+team,sales
+A,10
+B,20
+C,
+</code></pre>
+<p>Expected numeric result: count 2, missing 1, sum 30, mean 15, minimum 10, maximum 20.</p>
+<pre><code class="language-text">Validate and format this JSON with the JSON tool: {&quot;b&quot;:2,&quot;a&quot;:1}
+</code></pre>
+<p>Expected result: valid, indented JSON with keys <code>a</code>, <code>b</code> and unchanged values.
+Duplicate keys such as <code>{&quot;a&quot;:1,&quot;a&quot;:2}</code> produce a validation error.</p>
+<pre><code class="language-text">Use Calculator (MCP) to add 17 and 25. Report the tool result.
+Use Text round-trip (MCP) with message &quot;starter-check&quot;. Report the returned text.
+</code></pre>
+<p>Expected tool outputs include 42 and <code>starter-check</code>, respectively. Actual model
+selection and tool-call behavior depend on the configured provider. A model
+answering from memory does not establish that a tool executed.</p>
+<h2 id="validation-coverage">Validation coverage</h2>
+<p>Executable backend tests cover bundle execution and input limits, deterministic
+catalog bytes, dry-run behavior, runtime-role RLS, tenant isolation, foreign ID
+collisions, concurrent installation, scoped provisioning receipts and preserving
+operator edits/revoked grants. Wrapper tests execute the shell with an inert Docker
+recorder to verify selected commands and retained environment. See
+<a href="TESTING.html">testing</a> for service lint/type/test commands and isolated database
+requirements. Starter tests live in <code>business-backend/tests/starter_tools/</code>.</p>
+<p>These checks do not prove a real MCP SSE exchange, sandbox container execution,
+provider inference, Kubernetes CNI behavior or production installation. Those
+require separate operator acceptance against the intended deployment. The
+installer itself does not invoke those acceptance scenarios or mutate existing
+organization configuration to make them pass.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

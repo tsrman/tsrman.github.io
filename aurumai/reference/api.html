@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API reference · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="api-reference">API reference</h1>
+<p>AurumAI has two HTTP planes served by the same backend code with different audiences:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Plane</th>
+<th>Port</th>
+<th>Audience</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Business API</strong></td>
+<td>8000</td>
+<td>Chat app users</td>
+<td><code>business-ui</code>, runners, workers</td>
+</tr>
+<tr>
+<td><strong>Admin API</strong></td>
+<td>8001</td>
+<td>Administrators</td>
+<td><code>admin-ui</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Both authenticate with Keycloak access tokens (<code>Authorization: Bearer ...</code>). Each plane
+accepts only its own audience, so a chat token does not open the Admin API. Responses
+are mostly wrapped as <code>{&quot;data&quot;: ..., &quot;meta&quot;: ...}</code> (lists add <code>pagination</code>), and errors
+carry a bounded <code>code</code>.</p>
+<p>Request and response schemas are not repeated here. With <code>APP_DEBUG=true</code> each plane
+serves interactive OpenAPI documentation at <code>/docs</code> and <code>/redoc</code>; it is disabled otherwise,
+so for a production deployment read the routers in
+<code>business-backend/src/routers/</code> or run a development instance.</p>
+<p>Paths below are relative to the plane's host. The business routes are mounted under
+<code>/v1</code>.</p>
+<h2 id="conventions">Conventions</h2>
+<ul>
+<li><strong>Rate limits:</strong> per user, 300 ordinary requests and 30 chat streams per minute by
+default; over the limit the API answers 429.</li>
+<li><strong>Quota:</strong> model calls count against the organization's monthly request and token
+limits; when spent they are refused.</li>
+<li><strong>Capabilities</strong> gate actions; <strong>grants</strong> gate resources. A missing capability answers
+403; a resource you cannot see answers 404.</li>
+<li><strong>Service-only</strong> routes (everything under <code>/v1/internal/*</code> and
+<code>/v1/hermes/chat/completions</code>, the Hermes MCP bridge and the preview checks) are for
+the platform's own services. They accept service credentials or session tokens, not
+browser tokens, and are not a client API.</li>
+<li>Health: <code>GET /health</code> (liveness), <code>GET /ready</code> (dependencies), <code>GET /metrics</code>.</li>
+</ul>
+<h2 id="business-api-port-8000">Business API (port 8000)</h2>
+<h3 id="conversations-and-chat">Conversations and chat</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/chat/agents</code></td>
+<td>Agents the user may chat with (Hermes only if a Hermes turn would be accepted)</td>
+<td><code>chat.send</code></td>
+</tr>
+<tr>
+<td><code>POST /v1/chat/stream</code></td>
+<td>Send a message and stream the answer (SSE); <code>agent: &quot;hermes&quot;</code> selects Hermes Agent</td>
+<td><code>chat.send</code></td>
+</tr>
+<tr>
+<td><code>POST /v1/chat/completions</code></td>
+<td>Completion route that the conversation runner calls with its session token; also accepts a user token</td>
+<td><code>chat.send</code></td>
+</tr>
+<tr>
+<td><code>POST /v1/chat/{id}/cancel</code></td>
+<td>Cancel the answer in progress</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations</code>, <code>POST /v1/conversations</code></td>
+<td>List and create</td>
+<td><code>chat.send</code></td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations/{id}</code>, <code>PATCH</code>, <code>DELETE</code></td>
+<td>Read, rename or update, delete</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/messages</code></td>
+<td>Append a message</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>PATCH /v1/conversations/{id}/messages/{turn}/score</code></td>
+<td>Rate an answer</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations/{id}/turns/active</code>, <code>.../turns/{turn}</code>, <code>.../turns/{turn}/events</code></td>
+<td>Reload and resume a turn</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations/{id}/turns/{turn}/sources</code></td>
+<td>Web sources cited in a turn</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/executions</code></td>
+<td>Run an agent or skill execution</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>GET /v1/models</code></td>
+<td>Models the user may use</td>
+<td><code>chat.send</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="attachments-images-and-files">Attachments, images and files</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /v1/conversations/{id}/attachments</code></td>
+<td>Attach a document for retrieval (202, then indexed)</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/images</code>, <code>DELETE .../images/{image}</code></td>
+<td>Upload and remove a picture for a vision model</td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations/{id}/images/{image}/content</code></td>
+<td>Download a picture</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/files</code>, <code>DELETE .../files/{file}</code></td>
+<td>Upload and remove a file for Hermes's workspace</td>
+</tr>
+<tr>
+<td><code>GET /v1/conversations/{id}/files/{file}/content</code></td>
+<td>Download a file Hermes produced or you uploaded (always as an attachment)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="knowledge-and-documents">Knowledge and documents</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /v1/knowledge-bases</code></td>
+<td>Create</td>
+<td><code>workspace.knowledge.create</code></td>
+</tr>
+<tr>
+<td><code>GET /v1/knowledge-bases</code>, <code>GET .../{id}</code>, <code>DELETE .../{id}</code></td>
+<td>List, read, delete</td>
+<td>grant / owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/documents</code>, <code>POST /v1/documents/upload</code></td>
+<td>Register or upload a document (202)</td>
+<td><code>workspace.knowledge.create</code></td>
+</tr>
+<tr>
+<td><code>GET /v1/documents</code>, <code>GET .../{id}</code>, <code>DELETE .../{id}</code></td>
+<td>List, read, delete</td>
+<td>grant</td>
+</tr>
+<tr>
+<td><code>POST /v1/knowledge-bases/{id}/search</code></td>
+<td>Search a knowledge base</td>
+<td>grant</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agents-skills-and-workflows">Agents, skills and workflows</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/agent-definitions</code>, <code>POST /v1/agent-definitions</code></td>
+<td>List and create agents</td>
+<td><code>workspace.agents.create</code> to create</td>
+</tr>
+<tr>
+<td><code>GET/PATCH/DELETE /v1/agent-definitions/{id}</code>, <code>GET .../{id}/execution</code></td>
+<td>Read, edit, delete an agent; its execution settings</td>
+<td>grant / owner</td>
+</tr>
+<tr>
+<td><code>GET /v1/skills/</code>, <code>GET /v1/skills/{id}</code></td>
+<td>Skills the user may use</td>
+<td>grant</td>
+</tr>
+<tr>
+<td><code>GET /v1/workflows</code>, <code>GET /v1/workflows/{id}</code></td>
+<td>Workflows the user may run</td>
+<td>grant</td>
+</tr>
+<tr>
+<td><code>GET /v1/workflow-runs/{id}</code></td>
+<td>A run's state</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/workflow-runs/{id}/cancel</code></td>
+<td>Cancel a run (202)</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/workflow-runs/{id}/nodes/{node}/decision</code></td>
+<td>Approve or reject a confirmation node</td>
+<td>owner</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="questions">Questions</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/conversations/{id}/questions</code></td>
+<td>Open questions of a conversation</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/questions/{question}/answer</code></td>
+<td>Answer one</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/turns/{turn}/cancel</code></td>
+<td>Cancel a turn waiting on a question</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="user-settings-and-usage">User settings and usage</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/settings/me</code>, <code>PATCH /v1/settings/me</code></td>
+<td>Personal settings</td>
+</tr>
+<tr>
+<td><code>GET /v1/usage/me</code></td>
+<td>Your usage against the organization's limits</td>
+</tr>
+<tr>
+<td><code>GET /v1/hermes/memory</code>, <code>DELETE /v1/hermes/memory</code></td>
+<td>Your Hermes memory</td>
+</tr>
+<tr>
+<td><code>GET /v1/hermes/skill-drafts</code>, <code>DELETE /v1/hermes/skill-drafts/{id}</code></td>
+<td>Skills Hermes wrote for you; withdraw one</td>
+</tr>
+<tr>
+<td><code>POST /v1/conversations/{id}/previews/{preview}/ticket</code></td>
+<td>Mint the one-time ticket that opens a Hermes preview (needs both Hermes capabilities)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="admin-api-port-8001">Admin API (port 8001)</h2>
+<p>Every route needs the <code>org_admin</code> role unless noted.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/admin/users</code></td>
+<td>Users and their roles</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/groups/</code>, <code>POST</code>, <code>PATCH /{id}</code>, <code>DELETE /{id}</code></td>
+<td>Groups</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/authorization/capabilities</code> and <code>/subjects</code></td>
+<td>Capability catalog and subjects</td>
+</tr>
+<tr>
+<td><code>GET/PUT /v1/admin/authorization/capabilities/organization</code></td>
+<td>Default permissions</td>
+</tr>
+<tr>
+<td><code>GET/PUT /v1/admin/authorization/capabilities/groups/{id}</code></td>
+<td>A group's capabilities</td>
+</tr>
+<tr>
+<td><code>POST /v1/admin/authorization/preview/users/{id}</code>, <code>.../groups/{id}</code></td>
+<td>Preview effective access</td>
+</tr>
+<tr>
+<td><code>GET/POST /v1/admin/authorization/grants</code>, <code>PUT .../grants/reconcile</code>, <code>DELETE .../grants/{id}</code></td>
+<td>Resource grants</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/analytics/usage</code></td>
+<td>Usage report</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/models</code>, <code>PUT /v1/admin/settings/models</code></td>
+<td>Model catalog and defaults</td>
+</tr>
+<tr>
+<td><code>GET/PUT /v1/admin/settings/images</code></td>
+<td>Image models and vision models</td>
+</tr>
+<tr>
+<td><code>GET/PUT /v1/admin/settings/hermes</code></td>
+<td>Hermes model and egress mode</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/hermes/skill-drafts</code>, <code>GET .../{id}</code>, <code>POST .../{id}/approve</code>, <code>POST .../{id}/reject</code></td>
+<td>Review skills Hermes wrote</td>
+</tr>
+<tr>
+<td><code>GET /v1/skills/</code>, <code>POST /v1/skills/</code>, <code>PATCH/DELETE /v1/skills/{id}</code></td>
+<td>Manage skills</td>
+</tr>
+<tr>
+<td><code>POST /v1/skills/discover-mcp-tools</code>, <code>POST /v1/skills/code</code>, <code>PUT /v1/skills/code/{id}/bundle</code></td>
+<td>Discover MCP tools; create and replace code skills</td>
+</tr>
+<tr>
+<td><code>POST /v1/admin/workflows/validate</code>, <code>GET/POST /v1/admin/workflows</code>, <code>GET/PUT/DELETE /v1/admin/workflows/{id}</code></td>
+<td>Workflow definitions</td>
+</tr>
+<tr>
+<td><code>GET/POST /v1/admin/workflow-templates</code>, <code>GET/PUT .../{id}</code>, <code>POST .../{id}/instantiate</code>, <code>POST .../{id}/archive</code></td>
+<td>Workflow templates</td>
+</tr>
+<tr>
+<td><code>GET /v1/admin/workflow-runs/{id}</code></td>
+<td>Run diagnostics</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Admin API also serves the agent-definition and knowledge-base routes above, so the
+admin app can manage them.</p>
+<h2 id="authentication">Authentication</h2>
+<p>Sign in uses OpenID Connect through Keycloak (realm <code>aurum-ai</code>). Browser clients are
+<code>business-ui</code> and <code>admin-ui</code>; each issues tokens with its own audience. The runner,
+tool workers and Hermes sandboxes use <strong>session tokens</strong> minted by the backend that
+carry identity only, have their own audience, and are valid only while their session
+or turn is open. Authorization is evaluated live on every request.</p>
+<p>For local scripts, a development token can be fetched with the password grant against
+the Keycloak token endpoint using the <code>user</code> or <code>admin</code> fixture accounts. Do not do that
+outside development.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

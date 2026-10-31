@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation and deployment · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="installation-and-deployment">Installation and deployment</h1>
+<p>This guide gets AurumAI running and shows where each optional feature is switched
+on. Two supported ways exist:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Use for</th>
+<th>Runtime isolation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Docker Compose</td>
+<td>Local evaluation, development, a trusted single host</td>
+<td>The backend holds Docker-socket authority</td>
+</tr>
+<tr>
+<td>Helm (<code>charts/aurum-ai</code>)</td>
+<td>Production on Kubernetes</td>
+<td>Namespace-scoped RBAC and network policies</td>
+</tr>
+</tbody>
+</table></div>
+<p>Hermes Agent runs on the Docker runtime only; the Helm chart does not deploy it yet.
+For every environment variable see the
+<a href="../CONFIGURATION.html">configuration reference</a>.</p>
+<h2 id="docker-compose">Docker Compose</h2>
+<h3 id="requirements">Requirements</h3>
+<p>Docker with Compose v2, Bash and OpenSSL. Free ports 3000, 3001, 3100, 8000, 8001,
+8080 and 8082; the Compose file also uses loopback ports for infrastructure. Plan for
+about 8 GB of free RAM and 15 GB of disk for the base stack; optional RAG models and
+build caches need more.</p>
+<h3 id="install">Install</h3>
+<pre><code class="language-bash">git clone https://github.com/tsrman/AurumAI.git &amp;&amp; cd AurumAI
+./scripts/bootstrap-dev-env.sh                   # creates .env with generated secrets
+docker compose --profile build build runner     # image the backend starts per conversation
+docker compose up -d --build
+curl --fail http://localhost:8000/ready
+</code></pre>
+<p><code>bootstrap-dev-env.sh</code> creates the ignored <code>.env</code> from <code>.env.example</code>, generates the
+required secrets and keeps values you already set when you run it again. Never commit
+<code>.env</code>. Building the runner is required: the backend starts one container from it for
+each conversation.</p>
+<p>Keycloak and Temporal take longer to initialise than the APIs. A passing <code>/ready</code> does
+not prove optional features are ready; check <code>docker compose logs</code> for the component
+that is failing.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Address</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:3000</code></td>
+<td>Chat app</td>
+</tr>
+<tr>
+<td><code>http://localhost:3100</code></td>
+<td>Admin app</td>
+</tr>
+<tr>
+<td><code>http://localhost:8000</code>, <code>:8001</code></td>
+<td>Business and Admin APIs</td>
+</tr>
+<tr>
+<td><code>http://localhost:8080</code></td>
+<td>Keycloak</td>
+</tr>
+<tr>
+<td><code>http://localhost:8082</code></td>
+<td>Temporal UI</td>
+</tr>
+<tr>
+<td><code>http://localhost:3001</code></td>
+<td>Langfuse</td>
+</tr>
+</tbody>
+</table></div>
+<p>Log in at the chat address as <code>user</code> / <code>user</code>, or at the admin address as <code>admin</code> /
+<code>admin</code>; <code>user2</code> and <code>admin2</code> belong to a second organization. These development
+accounts are realm fixtures: replace them before real use.</p>
+<p>With <code>APP_DEBUG=true</code> and no model gateway configured, answers come from a
+development mock. That still exercises login, API, Temporal and the conversation
+runner.</p>
+<p><img src="../assets/screenshots/chat-empty.png" alt="The chat app after signing in" /></p>
+<h3 id="connect-a-real-model">Connect a real model</h3>
+<p>Any OpenAI-compatible gateway works. In <code>.env</code>:</p>
+<pre><code class="language-dotenv">LLM_GATEWAY_URL=https://gateway.example.org   # base URL without the final /v1
+GATEWAY_API_KEY=operator-supplied-key
+</code></pre>
+<p>Recreate both API planes afterwards (<code>docker compose up -d --force-recreate backend backend-admin</code>).
+Then open <strong>Models</strong> in the Admin app: the gateway's models appear there and you decide
+who may use them (see the <a href="admin-guide.html#models">administrator guide</a>).</p>
+<p><code>./start-with-llm-gateway.sh</code> starts an optional local Bifrost gateway for OpenRouter
+(<code>OPENROUTER_API_KEY</code>). The runner always calls the backend's proxy with its own
+session token, so authorization and quota apply.</p>
+<h3 id="optional-features">Optional features</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>How to turn it on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starter tools (CSV statistics, JSON formatting)</td>
+<td><code>./install-platform.sh --apply</code> (a dry run without <code>--apply</code>)</td>
+</tr>
+<tr>
+<td>Code skills</td>
+<td><code>docker compose --profile build build skill-sandbox</code>, start with profile <code>skills-exec</code></td>
+</tr>
+<tr>
+<td>Knowledge bases (RAG)</td>
+<td><code>docker compose --profile rag up -d --build</code>; the first model download can take minutes</td>
+</tr>
+<tr>
+<td>Questions</td>
+<td><code>USER_QUESTIONS_ENABLED=true</code></td>
+</tr>
+<tr>
+<td>Web search and read</td>
+<td><code>docker-compose.web.yml</code> with profile <code>web</code>, its secrets and enforcement checks</td>
+</tr>
+<tr>
+<td>Images</td>
+<td><code>IMAGES_ENABLED=true</code>, then models in Admin → Models</td>
+</tr>
+<tr>
+<td>Hermes Agent</td>
+<td>See <a href="hermes-agent.html#set-it-up">Hermes Agent: setup</a></td>
+</tr>
+<tr>
+<td>Identity synchronization, archiving</td>
+<td>Profile <code>maintenance</code>; see <a href="operations.html">operations</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Each switch is off by default and independent. Capabilities are default-deny, so a
+feature also needs its capability granted to the people who should use it (Admin →
+Users → Groups).</p>
+<h3 id="publish-on-the-internet">Publish on the internet</h3>
+<p><code>docker-compose.proxy.yml</code> adds Traefik with Let's Encrypt and publishes only ports 80
+and 443:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Host</th>
+<th>Service</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chat.&lt;domain&gt;</code></td>
+<td>Chat app</td>
+</tr>
+<tr>
+<td><code>admin.&lt;domain&gt;</code></td>
+<td>Admin app</td>
+</tr>
+<tr>
+<td><code>api.&lt;domain&gt;</code>, <code>admin-api.&lt;domain&gt;</code></td>
+<td>Business and Admin APIs</td>
+</tr>
+<tr>
+<td><code>auth.&lt;domain&gt;</code></td>
+<td>Keycloak</td>
+</tr>
+<tr>
+<td><code>temporal.&lt;domain&gt;</code></td>
+<td>Temporal UI behind basic auth</td>
+</tr>
+<tr>
+<td><code>langfuse.&lt;domain&gt;</code></td>
+<td>Langfuse</td>
+</tr>
+</tbody>
+</table></div>
+<p>Point DNS at the host, set <code>PUBLIC_DOMAIN</code> and <code>ACME_EMAIL</code> in <code>.env</code>, run
+<code>./scripts/bootstrap-dev-env.sh</code> (it generates the Temporal UI password), then:</p>
+<pre><code class="language-bash">docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
+</code></pre>
+<p>On an existing Keycloak database add <code>https://chat.&lt;domain&gt;/*</code> and
+<code>https://admin.&lt;domain&gt;/*</code> to the <code>business-ui</code> and <code>admin-ui</code> clients yourself; the
+realm import runs only on a fresh database. Use
+<code>ACME_CA_SERVER=https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing
+DNS. Do not widen <code>PUBLIC_BIND_ADDRESS</code> instead of using the proxy: Docker-published
+ports bypass host firewalls.</p>
+<h3 id="production-checklist">Production checklist</h3>
+<ul>
+<li>Replace the development accounts and set real secrets; set <code>APP_DEBUG=false</code>
+(it also hides the API's <code>/docs</code>).</li>
+<li>Terminate TLS and set the Keycloak redirect origins to your real hosts.</li>
+<li>Set <code>RUNTIME_SOURCE_CODE_URL</code> to where users can get the source of your deployment
+(AGPL), shown on each app's <code>/about</code> page.</li>
+<li>Compose gives the backend root-equivalent Docker-socket authority. Never expose it
+to untrusted clients; use Helm when you need stronger isolation.</li>
+<li>Keep code execution, MCP and public web behind their opt-in policies. Do not open
+outbound network access to make a failing check pass.</li>
+<li>Decide deliberately whether Langfuse captures full prompts and documents.</li>
+<li>Back up PostgreSQL, MinIO and the <code>.env</code> secrets (see <a href="operations.html">operations</a>).</li>
+</ul>
+<h2 id="kubernetes-with-helm">Kubernetes with Helm</h2>
+<p>The chart deploys the two APIs, both apps, tool-worker and skill-executor. The API starts
+one runner Pod per conversation; skill-executor starts a sandbox Pod per code session.
+PostgreSQL 16 (with pgvector and pg_partman), Redis, Keycloak, Temporal, MinIO, the RAG
+API and Langfuse are <strong>external</strong>: you supply their endpoints.</p>
+<p>Requirements:</p>
+<ul>
+<li>Kubernetes, Helm 3, kubectl and a CNI that actually enforces NetworkPolicy.</li>
+<li>Three different namespaces for the release, the runners and the sandboxes. The chart
+rejects coinciding namespaces.</li>
+<li>Registry images (<code>ghcr.io/tsrman/aurum-ai-*</code>, tagged per release) and pull secrets in
+every namespace that needs them; Helm does not copy secrets between namespaces.</li>
+<li>Explicit external CIDRs and ports. The development private-range defaults are not a
+production allowance.</li>
+</ul>
+<pre><code class="language-bash">helm lint charts/aurum-ai -f values-production.yaml
+helm template aurumai charts/aurum-ai -n aurumai -f values-production.yaml | kubeconform -strict -summary
+helm upgrade --install aurumai charts/aurum-ai -n aurumai --create-namespace -f values-production.yaml --wait
+</code></pre>
+<p>Migrations run through a dedicated hook and role, not on every API replica's startup.
+Browser origins derive from the configured Ingress unless you override them. The
+<a href="https://github.com/tsrman/AurumAI/blob/main/charts/aurum-ai/README.md">chart guide</a>
+covers secret ownership, workflow and feature rollout, and acceptance checks.</p>
+<h2 id="air-gapped-installation">Air-gapped installation</h2>
+<p><a href="../AIR_GAPPED.html">Air-gapped deployment</a> describes preparing images and models outside
+the boundary and building and verifying inside it.</p>
+<h2 id="images">Images</h2>
+<p>Service images are published to <code>ghcr.io/tsrman/aurum-ai-*</code> for each release by the
+<code>publish images</code> workflow. A package published for the first time may be private until
+its visibility is changed in the GitHub package settings.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

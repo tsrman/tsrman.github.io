@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes Agent guide · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="hermes-agent-guide">Hermes Agent guide</h1>
+<p>Hermes Agent is an opt-in system agent. Instead of a single answer from a model, it
+gets a workspace of its own, a long-lived sandbox where it runs commands and code,
+keeps files between turns and reports back. Use it for tasks that need work, not just
+text: analysing spreadsheets, producing documents and charts, building and testing a
+small web app.</p>
+<p>This guide covers how to set it up, how people use it and how administrators manage
+it. The settings reference is in <a href="../CONFIGURATION.html#hermes-agent">configuration</a>; the
+design and its reasoning in the <a href="../HERMES_AGENT.html">design document</a>.</p>
+<h2 id="what-it-can-do">What it can do</h2>
+<ul>
+<li><strong>Run commands and code</strong> in its own sandbox. The image has Python (pandas,
+matplotlib, openpyxl, python-pptx, python-docx, pypdf), Node.js 24 with npm, a
+headless Chromium and Playwright.</li>
+<li><strong>Work on your files.</strong> Files you attach appear in <code>/workspace/inputs/</code> in its
+sandbox, with stable numbered names.</li>
+<li><strong>Hand files back.</strong> Charts, spreadsheets, documents, presentations and archives
+appear in the answer as downloads; pictures show under the answer.</li>
+<li><strong>Use platform tools</strong> through a bridge: knowledge search, web search and read,
+image generation and editing, skills it is granted, and questions to you.</li>
+<li><strong>Look at pictures</strong> when the organization marks its model as taking images.</li>
+<li><strong>Remember</strong> notes about you across conversations, which you can clear.</li>
+<li><strong>Write skills</strong> for itself that an administrator reviews before anyone else can use them.</li>
+<li><strong>Show you what it builds.</strong> It starts an app in the background and shares it; an
+<strong>Open prototype</strong> card appears in the answer.</li>
+<li><strong>Be a workflow node</strong>, running inside a larger workflow.</li>
+</ul>
+<h2 id="set-it-up">Set it up</h2>
+<p>You need Docker 28 or newer on the host: every sandbox gets its own internal network.</p>
+<ol>
+<li>
+<p>Create the secrets. In <code>.env</code>:</p>
+<pre><code class="language-dotenv">HERMES_ENABLED=true
+HERMES_EGRESS_SERVICE_SECRET=&lt;a long random value&gt;
+HERMES_EGRESS_MAX_MODE=packages        # none | packages | public
+</code></pre>
+<p><code>HERMES_EGRESS_MAX_MODE</code> is the most internet any organization can give its
+sandboxes. <code>packages</code> allows only package registries (<code>HERMES_EGRESS_PACKAGE_HOSTS</code>:
+PyPI and npm by default).</p>
+</li>
+<li>
+<p>Build the sandbox image (about 2.4 GB) and the runner, then start the stack with the
+overlay and profiles:</p>
+<pre><code class="language-bash">docker compose -f docker-compose.yml -f docker-compose.hermes.yml --profile build build hermes-sandbox runner
+docker compose -f docker-compose.yml -f docker-compose.hermes.yml \
+  --profile hermes --profile skills-exec up -d --build
+</code></pre>
+</li>
+<li>
+<p>The model gateway must forward <strong>native tool calls</strong>, and the model you give Hermes
+needs tool calling.</p>
+</li>
+<li>
+<p>In the Admin app (see <a href="#administration">Administration</a>), choose Hermes's model and
+grant the <code>agents.hermes</code> capability to the right group.</p>
+</li>
+</ol>
+<p>Hermes needs <code>tool-worker</code> and <code>skill-executor</code> running (<code>skill-executor</code> is in the
+<code>skills-exec</code> profile). It is not part of the Helm chart.</p>
+<h3 id="previews-of-running-apps-optional">Previews of running apps (optional)</h3>
+<p>Previews let a person open an app Hermes is running. They are off until you give them
+their own origin:</p>
+<pre><code class="language-dotenv">HERMES_PREVIEW_ENABLED=true
+HERMES_PREVIEW_ORIGIN=https://{preview}.preview.example.org
+HERMES_PREVIEW_SERVICE_SECRET=&lt;random&gt;
+HERMES_PREVIEW_EXECUTOR_SECRET=&lt;random&gt;
+</code></pre>
+<p>Start the <code>hermes-preview</code> profile as well. The service listens on
+<code>HERMES_PREVIEW_PORT</code> (8095) and must be reachable at the origin template, so it needs a
+<strong>wildcard DNS record and a wildcard TLS certificate</strong> for it, terminated in front of
+the service. Use a domain that is <strong>not</strong> the platform's own and not a subdomain of it:
+a preview runs agent-written code in the viewer's browser, and a page on a shared
+parent domain can set cookies for that parent. See the
+<a href="../reference/security.html#previews">security model</a>.</p>
+<p>For local trials set the origin to <code>http://{preview}.preview.localhost:8095</code>, which
+browsers resolve to the machine itself. Connection limits and timeouts are in the
+<a href="../CONFIGURATION.html#hermes-agent">configuration reference</a>.</p>
+<h2 id="administration">Administration</h2>
+<p>Everything is in the Admin app.</p>
+<p><img src="../assets/screenshots/admin-models-hermes.png" alt="Models → Hermes Agent: the model and the internet access mode" /></p>
+<ul>
+<li><strong>Models → Hermes Agent.</strong>
+<ul>
+<li><em>Model</em>: what Hermes runs on. Without one, Hermes is not offered in chat. The model
+must be one the organization may use.</li>
+<li><em>Internet access</em>: <strong>None</strong>, <strong>Package registries only</strong> or <strong>Public internet</strong>,
+within the deployment's maximum; a mode above the maximum is shown as such and refused.</li>
+</ul>
+</li>
+<li><strong>Users → Groups.</strong> Grant <code>agents.hermes</code> to the people who should have it. Nobody
+has it by default.</li>
+<li><strong>Workflows and Agents.</strong> A Hermes Agent can be a workflow node (&quot;Hermes Agent
+(workflow nodes)&quot; kind) and runs on the organization's Hermes model.</li>
+</ul>
+<p>If the page says Hermes is switched off on this deployment, <code>HERMES_ENABLED</code> is not set.</p>
+<h3 id="reviewing-skills-hermes-wrote">Reviewing skills Hermes wrote</h3>
+<p>Hermes can write skills for itself while it works. Each lands in <strong>Skills and tools →
+Skills Hermes Agent wrote</strong> as a draft for the person it was written for. <strong>Review</strong>
+shows every file as written. <strong>Nothing in it runs until you approve it.</strong> Approving
+makes it a code skill of the organization that its author can use; you grant it to
+others as for any skill. <strong>Decline</strong> rejects it. Read every file: it is code.</p>
+<h3 id="limits">Limits</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sandboxes running at once</td>
+<td>16 in total, 4 per organization</td>
+</tr>
+<tr>
+<td>Sandbox resources</td>
+<td>2 CPUs, 2 GiB memory, 512 processes, 1 GiB workspace</td>
+</tr>
+<tr>
+<td>Idle sandbox</td>
+<td>Stopped after 30 minutes; the workspace is snapshotted</td>
+</tr>
+<tr>
+<td>Session lifetime</td>
+<td>24 hours</td>
+</tr>
+<tr>
+<td>Skill run</td>
+<td>240 seconds per call</td>
+</tr>
+<tr>
+<td>Files handed back</td>
+<td>10 per turn, 20 MiB each</td>
+</tr>
+</tbody>
+</table></div>
+<p>Limits are settings of the deployment; the names are in the
+<a href="../CONFIGURATION.html#hermes-sandboxes">configuration reference</a>.</p>
+<h2 id="using-it">Using it</h2>
+<ol>
+<li>
+<p>In the chat, open the workflow picker and choose <strong>Hermes Agent</strong>.</p>
+<p><img src="../assets/screenshots/hermes-picker.png" alt="The workflow picker with Hermes Agent" /></p>
+</li>
+<li>
+<p>Describe the task. Attach files with <strong>+</strong> or by dragging them in (up to 10 per
+message, 20 MiB each; spreadsheets, documents, code, text, ZIP and PNG, JPEG or WebP
+pictures; at most 20 uploads and 200 MiB per conversation).</p>
+</li>
+<li>
+<p>Watch the tool rows: commands it runs appear by kind, not their output.</p>
+</li>
+<li>
+<p>When it asks you something, a question card appears; answer to continue.</p>
+</li>
+<li>
+<p>Download what it produced from the answer. Pictures show under it.</p>
+<p><img src="../assets/screenshots/hermes-chart.png" alt="A chart and its data, made and attached by Hermes" /></p>
+</li>
+</ol>
+<p>A conversation with Hermes keeps its workspace between messages, so follow-ups can
+build on earlier files.</p>
+<h3 id="example-pivot-table-and-a-presentation">Example: pivot table and a presentation</h3>
+<p>Attach several <code>.xlsx</code> files and ask: <em>&quot;Combine these workbooks into one pivot table
+by region and month in a new workbook, and make a short presentation with charts.&quot;</em>
+Hermes reads the files from its inputs folder, builds the workbook with <code>openpyxl</code> or
+pandas, draws charts with matplotlib, writes a <code>.pptx</code> with <code>python-pptx</code> and attaches
+both.</p>
+<p><img src="../assets/screenshots/hermes-attach.png" alt="Two workbooks attached to the message, before sending" /></p>
+<p><img src="../assets/screenshots/hermes-pivot.png" alt="The answer: the requested number, the pivot workbook and the deck" /></p>
+<h3 id="example-a-web-app-prototype">Example: a web app prototype</h3>
+<p>Ask: <em>&quot;Build a prototype of a task tracker web app, check that it works, and give me the
+code with instructions to run it.&quot;</em> Hermes scaffolds the app with Node.js, runs it,
+checks it in a headless browser, and returns a ZIP with the code, a README and
+screenshots. With previews enabled it also shares the running app: an <strong>Open prototype</strong>
+card opens it in a new tab at an origin of its own.</p>
+<p><img src="../assets/screenshots/hermes-prototype.png" alt="The prototype's screenshot and the project ZIP" /></p>
+<p><img src="../assets/screenshots/hermes-preview-card.png" alt="The Open prototype card under the answer" /></p>
+<p><img src="../assets/screenshots/hermes-prototype-open.png" alt="The running app in its own tab" /></p>
+<h3 id="memory-and-your-skills">Memory and your skills</h3>
+<p><strong>Settings → Hermes Agent memory</strong> shows what Hermes keeps about you; <strong>Clear
+memory</strong> erases it. <strong>Settings → Hermes Agent skills</strong> shows the skills it wrote for
+you and their review status, and lets you withdraw one (see the
+<a href="user-guide.html#settings">settings screenshot</a>).</p>
+<h2 id="network-and-safety-in-short">Network and safety in short</h2>
+<ul>
+<li>The sandbox has <strong>no route</strong> to your network or the internet except through the
+platform's egress guard, which allows the platform itself and, up to the mode the
+organization chose, the registries or the internet.</li>
+<li>Its credentials are a short-lived token that names a person only; no model-provider
+key is in the sandbox.</li>
+<li>A preview needs a ticket that opens once and a cookie that is valid for one preview,
+and the service re-checks it continuously; ending the session cuts it.</li>
+</ul>
+<p>Details: <a href="../reference/security.html#hermes-agent">security model</a>.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hermes Agent is not in the picker</td>
+<td><code>HERMES_ENABLED</code> is off, no model chosen under Models → Hermes Agent, or the user lacks <code>agents.hermes</code></td>
+</tr>
+<tr>
+<td>It cannot install packages</td>
+<td>Mode is <strong>None</strong>, or the registry is not in <code>HERMES_EGRESS_PACKAGE_HOSTS</code></td>
+</tr>
+<tr>
+<td>The turn fails at the start</td>
+<td>The sandbox image is not built, <code>skill-executor</code> is not running, or the 16/4 concurrent limit is reached</td>
+</tr>
+<tr>
+<td>It cannot reach a website</td>
+<td>Mode is not <strong>Public internet</strong></td>
+</tr>
+<tr>
+<td>Pictures are ignored</td>
+<td>The model is not marked as accepting images (Models → Images)</td>
+</tr>
+<tr>
+<td><em>Open prototype</em> does nothing</td>
+<td>Previews are off, the wildcard DNS or TLS is wrong, or the service secrets differ</td>
+</tr>
+</tbody>
+</table></div>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

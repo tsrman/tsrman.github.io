@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing AurumAI · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="testing-aurumai">Testing AurumAI</h1>
+<p>Use the commands below inside the relevant service. Python services use uv and
+strict Ruff/mypy. Frontends use npm, ESLint, TypeScript, Vitest and production builds.
+CI covers these checks; live acceptance is separate and often exclusive.</p>
+<h2 id="install-dependencies">Install dependencies</h2>
+<pre><code class="language-bash">cd business-backend
+uv sync --frozen
+</code></pre>
+<p>Repeat for each Python service. For <code>business-ui</code>, <code>admin-ui</code> and <code>scripts</code>, run
+<code>npm ci</code>. Scripts include the TypeScript parser used by the English-comment check;
+harness tests must not depend on a developer's unrelated UI installation.</p>
+<h2 id="python-services">Python services</h2>
+<pre><code class="language-bash">uv run ruff check src tests
+uv run mypy src
+uv run pytest tests -v
+</code></pre>
+<p>Apply service migrations and use a separately created test database for backend
+and RAG DB tests. Never point tests at a live API database: its outbox dispatcher
+can consume test rows. Set <code>APP_DATABASE_URL</code>, not a similarly named ignored env.</p>
+<pre><code class="language-bash">APP_DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/aurum_ai_test uv run alembic upgrade head
+APP_DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/aurum_ai_test uv run pytest tests -m 'not integration' -v
+</code></pre>
+<p>The test database needs pgvector/pg_partman and current roles/schema. Use the
+project PostgreSQL image or equivalent prerequisites. Integration markers require
+additional live dependencies; report skipped tests explicitly.</p>
+<h2 id="frontends">Frontends</h2>
+<p>Run in both UI directories:</p>
+<pre><code class="language-bash">npm run lint -- --max-warnings=0
+npm run typecheck
+npm run test
+npm run build
+</code></pre>
+<p><code>next lint</code> is not the lint entry point. Business/admin Keycloak audiences are
+separate. Runtime configuration/source URL behavior, complete chat history and
+permanent-denial/reconnect behavior are covered by relevant tests.</p>
+<h2 id="harness-and-documentation">Harness and documentation</h2>
+<p>From the repository root, after installing backend and scripts dependencies:</p>
+<pre><code class="language-bash">uv run --project business-backend pytest scripts/tests -q
+node scripts/check-mermaid.mjs
+python3 scripts/check-release-language.py --root .
+</code></pre>
+<p>The default harness run does not require exporting a deployment's <code>APP_SECRET_KEY</code>.
+The metadata-only attachment check supplies its own synthetic signing key and
+fixture database URL to its subprocess without connecting to that database.
+Live acceptance has separate credential and infrastructure prerequisites below.</p>
+<p>The source-export manifest deliberately excludes private development history.
+Language checks reject Russian text in every published file except the
+<code>messages/ru.json</code> UI catalogs. The independent scanner reviews exported files and bounded archive content,
+with redaction. See <a href="RELEASE.html">release preparation</a>.</p>
+<h2 id="live-compose-acceptance">Live Compose acceptance</h2>
+<p>A built stack is required. Run shared-organization/browser wrappers sequentially,
+never concurrently with restarts or other organization mutations. Most wrappers
+use a deterministic gateway so assertions do not depend on provider behavior.</p>
+<p>Core commands include <code>smoke-test.sh</code>, MCP/code skill, groups/quota/organization,
+authorization, knowledge and multi-agent/workflow wrappers. Workflow tests cover
+UI authoring/templates/routing/branching, explicit HITL negatives, restart and loops.
+A wrapper succeeds only after its scenario, exact cleanup, grant restoration,
+verify-clean and infrastructure restoration all succeed.</p>
+<p>Questions have separate short/restart/hour variants:</p>
+<pre><code class="language-bash">QUESTION_ACCEPTANCE_KIND=short ./smoke-test-user-questions.sh
+QUESTION_ACCEPTANCE_KIND=restart ./smoke-test-user-questions.sh
+QUESTION_ACCEPTANCE_KIND=hour ./smoke-test-user-questions.sh
+</code></pre>
+<p>The hour variant uses a real 3600-second deadline; a shortened/test-clock scenario
+does not substitute for it. HITL's dedicated timeout test image similarly does not
+prove the production 1800-second deadline.</p>
+<p>Web requires exclusive mode and its configured secrets/enforcement:</p>
+<pre><code class="language-bash">WEB_ACCEPTANCE_EXCLUSIVE=1 WEB_ACCEPTANCE_KIND=controlled ./smoke-test-web-tools.sh
+WEB_ACCEPTANCE_EXCLUSIVE=1 WEB_ACCEPTANCE_KIND=public ./smoke-test-web-tools.sh
+</code></pre>
+<p>Controlled and public-provider results are distinct. External <code>web_unavailable</code>
+is reported as blocked coverage rather than relaxing policy or assertions.</p>
+<h2 id="kubernetes-and-real-provider-boundaries">Kubernetes and real-provider boundaries</h2>
+<p><code>smoke-test-k8s.sh</code>, <code>smoke-test-user-questions-k8s.sh</code> and
+<code>smoke-test-web-tools-k8s.sh</code> use separate owned k3d/Helm resources. Network policy
+acceptance requires real reachable IPv4/IPv6 controls; unit/Helm passes do not prove
+CNI/SSRF enforcement. Browser traffic uses the actual Helm Ingress and loopback
+NodePort path, not an SSE port-forward tunnel.</p>
+<p>Real-provider Playwright scenarios require explicit gateway credentials/model and
+<code>E2E_USE_REAL_LLM=true</code>. The mixed long-dialog scenario additionally opts into
+questions/web and uses 26 turns with complete REST/reload history. Its prerequisites
+and flags must be configured before rebuilding/recreating required components.
+Paid provider availability is not inferred from a deterministic mock pass.</p>
+<h2 id="recovery-and-report-privacy">Recovery and report privacy</h2>
+<p>Keep private journals on failed cleanup. Replay exactly the printed owned recovery
+command using the original URLs/model identity and established history. Do not replace
+closure proof with prefix SQL, broad Temporal terminate/search or a new namespace.
+Kubernetes wrappers retain runtime/infrastructure when ownership cannot be proved.</p>
+<p>Disable trace/video/screenshots/storage-state capture for auth-bearing acceptance.
+Use the dedicated sanitized web/browser harness where required. Public reports
+contain safe phase/status/counts, not credentials, raw HTTP, object payloads or
+private marker/journal contents.</p>
+<p>A fresh release report identifies its exact candidate hash, test commands and
+PASS/BLOCKED/FAILED boundaries. Historical private runs are not a current release
+pass. See <a href="testing/interactive-web-coverage.html">interactive coverage</a> and
+<a href="testing/data-lifecycle.html">data lifecycle coverage</a>.</p>
+<h2 id="manual-acceptance-commands-and-prerequisites">Manual acceptance commands and prerequisites</h2>
+<p>Run these sequentially against a disposable, built stack. Export the current stack
+<code>APP_SECRET_KEY</code>; do not generate a replacement signing key for an existing deployment.
+<code>./smoke-test-groups.sh</code> also needs the <code>master</code> realm administrator: export
+<code>KEYCLOAK_ADMIN_PASSWORD</code> from <code>.env</code> (stacks initialized before generated Keycloak
+passwords still use <code>admin</code>).
+MCP/code need profiles <code>mcp</code> and <code>skills-exec</code> and a built <code>runner</code>/<code>skill-sandbox</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Coverage / additional prerequisites</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>./smoke-test.sh</code></td>
+<td>Ordinary chat/SSE with Keycloak and a runner</td>
+</tr>
+<tr>
+<td><code>./smoke-test-langfuse.sh</code></td>
+<td>Chat observability in the local Langfuse project</td>
+</tr>
+<tr>
+<td><code>./smoke-test-mcp.sh</code></td>
+<td>MCP SSE tools; deterministic overlay recommended</td>
+</tr>
+<tr>
+<td><code>./smoke-test-code-skill.sh</code></td>
+<td>Stateful code sandbox and bundle execution</td>
+</tr>
+<tr>
+<td><code>./smoke-test-groups.sh</code></td>
+<td>Group-based access to skills/models/documents</td>
+</tr>
+<tr>
+<td><code>./smoke-test-quota.sh</code></td>
+<td>Disposable DB/backend/gateway; existing Keycloak</td>
+</tr>
+<tr>
+<td><code>./smoke-test-organization-ui.sh</code></td>
+<td>Both UI audiences, models/analytics/revoke; temporary ports8000/8001</td>
+</tr>
+<tr>
+<td><code>./smoke-test-multi-agent.sh</code></td>
+<td>Sequential/parallel DAG, revoke/quota/cancel and owned cleanup</td>
+</tr>
+<tr>
+<td><code>./smoke-test-knowledge-ui.sh</code></td>
+<td>Real UI and MinIO/Temporal/Milvus; wrapper starts RAG profile</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-ui.sh</code></td>
+<td>Real UI workflow authoring, deterministic gateway</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-templates-ui.sh</code></td>
+<td>Template versions/copies/grants/HITL/archive</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-routing-ui.sh</code></td>
+<td>Auto selection, malformed/inaccessible fallback, explicit picker priority</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-branching-ui.sh</code></td>
+<td>Node failure, conditional edges, AND-join, skip cascade</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-hitl-ui.sh</code></td>
+<td>Reject/cancel and real65-second dedicated test deadline</td>
+</tr>
+<tr>
+<td><code>./smoke-test-workflow-loops.sh</code></td>
+<td>API-only loop cap/fallthrough/cancel and previous-iteration context</td>
+</tr>
+<tr>
+<td><code>./smoke-test-archive-images.sh</code></td>
+<td>Disposable lifecycle project: data-worker archives/restores an old conversation with images; scoped image IAM</td>
+</tr>
+<tr>
+<td><code>./smoke-test-hermes-ui.sh</code></td>
+<td>Real UIs with the Hermes overlay and the deterministic gateway: the Admin UI picks the Hermes model; a member chooses Hermes, sees its tool cards and keeps it chosen after a reload, answers its question card, clears its memory in settings and sees a skill draft; the administrator reads and approves the draft, and the next turn's sandbox has the skill; Hermes attaches a chart and a CSV it made in its terminal (shown, downloaded, kept after a reload) and is refused a platform secret; the member gives Hermes two workbooks and a logo, which reach <code>/workspace/inputs/</code>, and gets back a pivot workbook and a deck with the pivot's totals and the logo's size as Hermes's code read it; Hermes looks at the logo with <code>vision_analyze</code>, which the model sees only once the organization marks it as taking images; Hermes shares the web app running in its sandbox, which the member opens from its card in a new tab at its own origin (the ticket gone from the address, the app answering), while a browser without the cookie and a reused ticket are refused; Hermes is told about its sandbox and builds a web app, installing an npm package through hermes-egress, checking the page in headless Chromium and handing over a screenshot and the project as a ZIP. With <code>HERMES_E2E_REAL_LLM=true</code> it runs <code>hermes.real-llm.spec.ts</code> through the stack's gateway on <code>E2E_HERMES_MODEL</code> (default <code>deepseek-flash-free</code>; native tool calling required): a hash only the terminal can produce, a matplotlib chart and its CSV attached, a pivot workbook and a deck built from two uploaded workbooks (the answer is the pivot's total), a Flask prototype tested with pytest and Playwright, handed over as a ZIP with a screenshot and opened from its preview card, and with <code>E2E_HERMES_VISION=true</code> (a model that takes images, such as <code>gemini-3.5-flash-lite</code>) the colour of a picture, a question card, memory and a skill draft. Not at the same time as the sandbox acceptance (one egress guard)</td>
+</tr>
+<tr>
+<td><code>./smoke-test-hermes-sandbox.sh</code></td>
+<td>Disposable project: skill-executor creates Hermes sandboxes from this checkout; a run reaches the real backend route through hermes-egress and is billed; no capabilities, non-root, read-only root, no secrets in metadata; sandboxes cannot reach each other or the host; re-adoption after an executor restart, guard reconnection, and nothing left after close or idle expiry</td>
+</tr>
+<tr>
+<td><code>./smoke-test-hermes-egress.sh</code></td>
+<td>Disposable project with the real <code>docker-compose.hermes.yml</code>: a probe on the Hermes sandbox network has no DNS or routes of its own, reaches only the completion path, and gets internet egress per mode (<code>none</code>, <code>packages</code> with <code>pip</code>, <code>public</code> with <code>web.access</code>); a closed session cuts an open tunnel. Needs internet access</td>
+</tr>
+<tr>
+<td><code>./smoke-test-authorization-ui.sh</code></td>
+<td>Five resource types, live revoke and both audiences</td>
+</tr>
+<tr>
+<td><code>./smoke-test-images-ui.sh</code></td>
+<td>Admin image and vision models, chat generation, editing and image attachments, reload; deterministic gateway</td>
+</tr>
+<tr>
+<td><code>./smoke-test-auth-lifecycle.sh</code></td>
+<td>UI logout/refresh/recovery and natural access expiry (up to15minutes)</td>
+</tr>
+<tr>
+<td><code>./smoke-test-k8s.sh</code></td>
+<td>Fresh owned k3d/Helm install/upgrade, runner/sandbox/RBAC</td>
+</tr>
+<tr>
+<td><code>./smoke-test-user-questions-k8s.sh</code></td>
+<td>Fresh owned questions Ingress/Pod UID lifecycle</td>
+</tr>
+<tr>
+<td><code>./smoke-test-web-tools-k8s.sh</code></td>
+<td>Fresh dual-stack CNI/SSRF controls; required web secrets/exclusive flag</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>./seed-skills.sh</code> is deliberate manual development setup, not a test; acceptance
+removes its own fixtures and leaves no persistent seed skills.</p>
+<p>Workflow C5 wrappers share <code>E2E_BUSINESS_UI_URL</code>, <code>E2E_ADMIN_UI_URL</code>,
+<code>E2E_BUSINESS_BACKEND_URL</code>, <code>E2E_ADMIN_BACKEND_URL</code>, <code>E2E_KEYCLOAK_URL</code> and
+<code>E2E_POSTGRES_CONTAINER</code>. Their marker/state/model variables are wrapper-owned;
+unmanaged loop mode and legacy overrides are rejected. Do not launch standard
+wrappers against a differently named Compose stack: they verify their expected
+service identities. The recovery CLI additionally accepts <code>E2E_BACKEND_CONTAINER</code>
+for an explicitly identified backend and verifies matching Compose project/service
+labels before executing exact Temporal RPCs.</p>
+<p>The knowledge wrapper may need up to15minutes to download/warm the reranker on
+fresh cache; <code>RERANKER_READY_ATTEMPTS</code> controls its polling bound. The auth lifecycle
+wrapper changes only its own browser SSO session, never realm/client/membership
+settings or logout-all, and does not prove natural refresh-token expiry.</p>
+<p>For deterministic overlay setup, build runner/sandbox before applying it:</p>
+<pre><code class="language-bash">export APP_SECRET_KEY=&lt;current-stack-secret&gt;
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile build build runner skill-sandbox
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile mcp --profile skills-exec build backend backend-admin tool-worker mcp-everything mcp-fetch skill-executor test-gateway
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile mcp --profile skills-exec up -d --no-build backend backend-admin tool-worker mcp-everything mcp-fetch skill-executor
+./smoke-test-mcp.sh
+./smoke-test-code-skill.sh
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml rm -sf test-gateway
+docker compose -f docker-compose.yml up -d --force-recreate backend
+</code></pre>
+<p>The repository harness requires synthetic <code>APP_SECRET_KEY</code> and <code>APP_DATABASE_URL</code>
+environment values just as CI does; its optional database/container tests require
+their documented separate prerequisites. Keep logs private because third-party
+assertion diagnostics may include environment values.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

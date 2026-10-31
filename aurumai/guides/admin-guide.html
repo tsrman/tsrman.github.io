@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrator guide · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="administrator-guide">Administrator guide</h1>
+<p>This guide is for people who run an AurumAI organization day to day: who may do what,
+which models and agents people get, and how to watch usage. Installing the platform
+is covered in <a href="deployment.html">Installation and deployment</a>; running it in production
+in <a href="operations.html">Operations</a>.</p>
+<h2 id="the-admin-app">The Admin app</h2>
+<p>Open the admin address (<code>http://localhost:3100</code> locally) and sign in with an account
+that has the <code>org_admin</code> role in Keycloak. People without it cannot enter. The sidebar
+has three groups:</p>
+<ul>
+<li><strong>People</strong>: Users, Groups</li>
+<li><strong>Workspace</strong>: Agents, Skills and tools, Workflows, Knowledge bases, Models</li>
+<li><strong>Monitoring</strong>: Analytics</li>
+</ul>
+<p><img src="../assets/screenshots/admin-users.png" alt="The Users page" /></p>
+<p>Roles, accounts and group membership live in <strong>Keycloak</strong>
+(<code>http://localhost:8080</code> locally). The Admin app shows them after a person signs in
+but does not edit them. Membership is synchronised from the <code>groups</code> claim on every
+sign-in, so change it in Keycloak.</p>
+<h2 id="how-access-works">How access works</h2>
+<p>Access is <strong>default-deny</strong> and has two layers.</p>
+<ol>
+<li>
+<p><strong>Capabilities</strong> say what a person may do:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Allows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chat.send</code></td>
+<td>Start and continue conversations (the only default for a new organization)</td>
+</tr>
+<tr>
+<td><code>workspace.agents.create</code></td>
+<td>Create agents</td>
+</tr>
+<tr>
+<td><code>workspace.knowledge.create</code></td>
+<td>Create knowledge bases and upload documents</td>
+</tr>
+<tr>
+<td><code>workspace.skills.create</code></td>
+<td>Add skills</td>
+</tr>
+<tr>
+<td><code>sharing.manage</code></td>
+<td>Grant others access to resources (also needs the administrator role)</td>
+</tr>
+<tr>
+<td><code>web.access</code></td>
+<td>Use web search and read</td>
+</tr>
+<tr>
+<td><code>images.generate</code></td>
+<td>Create and edit images</td>
+</tr>
+<tr>
+<td><code>agents.hermes</code></td>
+<td>Use Hermes Agent</td>
+</tr>
+<tr>
+<td><code>admin.users.read</code>, <code>admin.users.write</code></td>
+<td>View and manage users</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Resource grants</strong> say which models, skills, knowledge bases, agents and workflows
+a person or group may use. Without a grant the resource is invisible to them.</p>
+</li>
+</ol>
+<p>Both layers are evaluated live: a change applies to the next request, including
+turns already running.</p>
+<h3 id="groups-and-default-permissions">Groups and default permissions</h3>
+<p><img src="../assets/screenshots/admin-groups.png" alt="Groups and the default permissions entry" /></p>
+<p><strong>Users → Groups</strong> lists groups synchronised from Keycloak. Open <strong>Default
+permissions</strong> to set capabilities every member has, whatever their groups. Open a
+group to give its members more on top of those defaults. Turn a capability on only
+when you want everyone it covers to be able to add something other members then
+see (an agent, a skill, a knowledge base).</p>
+<p>Before you save a change, the preview shows the effective result for a user or group.</p>
+<h3 id="resource-access">Resource access</h3>
+<p>Each agent, skill, workflow, knowledge base and model has an <strong>Access</strong> action. Grant
+it to users or groups there. Granting a model or skill to a group is how you decide
+what a team can use; the person still needs the capability for the action itself.</p>
+<p>New organizations are provisioned on the first login with the default capability and
+grants for the global skills and models. For existing organizations preview and apply
+provisioning from the backend container:</p>
+<pre><code class="language-bash">docker compose exec backend python -m src.cli.provision_org --all           # preview
+docker compose exec backend python -m src.cli.provision_org --all --apply
+</code></pre>
+<h2 id="models">Models</h2>
+<p><img src="../assets/screenshots/admin-models.png" alt="Models page: defaults and image settings" /></p>
+<p><strong>Models</strong> lists what the gateway publishes. The status bar says whether the gateway
+is reachable.</p>
+<ul>
+<li><strong>Defaults.</strong> The default model offered to users who have not chosen one, and the
+default temperature for agents that inherit the organization's value (unset means
+the system default, 0.7).</li>
+<li><strong>Access.</strong> Who may use each model, set in the catalog (see
+<a href="#resource-access">Resource access</a>). The defaults above do not change permissions.</li>
+<li><strong>Images.</strong> The image generation and image editing models (separate settings; either
+may be off), and which chat models accept pictures (&quot;Models that accept images&quot;).
+People also need <code>images.generate</code>, and the operator must have set
+<code>IMAGES_ENABLED</code>; the page warns when the switch is off.</li>
+<li><strong>Hermes Agent.</strong> The model Hermes runs on and its internet access mode. See
+<a href="hermes-agent.html#administration">Hermes Agent: administration</a>.</li>
+</ul>
+<h2 id="agents">Agents</h2>
+<p><strong>Agents</strong> are assistants with a model, instructions, allowed skills and knowledge
+bases, offered to users in chat. Create, edit and delete them here; people with
+<code>workspace.agents.create</code> can create their own. An agent works only with the skills
+and knowledge bases it has been granted, and a person using it must be granted the
+agent itself.</p>
+<p>Agent kinds include ordinary agents and, when Hermes Agent is on, an agent that runs on
+Hermes (usable as a workflow node, marked with a <strong>Hermes Agent</strong> badge).</p>
+<h2 id="skills-and-tools">Skills and tools</h2>
+<p><strong>Skills and tools</strong> are what agents and chat can call:</p>
+<ul>
+<li><strong>MCP</strong> servers: tools over an SSE endpoint (use <em>discover tools</em> when adding one).
+Tenant MCP uses SSE only.</li>
+<li><strong>Code</strong> skills: an uploaded bundle that runs in an isolated sandbox over several
+rounds. They need the <code>skills-exec</code> profile on the deployment.</li>
+<li><strong>Tool</strong> and <strong>Agent</strong> entries.</li>
+</ul>
+<p>Use <strong>Access</strong> to grant each to people or groups. The page also lists skills Hermes
+Agent wrote (see <a href="hermes-agent.html#reviewing-skills-hermes-wrote">Reviewing skills Hermes wrote</a>).</p>
+<p><code>./install-platform.sh --apply</code> installs four starter tools; see
+<a href="../STARTER_TOOLS.html">starter tools</a>.</p>
+<h2 id="workflows">Workflows</h2>
+<p><strong>Workflows</strong> describe multi-step processes: agents on connected nodes, with branches,
+parallel steps, human approval and bounded loops. An editor guides you through five
+steps, with runnable <strong>Examples</strong>, <strong>Saved templates</strong> and <strong>Run diagnostics</strong> tabs.
+The full walkthrough, with three complete examples, is in the
+<a href="../WORKFLOWS.html">workflow guide</a>. Workflows are versioned; a running turn keeps the
+version it started with. People run workflows from the workflow picker in chat, so
+grant them access to each one.</p>
+<h2 id="knowledge-bases">Knowledge bases</h2>
+<p>Documents are uploaded and managed in the chat app (users with
+<code>workspace.knowledge.create</code>). The Admin app's <strong>Knowledge bases</strong> page decides <strong>who
+can use</strong> each one.</p>
+<p><img src="../assets/screenshots/admin-knowledge.png" alt="Knowledge bases in the Admin app" /></p>
+<h2 id="usage-and-quotas">Usage and quotas</h2>
+<p><img src="../assets/screenshots/admin-analytics.png" alt="Usage analytics" /></p>
+<p><strong>Analytics</strong> shows requests, tokens and images for a date range (UTC), filtered by user
+or model, with a daily trend. The cards show the organization's monthly request and
+token limits, how much is used in the current month and what remains. Defaults are
+10 000 requests and 1 000 000 000 tokens per UTC calendar month. When either runs out,
+new requests are refused until the month changes. Requests whose provider reported no
+token data are counted separately and flagged on the page.</p>
+<p>Per user, <strong>Users → Usage</strong> opens the same report for one person. Image calls count
+against the quota too. In addition each user is rate-limited
+(<code>APP_RATE_LIMIT_PER_MINUTE</code>, 300; <code>APP_RATE_LIMIT_PER_MINUTE_STREAM</code>, 30).</p>
+<h2 id="a-first-day-checklist">A first-day checklist</h2>
+<ol>
+<li>Sign in to the Admin app. Check <strong>Models</strong> shows <em>Gateway available</em>.</li>
+<li>Choose a default model and decide which groups may use which models.</li>
+<li>In <strong>Groups → Default permissions</strong> keep <code>chat.send</code> and add only what everyone
+should have.</li>
+<li>Create the first agents; grant them to the people who should see them.</li>
+<li>Add skills or knowledge bases as needed and grant access.</li>
+<li>Turn on optional features in the deployment and grant their capabilities to the
+right groups: web, images, <a href="hermes-agent.html">Hermes Agent</a>.</li>
+<li>Watch <strong>Analytics</strong> during the first week.</li>
+</ol>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operations · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="operations">Operations</h1>
+<p>Running AurumAI after it is installed: health checks, monitoring, upgrades, backups,
+data lifecycle and the problems operators meet most. For installation see
+<a href="deployment.html">Installation and deployment</a>.</p>
+<h2 id="health-and-readiness">Health and readiness</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /health</code> on port 8000 or 8001</td>
+<td>Liveness: the process is up</td>
+</tr>
+<tr>
+<td><code>GET /ready</code></td>
+<td>The required application dependencies answer</td>
+</tr>
+<tr>
+<td><code>GET /metrics</code></td>
+<td>Prometheus metrics, including <code>http_requests_total</code>, <code>http_request_duration_seconds</code> and the image, web-tool and interaction-outbox counters</td>
+</tr>
+</tbody>
+</table></div>
+<p>A healthy <code>/ready</code> does not prove an optional feature works. Check each one's own
+service: <code>docker compose ps</code>, then <code>docker compose logs &lt;service&gt;</code> for the one that
+is failing. Keycloak and Temporal are slow to start.</p>
+<p>Keep <code>/metrics</code> off the public internet; scrape it from inside the network.</p>
+<h2 id="observability">Observability</h2>
+<ul>
+<li><strong>Langfuse</strong> (<code>http://localhost:3001</code> locally) traces model calls. Capturing full
+prompts and documents is a deliberate privacy decision, separate from enabling
+telemetry.</li>
+<li><strong>Temporal UI</strong> (<code>http://localhost:8082</code> locally) shows conversation, workflow,
+Hermes and tool workflows. Behind the proxy it sits behind basic auth.</li>
+<li><strong>Usage analytics</strong> in the Admin app shows requests, tokens and images per user and
+model against the monthly limits (see the <a href="admin-guide.html#usage-and-quotas">administrator guide</a>).</li>
+</ul>
+<p>Never publish a complete environment dump or a browser trace that contains tokens.</p>
+<h2 id="upgrades">Upgrades</h2>
+<ol>
+<li>Read the release notes and the <a href="https://github.com/tsrman/AurumAI/blob/main/CHANGELOG.md">changelog</a> for migrations and new
+settings. Back up first (see below).</li>
+<li>Pull the new source or images, then rebuild: <code>docker compose up -d --build</code>. The
+backend entrypoint applies database migrations with the migration role before it
+starts; the RAG service has its own migration job.</li>
+<li>Rebuild the images that are built by profile when their sources changed:
+<code>docker compose --profile build build runner skill-sandbox</code> (and <code>hermes-sandbox</code>
+with the Hermes overlay).</li>
+<li>Check <code>/ready</code>, then run one conversation end to end.</li>
+</ol>
+<p>With Helm, migrations run through a dedicated hook, not on each replica. Roll back
+API admission before stopping an identity worker, and keep the Temporal patch markers
+across upgrades so running workflows replay. An existing Keycloak database keeps its
+clients and mappers: apply realm changes through a reviewed upgrade, never by deleting
+volumes.</p>
+<p>Archive format versions are forward-only for jobs already started; an older job refuses
+content its version cannot carry.</p>
+<h2 id="backups">Backups</h2>
+<p>Back up these; the stack's state is split across them:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL (<code>postgres_data</code>)</td>
+<td>Conversations, authorization, settings, workflows</td>
+</tr>
+<tr>
+<td>MinIO (<code>minio_data</code>)</td>
+<td>Uploads, images, files, Hermes workspace snapshots, archives</td>
+</tr>
+<tr>
+<td><code>.env</code> and any secret store</td>
+<td>Generated secrets; without them the data cannot be used</td>
+</tr>
+<tr>
+<td>Keycloak's database</td>
+<td>Accounts, roles, clients</td>
+</tr>
+<tr>
+<td>Milvus (<code>milvus_data</code>, <code>etcd_data</code>)</td>
+<td>Knowledge-base vectors (rebuildable from documents)</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>docker compose down</code> stops the stack and keeps volumes. <code>docker compose down -v</code> deletes
+them: it is not a repair step.</p>
+<h2 id="data-lifecycle">Data lifecycle</h2>
+<p>Payload tables are partitioned by month. Long-lived data can be <strong>archived</strong>: written as
+verified Parquet and object copies, exported and later restored, by operator-only
+commands. Archiving is off by default (<code>APP_ARCHIVE_ENABLED</code>); it needs its own database
+roles and S3 accounts, and deletion happens only after verification. Conversations
+holding images or files are archived with their bytes.</p>
+<pre><code class="language-bash">uv run python -m src.cli.archive_data list --org-id &lt;ORG_UUID&gt;
+uv run python -m src.cli.archive_data run --org-id &lt;ORG_UUID&gt; --audit            # dry run
+</code></pre>
+<p>The runbook has roles, bounds, export and recovery: <a href="../operations/data-archive.html">data archive</a>.
+An ambiguous deletion is not a successful cleanup: keep the recovery evidence.</p>
+<h2 id="identity-synchronization">Identity synchronization</h2>
+<p>An optional worker (profile <code>maintenance</code>) synchronises Keycloak users and groups in the
+background. Enable it with admission off, verify the groups mapper on both clients and
+worker readiness, then turn admission on. Without it, sign-in synchronises a person's
+groups when they log in.</p>
+<h2 id="scaling-and-limits">Scaling and limits</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ordinary and stream rate per user</td>
+<td><code>APP_RATE_LIMIT_PER_MINUTE</code> (300), <code>APP_RATE_LIMIT_PER_MINUTE_STREAM</code> (30)</td>
+</tr>
+<tr>
+<td>Runner pool</td>
+<td><code>RUNNER_POOL_SIZE</code>, idle reaping after 30 minutes</td>
+</tr>
+<tr>
+<td>Workflow size</td>
+<td><code>WORKFLOW_MAX_NODES</code> (20), <code>WORKFLOW_MAX_PARALLELISM</code> (4)</td>
+</tr>
+<tr>
+<td>Per turn</td>
+<td>10 questions, 4 open; 10 searches; 20 page reads; 4 images</td>
+</tr>
+<tr>
+<td>Hermes sandboxes</td>
+<td>16 running, 4 per organization</td>
+</tr>
+<tr>
+<td>Document upload</td>
+<td>25 MB</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <a href="../CONFIGURATION.html">configuration reference</a> has every setting.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stack is healthy but the first chat cannot start</td>
+<td>The runner image is not built (<code>docker compose --profile build build runner</code>), or the API lacks Docker-socket access</td>
+</tr>
+<tr>
+<td>A member cannot see a model or a new global skill</td>
+<td>Access is default-deny: preview and apply <code>src.cli.provision_org --all</code> (see the <a href="admin-guide.html#resource-access">administrator guide</a>)</td>
+</tr>
+<tr>
+<td>Keycloak clients or mappers are out of date</td>
+<td>The realm imports only on a fresh database; use a reviewed realm upgrade</td>
+</tr>
+<tr>
+<td>The evaluator does not run</td>
+<td>Set both <code>EVALUATOR_ENABLED=true</code> and an explicit <code>EVALUATOR_MODEL</code></td>
+</tr>
+<tr>
+<td>Knowledge search returns nothing</td>
+<td>The documents may not be indexed yet; first model downloads take minutes</td>
+</tr>
+<tr>
+<td>Users get &quot;quota exceeded&quot;</td>
+<td>The month's request or token limit is spent: see Analytics</td>
+</tr>
+<tr>
+<td>HTTP 429</td>
+<td>A user passed the per-minute rate limit</td>
+</tr>
+<tr>
+<td>Web search or read refuses</td>
+<td><code>WEB_ENABLED</code>, the <code>web</code> profile, secrets and the enforcement checks; never open outbound access to make it work</td>
+</tr>
+<tr>
+<td>Hermes: see its table</td>
+<td><a href="hermes-agent.html#troubleshooting">Hermes troubleshooting</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="security-hygiene">Security hygiene</h2>
+<p>Rotate generated secrets deliberately and recreate both API planes afterwards. Keep the
+development accounts out of anything reachable by others. Report vulnerabilities as
+described in <a href="https://github.com/tsrman/AurumAI/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

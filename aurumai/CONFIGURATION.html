@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="configuration">Configuration</h1>
+<p>Start with tracked <code>.env.example</code> and persistent <code>scripts/bootstrap-dev-env.sh</code>.
+Actual <code>.env</code> files, credentials and generated provider configuration are ignored
+and excluded from public exports. The root env serves Compose; each Python service
+uses its own settings prefix. Do not copy every root variable into a service dotenv.</p>
+<h2 id="api-and-identity">API and identity</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>APP_SECRET_KEY</code></td>
+<td>Session signing secret; generate a strong persistent value</td>
+</tr>
+<tr>
+<td><code>APP_DEBUG</code></td>
+<td>Development/mock/docs behavior; false for configured production</td>
+</tr>
+<tr>
+<td><code>APP_DATABASE_URL</code></td>
+<td>Scoped runtime database connection</td>
+</tr>
+<tr>
+<td><code>APP_MIGRATION_DATABASE_URL</code></td>
+<td>Separate privileged migration connection</td>
+</tr>
+<tr>
+<td><code>APP_DATABASE_ROLE_PASSWORD</code></td>
+<td>Runtime role creation/configuration password</td>
+</tr>
+<tr>
+<td><code>APP_REDIS_URL</code></td>
+<td>Redis connection, including configured auth</td>
+</tr>
+<tr>
+<td><code>APP_KEYCLOAK_URL</code>, realm/client/issuer settings</td>
+<td>Validated identity origin/audience</td>
+</tr>
+<tr>
+<td><code>APP_JWT_CLOCK_SKEW_SECONDS</code></td>
+<td>Tolerated Keycloak/API clock difference for token <code>iat</code>/<code>nbf</code> (default 30); expiry stays exact</td>
+</tr>
+<tr>
+<td><code>PUBLIC_HOST</code></td>
+<td>Compose browser-visible API/Keycloak/UI host</td>
+</tr>
+<tr>
+<td><code>PUBLIC_BIND_ADDRESS</code></td>
+<td>Host interface for browser-facing Compose ports; <code>127.0.0.1</code> by default</td>
+</tr>
+<tr>
+<td><code>KEYCLOAK_ADMIN_PASSWORD</code></td>
+<td>Generated <code>master</code> realm administrator password, applied on first Keycloak start</td>
+</tr>
+<tr>
+<td><code>PUBLIC_DOMAIN</code>, <code>ACME_EMAIL</code></td>
+<td>Base domain and Let's Encrypt contact for <code>docker-compose.proxy.yml</code></td>
+</tr>
+<tr>
+<td><code>TEMPORAL_UI_BASIC_AUTH_USER</code>, <code>TEMPORAL_UI_BASIC_AUTH_PASSWORD</code></td>
+<td>Proxy basic-auth credentials for Temporal UI</td>
+</tr>
+<tr>
+<td><code>ACME_CA_SERVER</code></td>
+<td>Optional ACME directory, for example the Let's Encrypt staging endpoint</td>
+</tr>
+</tbody>
+</table></div>
+<p>The business/admin planes have different Keycloak client audiences. Changing URLs
+requires compatible realm redirect origins and CORS, not disabling signature,
+issuer/audience or date validation. The proxy overlay sets a fixed Keycloak hostname
+(<code>https://auth.&lt;PUBLIC_DOMAIN&gt;</code>) and the matching backend issuer; the realm import
+reads <code>AURUMAI_CHAT_ORIGIN</code>/<code>AURUMAI_ADMIN_ORIGIN</code> for the extra client origins. Replace documented development users for
+production. The database is <code>aurum_ai</code> with <code>aurum_ai_*</code> roles; the realm is <code>aurum-ai</code>.</p>
+<p>Bootstrap-generated passwords are URL-safe. When supplying custom database values,
+use valid connection-URI encoding or an explicit connection URL. Persistent storage
+credentials must remain consistent with the initialized service; recreating an env
+file does not rotate an existing database/MinIO account automatically.</p>
+<h2 id="gateway-and-evaluation">Gateway and evaluation</h2>
+<p><code>LLM_GATEWAY_URL</code>/<code>APP_LLM_GATEWAY_URL</code> identify the external gateway base without a
+final <code>/v1</code>. <code>GATEWAY_API_KEY</code> is supplied by the operator. TLS verification is on;
+corporate CA configuration uses the existing gateway CA/verification settings.
+The runner uses the API proxy, not direct provider credentials.</p>
+<p>In Admin UI, select a default model under Models. A model marked as requiring
+organization access can be selected for configuration; use the grant editor below
+to give the organization read access, apply the grants, then save the default.
+Selecting a default never grants permission by itself.</p>
+<p>The Bifrost wrapper preserves persistent app secrets. OpenRouter requires
+<code>OPENROUTER_API_KEY</code>; the shipped Bifrost configuration contains only an
+environment reference to that key.</p>
+<p><code>EVALUATOR_ENABLED=true</code> additionally needs an explicit <code>EVALUATOR_MODEL</code>. New
+workflows skip evaluator creation when its model is empty. Its replay marker is
+permanent; do not remove old workflow markers during a branding/configuration edit.
+Real-provider E2E requires <code>E2E_USE_REAL_LLM=true</code> and <code>E2E_LLM_MODEL</code> explicitly.</p>
+<p><code>RAG_API_SEARCH_EMBEDDING_TIMEOUT_SECONDS</code> (default 10) bounds how long knowledge
+search waits for the query embedding. A CPU-only embedding model under memory
+pressure can exceed it on the first query after idling, which surfaces as a failed
+search; raise it on such hosts.</p>
+<h2 id="frontend-runtime-values">Frontend runtime values</h2>
+<p>Both UIs read <code>RUNTIME_*</code> on the server for each request:</p>
+<ul>
+<li><code>RUNTIME_API_URL</code>, including the application <code>/v1</code> path.</li>
+<li><code>RUNTIME_KEYCLOAK_URL</code>, <code>RUNTIME_KEYCLOAK_REALM</code>, <code>RUNTIME_KEYCLOAK_CLIENT_ID</code>.</li>
+<li><code>RUNTIME_ADMIN_URL</code> for chat UI; <code>RUNTIME_APP_URL</code> for admin UI.</li>
+<li><code>RUNTIME_SOURCE_CODE_URL</code>, pointing to the actual source of this deployment.</li>
+</ul>
+<p>The interface language is chosen per request: an explicit <code>NEXT_LOCALE</code> cookie
+(<code>en</code> or <code>ru</code>, set by the language switcher) wins, otherwise the first supported
+<code>Accept-Language</code> entry, otherwise English. URLs carry no locale prefix.</p>
+<p>These are not <code>NEXT_PUBLIC_*</code> build inputs. The same image can be deployed behind
+other browser-visible hosts with runtime settings. Source URLs are HTTP(S) without
+embedded URL credentials; empty/invalid source configuration does not invent a
+repository. Both applications ship a local copy of the project LICENSE.</p>
+<h2 id="runner-and-workflows">Runner and workflows</h2>
+<p><code>APP_RUNNER_RUNTIME=docker|kubernetes</code> and <code>SKILL_EXECUTOR_RUNTIME</code> select runtime
+at startup. Compose can use a warm pool; Kubernetes uses cold runners and pool size
+zero. Docker network/image settings must match the selected deployment. Kubernetes
+runner and sandbox namespaces are distinct and require appropriate RBAC, network
+policy and RuntimeClass/node PID enforcement.</p>
+<p>Workflow ceilings are <code>APP_WORKFLOW_MAX_NODES=20</code> and
+<code>APP_WORKFLOW_MAX_PARALLELISM=4</code>. Diagnostic retention defaults to 30 days and is
+independent of data archiving. Conversation/organization/agent temperatures are
+nullable overrides resolved server-side; a missing override inherits its configured
+parent/default, not a hardcoded model-specific value.</p>
+<h2 id="questions-and-web">Questions and web</h2>
+<p><code>USER_QUESTIONS_ENABLED</code> in Compose supplies server-owned
+<code>APP_USER_QUESTIONS_ENABLED</code>; the Helm equivalent is <code>backend.userQuestionsEnabled</code>.
+It is default-off. Disabling new reservations leaves existing question lifecycle
+operations available. Backend, runner and UI must be compatible before enabling.</p>
+<p>Web additionally needs the overlay/profile, <code>WEB_TOOLS_SERVICE_SECRET</code>,
+<code>SEARXNG_SECRET</code>, <code>web.access</code> grants and enforcement acceptance. The backend switch
+is separate from deploying the web boundary. <code>WEB_EGRESS_FORBIDDEN_CIDRS</code> adds
+operator deny ranges to application, guard and Helm policies. Do not weaken the
+required ranges or treat an unavailable positive control as a passed deny test.</p>
+<h2 id="images">Images</h2>
+<p><code>IMAGES_ENABLED=false</code> (<code>APP_IMAGES_ENABLED</code>) is the operator switch for the
+<code>generate_image</code> and <code>edit_image</code> chat tools. A turn offers them only when the
+switch is on, the user has the <code>images.generate</code> capability (Admin UI → Groups)
+and the organization has chosen a model in Admin UI → Models → Images. The
+generation and editing models are separate settings; either can stay off.</p>
+<p>The backend calls an OpenAI-compatible Images API (<code>/v1/images/generations</code> and
+<code>/v1/images/edits</code>). <code>IMAGES_API_URL</code> and <code>IMAGES_API_KEY</code> default to the chat
+gateway and its key; <code>IMAGES_TIMEOUT_SECONDS</code> bounds one provider call. Only inline
+<code>b64_json</code> results are accepted, never provider URLs, and the bytes must be PNG,
+JPEG or WebP. Images are stored in the platform bucket under
+<code>conversation-images/&lt;org&gt;/&lt;conversation&gt;/</code> and served only to the conversation
+owner. Each turn may create at most four images; image-enabled turns list the
+conversation's eight newest images to the model so a later turn can edit them.
+Conversations with images and files are archived with their bytes (see
+<a href="operations/data-archive.html#archive-format-versions">the archive guide</a>).</p>
+<p>Files attached to an answer (CSV, plain text, Markdown, JSON, PDF, XLSX, DOCX, PPTX
+and ZIP, at most 20 MiB each) are stored next to the images, under <code>conversation-images/&lt;org&gt;/&lt;conversation&gt;/files/</code>. Their type is
+recognised from the bytes, never from the name the agent chose; plain text keeps a
+code extension such as <code>.py</code> or <code>.html</code> in its name but stays <code>text/plain</code>. They are
+served only to the conversation owner and always as a download. In a Hermes conversation
+the user can upload such files, and PNG, JPEG or WebP pictures, for Hermes's workspace (<code>POST /v1/conversations/&lt;id&gt;/files</code>, with Hermes enabled and both Hermes capabilities): up
+to ten per message, twenty and 200 MiB per conversation, under
+<code>conversation-images/&lt;org&gt;/&lt;conversation&gt;/files/uploads/</code>; one not yet sent can be
+removed. Before each turn tool-worker puts the conversation's sent uploads into the
+sandbox's <code>/workspace/inputs/</code>, and the turn's text names their paths. Hermes's model
+sees a picture through its <code>vision_analyze</code> tool only when it is marked as taking
+images in Admin UI → Models → Images.</p>
+<p>Previews of apps Hermes runs (docs/HERMES_AGENT.md) are off by default:
+<code>APP_HERMES_PREVIEW_ENABLED</code>, <code>APP_HERMES_PREVIEW_ORIGIN</code> (an origin template with
+<code>{preview}</code>, on a wildcard domain with TLS in production) and
+<code>APP_HERMES_PREVIEW_SERVICE_SECRET</code> (shared with the preview service) turn them on.
+In Compose, set <code>HERMES_PREVIEW_ENABLED=true</code>, <code>HERMES_PREVIEW_ORIGIN</code> (for example
+<code>http://{preview}.preview.localhost:8095</code> in development, which browsers resolve to
+the machine itself), <code>HERMES_PREVIEW_SERVICE_SECRET</code> and
+<code>HERMES_PREVIEW_EXECUTOR_SECRET</code> (shared by the preview service and
+skill-executor's preview stream), and start the <code>hermes-preview</code> profile; it listens
+on <code>HERMES_PREVIEW_PORT</code> (8095). Limits: <code>HERMES_PREVIEW_MAX_CONNECTIONS</code> (32 per
+preview), <code>HERMES_PREVIEW_IDLE_SECONDS</code> (300), <code>HERMES_PREVIEW_RECHECK_SECONDS</code> (30)
+for open WebSocket connections.</p>
+<p>The same switch also enables image attachments. In Admin UI → Models → Images an
+administrator marks the chat models that accept image input; the chat composer
+offers PNG, JPEG and WebP attachments only while such a model is selected, and the
+backend rejects images sent to any other model. A message carries at most four
+images of at most <code>IMAGES_UPLOAD_MAX_BYTES</code> (10 MB) each; uploads need only
+<code>chat.send</code>. The runner forwards image ids, never bytes: the chat completions proxy
+inlines the four newest images of the request as base64 <code>image_url</code> parts, and
+replaces older images, or all of them when the selected model is not marked, with a
+short text note. Attached images also appear in the image list a later turn can edit. Removing an
+attachment before sending deletes it; an upload left unsent (for example when the tab
+closes) stays with the conversation, unused, and like any conversation image keeps
+it from being archived.
+Workflows use images too. Their node agents get <code>generate_image</code> and <code>edit_image</code>
+under the same switch, capability and organization models (supervisors never do);
+a node can edit an image an earlier node created, and the images of the nodes the
+final answer is built from are shown under it. Image calls of a workflow are
+billed to its run, phase and node, and the per-turn limit of four images is shared
+by all of its nodes. Attached images go to the supervisor and to every node; a
+workflow accepts them whatever the composer model is, and each agent receives them
+only if its own model is marked as accepting images. Because every agent call sends
+them again, attachments cost more in a workflow than in a chat turn.</p>
+<p>Image tools share the organization's monthly quota with chat. Each Images API attempt
+reserves one request before the call (an exhausted quota fails the tool with
+<code>image_quota_exceeded</code>, which the model is told about), is counted once the provider
+answers, and adds the tokens the provider reports in its <code>usage</code> block to the token
+quota; an attempt the provider never answered (a timeout, a refusal, an outage) gives
+its reservation back. A provider that reports no usage leaves the call counted as a
+request without token data. Usage events record the call as <code>image_generate</code> or
+<code>image_edit</code>, and Admin UI → Analytics shows the number of images per model and per
+user next to requests and tokens. Image tokens of attachments sent to vision models are
+part of the chat completion's own prompt tokens.</p>
+<h2 id="hermes-agent">Hermes Agent</h2>
+<p>This section is the reference for Hermes Agent's settings. For setup and daily use
+see <a href="guides/hermes-agent.html">the Hermes guide</a>; for the reasoning, see
+<a href="HERMES_AGENT.html">the design</a>.</p>
+<p><code>APP_HERMES_ENABLED=false</code> is the operator switch; while it is off, the Hermes routes
+answer 404. Users also need the <code>agents.hermes</code> capability (Admin UI → Groups), which
+provisioning never grants. Compose passes the switch only with the
+<code>docker-compose.hermes.yml</code> overlay, from <code>HERMES_ENABLED</code> in <code>.env</code>; the Helm chart
+does not pass it, because Hermes runs on the Docker runtime only.</p>
+<ul>
+<li><code>POST /v1/hermes/chat/completions</code> is an OpenAI-compatible completion route with
+native tools: <code>tools</code>, <code>tool_choice</code>, assistant <code>tool_calls</code>, <code>tool</code> messages and
+inline <code>data:image/png|jpeg|webp;base64</code> images (never remote image URLs). The
+gateway's chunks, tool call deltas included, are streamed unchanged. The
+configured <code>LLM_GATEWAY_URL</code> must therefore forward native tools; the runner's own
+route does not need that. Model grants, the vision model list and the monthly quota
+apply as on the runner route, and requests count against the user's ordinary rate
+limit. <code>APP_HERMES_MAX_TOOLS</code> (128) and <code>APP_HERMES_MAX_MESSAGES</code> (1000) bound one
+request.</li>
+<li>The route accepts only a Hermes session token, and only while its session is open,
+unexpired and bound to an active turn. A runner manages the session of its own
+conversation through internal routes: <code>POST /v1/internal/hermes/sessions</code> opens it
+(or rotates the token of the open one, so earlier tokens stop working) and returns
+a token; <code>PUT .../sessions/{id}/turn</code> binds it to the conversation's active turn
+and to the registered execution acting in it (<code>executionId</code>, whose phase and node
+must match), with the turn's workflow run, phase and node when the turn runs a
+workflow;
+<code>DELETE .../sessions/{id}/turn</code> unbinds it and <code>POST .../sessions/{id}/close</code> closes
+it. Opening and binding need the Hermes capabilities, unbinding and closing never
+do. Completions are billed to the bound turn's workflow correlation, never to
+anything in the request. A token holds identity only and has its own audience that
+no other route accepts; a session and its tokens end after
+<code>APP_HERMES_SESSION_MAX_LIFETIME_SECONDS</code> (86400) even if nothing closes them. A
+session left open without a turn for <code>APP_HERMES_SESSION_IDLE_CLOSE_SECONDS</code> (2700,
+at least 900) is closed by the backend, which revokes its tokens.</li>
+<li><strong>Chat.</strong> <code>POST /v1/chat/stream</code> with <code>&quot;agent&quot;: &quot;hermes&quot;</code> (instead of a workflow)
+runs the turn on Hermes Agent, on the organization's Hermes model: an organization
+administrator sets it with <code>PUT /v1/admin/settings/hermes</code> (<code>{&quot;model&quot;: ...}</code>, a
+model the organization grants; <code>null</code> turns Hermes off for it). The request needs
+<code>APP_HERMES_ENABLED</code> (404 otherwise), both Hermes capabilities (403) and the model
+(409); <code>imageIds</code> are refused with 422, because pictures reach Hermes as uploaded
+files (see <a href="#images">Images</a>). The runner hands the turn to the conversation's
+<code>HermesSessionWorkflow</code> on tool-worker's queue (runner settings <code>HERMES_TASK_QUEUE</code>,
+<code>HERMES_TURN_DEADLINE_SECONDS</code> 7200 and <code>HERMES_IDLE_SECONDS</code> 1800), so tool-worker
+needs <code>TOOL_WORKER_SKILL_EXECUTOR_URL</code>. <code>GET /v1/internal/hermes/sessions/current</code>
+returns the conversation's open session without rotating its token.
+<code>GET /v1/chat/agents</code> lists Hermes only when such a turn would be accepted (the
+switch, both capabilities, and a model the user may use); the composer offers it from
+there, and the Models page of the Admin UI sets the model and the egress mode.
+tool-worker publishes the turn's progress to the conversation's event channel
+through <code>TOOL_WORKER_REDIS_URL</code>: tool cards by tool kind only, and a keepalive every
+<code>TOOL_WORKER_HERMES_KEEPALIVE_SECONDS</code> (30, below <code>APP_EVENT_SUBSCRIBE_TIMEOUT</code>)
+that the chat stream drops. With <code>APP_USER_QUESTIONS_ENABLED</code>, Hermes's questions
+(its <code>clarify</code> tool) become the turn's question cards under the same limits;
+without it they are answered <code>skip</code>. Hermes's memory is kept per user in the
+platform (<code>hermes_memories</code>), written into the sandbox before each turn and read
+back after it; users see and clear it in their settings. Skills Hermes writes
+beyond its bundled ones are read after each turn as drafts per user
+(<code>hermes_skill_drafts</code>, bundles in the <code>S3_BUCKET</code> under <code>skills/{org}/</code>);
+organization administrators review every file on the Skills page of the Admin
+UI, and an approved draft becomes an ordinary code skill. The code skills a user
+may read are hydrated into the sandbox before each turn, read-only, from the
+bundles skill-executor fetches with its <code>S3_*</code> credentials (read access to
+<code>skills/</code>).</li>
+<li><code>POST /v1/hermes/mcp</code> is the platform tools' MCP endpoint (Streamable HTTP without
+a session: one JSON answer per POST, no server stream). It offers
+<code>knowledge_search</code> (only the files attached to the conversation), <code>web_search</code> and
+<code>web_read</code> while <code>APP_WEB_ENABLED</code> is on, and <code>generate_image</code> and <code>edit_image</code>
+while <code>APP_IMAGES_ENABLED</code> is on, and <code>list_skills</code> and <code>run_skill</code> for the MCP and
+tool skills granted to the user (code skills are not offered). Hermes lists them
+once when its sandbox starts,
+so the listing needs only an open session on the token's version, also between
+turns; a call needs the bound turn too, and the live capabilities, grants, per-turn
+budgets and quota of the ordinary web and image tools. A call is an operation of
+the bound execution, so a repeated request returns the stored result. A call the
+bridge denies or cannot complete is a tool error with a bounded code
+(<code>hermes_turn_inactive</code>, <code>web_limit</code>, <code>image_quota_exceeded</code>, ...), not an HTTP
+error, which Hermes counts towards pausing the server. Requests count against the
+user's ordinary rate limit (<code>APP_RATE_LIMIT_PER_MINUTE</code>, shared with the UI and the
+completions); over it they get HTTP 429, and after three failed calls in a row
+Hermes pauses the bridge's tools for 60 s. Requests are journaled like others.</li>
+<li>A skill run is a <code>HermesSkillCallWorkflow</code> on tool-worker's queue
+(<code>APP_HERMES_SKILL_TASK_QUEUE</code>, <code>tools</code>), which runs <code>execute_skill</code> as the runner's
+skill calls do, so tool-worker must be running. The bridge waits
+<code>APP_HERMES_SKILL_TIMEOUT_SECONDS</code> (240) for it; a repeated request attaches to the
+same run. Skill runs have no per-turn budget beyond the rate limit.</li>
+<li><code>attach_file</code> gives the user a file Hermes made in its workspace. The bridge
+reserves a <code>file_attach</code> operation (at most ten per turn) and starts a
+<code>HermesFileAttachWorkflow</code> on the same queue: tool-worker reads the file through
+skill-executor and posts the bytes to the backend, which recognises them and stores
+a picture as a conversation image and anything else as a conversation file. The
+bridge waits <code>APP_HERMES_FILE_TIMEOUT_SECONDS</code> (120); a call that gives up fails its
+operation, so a late upload is refused.</li>
+</ul>
+<h3 id="hermes-sandbox-egress">Hermes sandbox egress</h3>
+<p><code>docker-compose.hermes.yml</code> (profile <code>hermes</code>) adds <code>hermes-egress</code>, the only way
+out of a Hermes sandbox. Sandboxes join <code>aurum-ai-hermes-sandbox</code>
+(<code>HERMES_SANDBOX_SUBNET</code>, default <code>172.31.250.0/24</code>), an internal network without
+NAT or external DNS where the egress guard is the only platform member. The backend
+never joins it. Sandboxes share this segment; sandbox isolation from one another
+arrives with the sandboxes themselves.</p>
+<ul>
+<li>
+<p><strong>Platform path.</strong> <code>hermes-egress:8080</code> forwards exactly
+<code>POST /v1/hermes/chat/completions</code> and <code>POST /v1/hermes/mcp</code>, one request per
+connection with a <code>Content-Length</code> body.</p>
+</li>
+<li>
+<p><strong>Internet.</strong> <code>hermes-egress:3128</code> is a <code>CONNECT</code>-only proxy. A sandbox sets
+<code>HTTPS_PROXY=http://hermes:&lt;session token&gt;@hermes-egress:3128</code>. For each tunnel
+the proxy asks the backend (<code>POST /v1/internal/hermes/egress/authorize</code>,
+authenticated with <code>HERMES_EGRESS_SERVICE_SECRET</code>) whether the session is open and
+bound to an active turn, and which mode applies. It re-checks open tunnels every
+<code>HERMES_EGRESS_RECHECK_SECONDS</code> (30) and closes those no longer allowed, and also
+those it could not re-check three times in a row (backend unavailable).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Reachable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>packages</code></td>
+<td><code>HERMES_EGRESS_PACKAGE_HOSTS</code> on 443, and the TLS server name must match</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>any public host on 80 or 443; needs the user's <code>web.access</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>HERMES_EGRESS_MAX_MODE</code> (default <code>packages</code>) caps the backend, the proxy and the
+guard's public ports at once. Organizations choose within it through
+<code>GET</code>/<code>PUT /v1/admin/settings/hermes</code> (<code>egressMode</code>, default <code>packages</code>); the
+Admin UI control comes with the Hermes chat agent.</p>
+</li>
+<li>
+<p><strong>What stays closed.</strong> Private, loopback, link-local and platform ranges and
+<code>WEB_EGRESS_FORBIDDEN_CIDRS</code> are refused after resolution, and the tunnel connects
+to the checked address. An exact <code>host:port</code> in
+<code>HERMES_EGRESS_INTERNAL_PACKAGE_HOSTS</code> is the only private exception, meant for an
+internal package mirror.</p>
+</li>
+<li>
+<p><strong>Limits.</strong> <code>HERMES_EGRESS_MAX_CONNECTIONS</code> (16 per session),
+<code>HERMES_EGRESS_MAX_BYTES_PER_TURN</code> (2 GiB) and <code>HERMES_EGRESS_IDLE_TIMEOUT_SECONDS</code>
+(300). Counters are kept in memory by each hermes-egress replica and reset when
+it restarts.</p>
+</li>
+<li>
+<p><strong>Journal.</strong> Every decision and closed tunnel is a JSON line in the hermes-egress
+log: session, turn, host, port, mode, outcome and bytes, never credentials or
+traffic. The backend's rate limit and audit journal skip the per-connection check.</p>
+</li>
+</ul>
+<p>The Helm chart does not deploy hermes-egress yet.</p>
+<h3 id="hermes-sandboxes">Hermes sandboxes</h3>
+<p>With the overlay, skill-executor runs Hermes sandboxes (Docker runtime only;
+Docker 28 or newer, for isolated-gateway internal networks). Each sandbox gets its
+own <code>/28</code> network from <code>HERMES_SANDBOX_POOL</code> (default <code>172.31.0.0/16</code>, the guard's
+sandbox CIDR), a workspace volume and the <code>aurum-ai-hermes-sandbox</code> image, built
+with <code>docker compose -f docker-compose.yml -f docker-compose.hermes.yml --profile build build hermes-sandbox</code>. skill-executor settings (<code>SKILL_EXECUTOR_</code> prefix):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HERMES_ENABLED</code></td>
+<td><code>false</code> (the overlay passes <code>HERMES_ENABLED</code>)</td>
+</tr>
+<tr>
+<td><code>HERMES_CPUS</code>, <code>HERMES_MEMORY_BYTES</code>, <code>HERMES_PIDS_LIMIT</code>, <code>HERMES_TMP_MB</code></td>
+<td>2, 2 GiB, 512, 256</td>
+</tr>
+<tr>
+<td><code>HERMES_IDLE_TTL_SECONDS</code>, <code>HERMES_MAX_LIFETIME_SECONDS</code></td>
+<td>1800, 86400</td>
+</tr>
+<tr>
+<td><code>HERMES_START_TIMEOUT_SECONDS</code></td>
+<td>60</td>
+</tr>
+<tr>
+<td><code>HERMES_SNAPSHOT_ENABLED</code></td>
+<td><code>true</code> (needs <code>S3_ENDPOINT</code>)</td>
+</tr>
+<tr>
+<td><code>HERMES_SNAPSHOT_MAX_BYTES</code>, <code>HERMES_SNAPSHOT_MAX_ENTRIES</code></td>
+<td>1 GiB, 200000</td>
+</tr>
+<tr>
+<td><code>HERMES_SNAPSHOT_RETENTION_SECONDS</code>, <code>HERMES_SNAPSHOT_KEEP</code></td>
+<td>604800 (7 days), 2</td>
+</tr>
+<tr>
+<td><code>HERMES_SNAPSHOT_RETRY_SECONDS</code>, <code>HERMES_SNAPSHOT_TIMEOUT_SECONDS</code></td>
+<td>300, 900</td>
+</tr>
+<tr>
+<td><code>HERMES_SNAPSHOT_DIR</code></td>
+<td>the system temporary directory (needs twice the snapshot bound)</td>
+</tr>
+<tr>
+<td><code>HERMES_MAX_RUNNING</code>, <code>HERMES_MAX_RUNNING_PER_ORG</code></td>
+<td>16, 4</td>
+</tr>
+<tr>
+<td><code>HERMES_WORKSPACE_MODE</code></td>
+<td><code>volume</code> (or <code>tmpfs</code>)</td>
+</tr>
+<tr>
+<td><code>HERMES_WORKSPACE_MAX_BYTES</code>, <code>HERMES_DISK_CHECK_INTERVAL_SECONDS</code></td>
+<td>1 GiB, 60</td>
+</tr>
+</tbody>
+</table></div>
+<p>A restarted skill-executor re-adopts live and stopped sandboxes from their Docker
+labels and reconnects a recreated guard. A sandbox past its idle or absolute
+lifetime is stopped, its workspace is snapshotted, and then it is removed; the
+session's next create restores the latest snapshot (or <code>snapshot_sha256</code>) into a
+new sandbox. Snapshots go to the <code>S3_BUCKET</code> under
+<code>hermes-sessions/{org}/{conversation}/{sha256}.tar</code> with a <code>latest.json</code> pointer,
+and leave out the generated config, the proxy URL, relay state, logs, memory and
+skills. If a snapshot cannot be stored, the sandbox stays stopped with its volume,
+is retried every <code>HERMES_SNAPSHOT_RETRY_SECONDS</code>, can be resumed by the next create,
+and is removed only after the retention. Objects older than the retention are
+deleted hourly. skill-executor needs Get, Put, Delete and List on <code>hermes-sessions/*</code>
+besides reading skill bundles; Compose still gives it the MinIO root account, so
+scoping is the operator's. While snapshots are on, creating a new sandbox needs the
+store: if <code>latest.json</code> cannot be read, creation fails with
+<code>hermes_snapshot_store_failed</code> (503) instead of starting without the snapshot.</p>
+<p>Capacity: running sandboxes are capped operator-wide and per organization; stopped
+ones do not count. When a create (or a resume) reaches a cap, the least recently
+used idle sandbox is retired as at its idle TTL; idle means no open stream from
+skill-executor and no run its relay reports as queued or running. With none
+idle, creation fails with <code>hermes_capacity_exhausted</code> (503).</p>
+<p>Workspace size, by <code>HERMES_WORKSPACE_MODE</code>:</p>
+<ul>
+<li><code>volume</code> (default): a Docker volume with a soft limit. Every
+<code>HERMES_DISK_CHECK_INTERVAL_SECONDS</code> skill-executor reads Docker's volume usage;
+a sandbox over <code>HERMES_WORKSPACE_MAX_BYTES</code> has its active runs stopped and gets
+no new ones (<code>hermes_workspace_full</code>, 507) until it is back under. Between
+checks the host disk is not protected. Docker computes that usage by walking
+every local volume on the daemon, not only Hermes ones (about 0.9 s for 89
+volumes on a development host), so keep the interval well above that.</li>
+<li><code>tmpfs</code>: a tmpfs volume of that size, enforced by the kernel. It is charged to
+the container's memory, so the memory limit is raised by the same amount, and
+it is lost when the container stops: a sandbox whose snapshot fails is paused
+instead (still holding its memory), cannot be resumed, and its next create
+replaces it from a snapshot once one is stored. Any restart of the container
+(Hermes exiting, Docker or the host restarting) loses a tmpfs workspace; such a
+workspace is removed without a snapshot, and the session continues from its
+latest one.</li>
+</ul>
+<p>Keep <code>HERMES_WORKSPACE_MAX_BYTES</code> at or below <code>HERMES_SNAPSHOT_MAX_BYTES</code>. The
+soft limit can still be overshot between checks: a workspace over the snapshot
+bound when its sandbox is retired is removed without a snapshot, and the next
+create restores the last snapshot that fit.</p>
+<h2 id="identity-and-data-lifecycle">Identity and data lifecycle</h2>
+<p>Groups synchronized from Keycloak are managed in Keycloak. Admin UI disables local
+deletion for these groups, and the API rejects it: deleting only the local copy
+would allow synchronization to recreate it with a new identity. Groups created
+locally and not yet synchronized can still be deleted in Admin UI.
+Group membership always comes from the Keycloak <code>groups</code> claim at sign-in: a group
+created locally with the same name as a Keycloak group picks up its members, and
+the Members tab of the group dialog shows them read-only.</p>
+<p><code>APP_IDENTITY_SYNC_ENABLED=false</code> is the default. Install/verify the signed complete-
+groups mapper on both clients, apply migrations and start the maintenance worker/
+egress guard before enabling. <code>APP_IDENTITY_SYNC_WAIT_SECONDS</code> defaults to 10;
+changed identity admission is bounded during worker outages.</p>
+<p>New archive jobs are default-off. <code>APP_ARCHIVE_RETENTION_DAYS=180</code> and
+<code>APP_ARCHIVE_SWEEP_INTERVAL_SECONDS=86400</code> control eligibility and sweep timing;
+<code>APP_ARCHIVE_BATCH_SIZE</code> bounds a batch. Use separate lifecycle database accounts,
+archive S3 credentials and private RAG service secret/endpoint. Normal API/RAG
+accounts must not receive lifecycle/schema-owner rights or archive bucket access.</p>
+<p>Conversations with images or agent files are archived only when the data worker has
+<code>APP_ARCHIVE_IMAGES_S3_ENDPOINT</code>, <code>APP_ARCHIVE_IMAGES_S3_ACCESS_KEY</code> and
+<code>APP_ARCHIVE_IMAGES_S3_SECRET_KEY</code> (bucket <code>APP_ARCHIVE_IMAGES_S3_BUCKET</code>, default
+<code>aurum-ai-business</code>): separate credentials for the platform bucket, scoped to the
+<code>conversation-images/*</code> prefix with Get, Put and Delete. Without them such
+conversations stay live with the blocked reason <code>image_archive_not_configured</code>.</p>
+<p>Observer terminal receipts and partition maintenance continue independently of
+new-archive enablement. See <a href="operations/data-archive.html">the archive runbook</a> for
+roles, bounds, dry-run/apply, export and exact recovery.</p>
+<h2 id="observability-and-secrets">Observability and secrets</h2>
+<p>Langfuse is operator-configured. Capture of full prompts/documents is a deliberate
+privacy decision; disabling telemetry is separate from full-content capture.
+Generate root/auth/encryption secrets for the local services and restrict their
+ports. Never publish a complete env dump or browser trace containing tokens.</p>
+<p>Helm secret ownership/CIDRs and all deployment-specific prerequisites are described
+in <a href="https://github.com/tsrman/AurumAI/blob/main/charts/aurum-ai/README.md">the chart guide</a>. No source release can supply
+an operator's real cloud accounts, private certificates or production credentials.</p>
+<p>Backend automatically reads only <code>business-backend/.env</code>, relative to the service source. A root <code>.env</code> belongs to Docker Compose and is not implicitly loaded by API imports or harness commands. An explicit <code>Settings(_env_file=...)</code> still validates unknown settings strictly.</p>
+<p>Bootstrap accepts single-line dotenv assignments, including whitespace, optional <code>export</code>, quoted keys/values and inline comments. It preserves configured values byte-for-byte, detects duplicate required keys after normalization, and fills quoted empty values. Unsupported or multiline quoted syntax fails before replacing the file; review those configurations manually. The parser uses the existing Bash/OpenSSL/awk prerequisites and never executes env content.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AurumAI documentation · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="aurumai-documentation">AurumAI documentation</h1>
+<p>AurumAI is a self-hosted AI chat and agent platform for organizations: chat with
+models and agents, knowledge bases, skills and tools, multi-agent workflows, and an
+optional sandboxed agent (Hermes Agent). Start with the section for your role.</p>
+<h2 id="i-use-the-platform">I use the platform</h2>
+<ul>
+<li><a href="guides/user-guide.html">User guide</a>: sign in, chat, attach documents, knowledge bases,
+images, workflows, settings.</li>
+<li><a href="guides/hermes-agent.html">Hermes Agent guide</a>: the agent with its own workspace.</li>
+</ul>
+<h2 id="i-administer-an-organization">I administer an organization</h2>
+<ul>
+<li><a href="guides/admin-guide.html">Administrator guide</a>: users and groups, capabilities and
+grants, models, agents, skills, workflows, knowledge access, usage.</li>
+<li><a href="WORKFLOWS.html">Workflows</a> and <a href="STARTER_TOOLS.html">starter tools</a>.</li>
+<li><a href="AGENT_ROLES.html">Agent roles</a>.</li>
+</ul>
+<h2 id="i-install-and-operate-it">I install and operate it</h2>
+<ul>
+<li><a href="guides/deployment.html">Installation and deployment</a>: Compose, Helm, proxy and TLS,
+optional features, production checklist.</li>
+<li><a href="guides/operations.html">Operations</a>: health, upgrades, backups, troubleshooting.</li>
+<li><a href="CONFIGURATION.html">Configuration reference</a>: every setting.</li>
+<li><a href="AIR_GAPPED.html">Air-gapped deployment</a>.</li>
+<li><a href="operations/data-archive.html">Data archive, export and restore</a>.</li>
+</ul>
+<h2 id="i-integrate-or-review-it">I integrate or review it</h2>
+<ul>
+<li><a href="reference/api.html">API reference</a>.</li>
+<li><a href="reference/security.html">Security model</a>.</li>
+<li><a href="ARCHITECTURE.html">Architecture</a> and the <a href="HERMES_AGENT.html">Hermes Agent design</a>.</li>
+</ul>
+<h2 id="i-contribute">I contribute</h2>
+<ul>
+<li><a href="TESTING.html">Testing and coverage</a> and <a href="RELEASE.html">release preparation</a>.</li>
+<li><a href="https://github.com/tsrman/AurumAI/blob/main/CONTRIBUTING.md">Contributing</a> and the
+<a href="https://github.com/tsrman/AurumAI/blob/main/ROADMAP.md">roadmap</a>.</li>
+</ul>
+<h2 id="conventions">Conventions</h2>
+<p>Screenshots are of a development installation with the sample accounts. Names of
+environment variables are given as they appear in <code>.env</code>; the backend reads the same
+setting with an <code>APP_</code> prefix. Source code, comments and documentation are in
+English; the interface itself is available in English and Russian.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

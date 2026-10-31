@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive questions and web coverage · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="interactive-questions-and-web-coverage">Interactive questions and web coverage</h1>
+<p>Test presence, an isolated unit pass and a full live wrapper pass are different
+claims. Release reports identify the candidate and actual runtime/provider tested.
+Private incident data and historical recovery journals are not public release assets.</p>
+<h2 id="boundaries">Boundaries</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Evidence source</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ordinary durable questions, options/free text, reload/two tabs and turn lock</td>
+<td>Questions browser spec and short wrapper</td>
+<td>Deterministic LLM, real UI/API/Temporal/runner</td>
+</tr>
+<tr>
+<td>Answer while exact worker is stopped, consume after restart</td>
+<td>Restart wrapper</td>
+<td>Separate exact-owned worker lifecycle</td>
+</tr>
+<tr>
+<td>Natural 3600-second deadline and renewal/idle protection</td>
+<td>Hour wrapper</td>
+<td>Short/test-clock checks do not substitute</td>
+</tr>
+<tr>
+<td>Lost durable SSE body/wake-up and reconnection</td>
+<td>Client tests and browser fault helper</td>
+<td>Permanent auth denial stops retries</td>
+</tr>
+<tr>
+<td>Kubernetes question lifecycle</td>
+<td>Fresh questions k3d wrapper</td>
+<td>Real Helm Ingress/UID cleanup; not every hour/restart combination</td>
+</tr>
+<tr>
+<td>Search/read/citations/source ownership/history</td>
+<td>Controlled/public web browser specs</td>
+<td>Provider availability differs from controlled fixture behavior</td>
+</tr>
+<tr>
+<td>SSRF/rebinding/private IPv4 and IPv6 TCP80/443</td>
+<td>Compose and independent K8s network controls</td>
+<td>Reachable positive controls mandatory</td>
+</tr>
+<tr>
+<td>Multi-agent questions, sibling progress, citations and shared budgets</td>
+<td>Interactive multi-agent browser scenarios</td>
+<td>Exact consume/final and no internal payload exposure</td>
+</tr>
+<tr>
+<td>Cancel/revoke during HTTP, deadlines and next turn</td>
+<td>DB tests plus controlled fault browser scenarios</td>
+<td>No late source/final persistence</td>
+</tr>
+<tr>
+<td>Retry semantics across boundaries</td>
+<td>Service/DB/browser tests</td>
+<td>429/nonretryable4xx stay nonretryable; transient attempts bounded</td>
+</tr>
+<tr>
+<td>Long real-provider dialogue with MCP/questions/web</td>
+<td>Opt-in long-dialog spec</td>
+<td>Explicit paid provider and separate flags; complete REST/reload history</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="commands">Commands</h2>
+<pre><code class="language-bash">QUESTION_ACCEPTANCE_KIND=short ./smoke-test-user-questions.sh
+QUESTION_ACCEPTANCE_KIND=restart ./smoke-test-user-questions.sh
+QUESTION_ACCEPTANCE_KIND=hour ./smoke-test-user-questions.sh
+./smoke-test-user-questions-k8s.sh
+WEB_ACCEPTANCE_EXCLUSIVE=1 WEB_ACCEPTANCE_KIND=controlled ./smoke-test-web-tools.sh
+WEB_ACCEPTANCE_EXCLUSIVE=1 WEB_ACCEPTANCE_KIND=public ./smoke-test-web-tools.sh
+WEB_ACCEPTANCE_EXCLUSIVE=1 ./smoke-test-web-tools-k8s.sh
+</code></pre>
+<p>Run sequentially with other organization-mutating/browser acceptance. Provide
+matching application/web/search secrets before mutation. Trace/video/screenshots/
+storage state are disabled; the dedicated web harness sanitizes matcher diagnostics.</p>
+<p>Kubernetes browser traffic uses Helm Ingress through loopback k3d NodePort30080.
+Workload/CNI controls stay dual-stack; disabling the system service load balancer
+is not permission to drop IPv6 tests. REST-only recovery forwards exist solely for
+compatible established recovery paths, not browser SSE transport.</p>
+<h2 id="recovery-and-honest-status">Recovery and honest status</h2>
+<p>PASS requires the complete scenario, exact Temporal/resource cleanup, permission
+restoration, verify-clean, teardown and infrastructure verification. A partial
+browser pass or cleanup-only recovery does not close a gate. Preserve journals/
+runtime when exact closure is unavailable. Never change JWT validation, time,
+SSRF denies or cleanup ownership to turn a failed run green.</p>
+<p>An external search <code>web_unavailable</code> is blocked provider coverage until stable
+prerequisites return. A mixed real-provider long-dialog gate requires actual
+credentials/model; deterministic acceptance does not imply paid-provider coverage.
+Report the 26-turn/history/reload combinations explicitly rather than extrapolating
+from a shorter conversation or a run with questions/web disabled.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

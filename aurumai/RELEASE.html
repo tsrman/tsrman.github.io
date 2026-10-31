@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preparing a public AurumAI source release · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="preparing-a-public-aurumai-source-release">Preparing a public AurumAI source release</h1>
+<p>A public source candidate is a reviewed snapshot with a new Git history. Never
+mirror the private repository or change its visibility as a shortcut. The source
+manifest includes required build/test/deployment inputs and excludes private
+history, journals, runtime state, env files and design caches.</p>
+<h2 id="build-the-candidate">Build the candidate</h2>
+<p>Install maintenance dependencies and choose a new directory outside the source:</p>
+<pre><code class="language-bash">cd scripts &amp;&amp; npm ci
+cd ..
+python3 scripts/prepare-oss-release.py export --source . --destination /tmp/AurumAI-candidate --manifest release/oss-manifest.json --report /tmp/AurumAI-inventory.json
+python3 scripts/prepare-oss-release.py verify --candidate /tmp/AurumAI-candidate --manifest release/oss-manifest.json --inventory /tmp/AurumAI-inventory.json --report /tmp/AurumAI-checks.json
+</code></pre>
+<p>The CLI rejects an existing destination/report, unsafe paths/symlinks, prohibited
+artifacts, missing required files and detected secrets. Verification compares the
+file set/content to the recorded inventory and checks that only the UI catalogs
+contain Russian text. Reports are
+private files and contain findings metadata, never matched secret values.</p>
+<p>Source changes/new files must be reviewed and admitted to the manifest/Git index.
+Do not automatically collect arbitrary untracked working-directory data.
+Independent secret scanning is mandatory; the custom checks alone are not a claim
+of comprehensive credential discovery.</p>
+<h2 id="independent-review">Independent review</h2>
+<p>Gitleaks 8.30.1 is pinned in <code>release/tools.json</code>; verify the official distribution
+checksum before running it. CI scans the exported directory with <code>--redact</code>, not
+private Git history. Review archive contents, replay fixtures, dependency/license
+inventories, generated example configuration and all remaining findings.</p>
+<p>Install dependencies in the candidate itself, initialize a separate local <code>main</code>
+checkout for Git-tracked tooling when needed, and run service/tests/builds/Helm/
+Compose/documentation checks there. Do not symlink original virtual environments
+or node_modules as evidence that a clean clone works.</p>
+<p>Use an isolated owned Compose project and fresh disposable volumes for startup/
+browser/deterministic tool-workflow acceptance. Preserve shared resources and private
+incident evidence. Exact cleanup must succeed before declaring a live gate passed.</p>
+<h2 id="publication-checklist">Publication checklist</h2>
+<ol>
+<li>Freeze the file/hash inventory; any edit invalidates affected evidence.</li>
+<li>Confirm AGPL-3.0-only project ownership notices and upstream attribution.</li>
+<li>Confirm English public docs/comments, working references and redacted scans.</li>
+<li>Record fresh tests/builds/startup results and explicit blocked/failed coverage.</li>
+<li>Obtain the intended repository owner/name and explicit publication authorization.</li>
+<li>Create a new public repository on <code>main</code> with one reviewed initial source commit.</li>
+<li>Set actual source URLs/build provenance; configure and test private vulnerability
+reporting and community reporting paths before announcing the repository.</li>
+<li>Enable the prepared read-only/fork-safe CI, then create tags/releases only for
+artifacts that have actually passed the declared checks.</li>
+</ol>
+<p>Do not invent hosted repository/image URLs, announce unpublished tags, or push an
+unreviewed private branch. Operator data/credentials/archives are never release
+assets. See <a href="https://github.com/tsrman/AurumAI/blob/main/SECURITY.md">security</a>, <a href="https://github.com/tsrman/AurumAI/blob/main/THIRD_PARTY_NOTICES.md">third-party notices</a>
+and <a href="TESTING.html">testing</a>.</p>
+<p>The snapshot exporter requires Linux with <code>renameat2(RENAME_NOREPLACE)</code> support. It fails closed on unsupported hosts or filesystems, so an existing or concurrently created destination is never replaced. Keep private reports outside both the source and candidate trees.</p>
+<p>Run the pinned Gitleaks binary with <code>--config &lt;candidate&gt;/.gitleaks.toml --max-archive-depth 2 --max-decode-depth 2 --redact</code>. The configuration extends all upstream rules and permits only exact demonstration values and non-credential code phrases; it does not exempt directories or test files. The scanner regression test also verifies detection of a token inserted on an otherwise permitted fixture path.</p>
+<h2 id="container-images">Container images</h2>
+<p><code>.github/workflows/publish-images.yml</code> builds the deployable service images and
+pushes them to GitHub Container Registry as <code>ghcr.io/&lt;owner&gt;/&lt;name&gt;</code>, with names
+matching <code>charts/aurum-ai/values.yaml</code>. Pushing a <code>vX.Y.Z</code> tag publishes <code>X.Y.Z</code>,
+<code>X.Y</code>, <code>latest</code> and <code>sha-&lt;commit&gt;</code>; a prerelease tag such as <code>v1.2.0-rc.1</code>
+publishes only its own version and the commit tag. A manual run of the workflow
+publishes only <code>sha-&lt;commit&gt;</code>. Authentication uses the workflow's own
+<code>GITHUB_TOKEN</code> with <code>packages: write</code>; no other secret is involved.</p>
+<p>Packages created by the first run are private on GitHub. Make each one public in
+its package settings if the images should be pullable anonymously. Deploy the
+chart with <code>image.registry=ghcr.io/&lt;owner&gt;</code> and <code>image.tag=&lt;version&gt;</code>.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

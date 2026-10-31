@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creating and running workflows · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="creating-and-running-workflows">Creating and running workflows</h1>
+<p>A workflow is a versioned task graph. Configure it in Admin UI at
+<code>/admin/workflows</code>; run it by selecting it in the Business UI chat composer.
+Saving a definition does not start a run.</p>
+<h2 id="roles-and-data-flow">Roles and data flow</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supervisor</td>
+<td>An existing agent that prepares one brief per step, then synthesizes the final response</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>A configured model, system prompt and allowed skill/knowledge references</td>
+</tr>
+<tr>
+<td>Step/node</td>
+<td>One task instruction assigned to an agent; the same agent may serve several roles</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>An execution dependency that passes predecessor results to the next step</td>
+</tr>
+<tr>
+<td>Workflow example</td>
+<td>Local illustrative draft with a sample request; no resources or grants are created by previewing it</td>
+</tr>
+<tr>
+<td>Saved template</td>
+<td>Server-side versioned snapshot used to create independent workflow/agent copies</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each step receives the current request, its instruction, the supervisor brief and
+outputs of its direct dependencies. The supervisor phases are automatic: do not
+add a supervisor node to the graph. Up to 20 task nodes and parallelism 1–4 are
+supported. Internal briefs and node outputs are not public chat messages; only a
+successful final synthesis is persisted as the assistant answer.</p>
+<h2 id="the-five-step-editor">The five-step editor</h2>
+<ol>
+<li><strong>Task:</strong> open Examples, inspect a complete scenario and choose Use this example,
+or choose Create workflow. Enter a task-oriented name and description.</li>
+<li><strong>Agents:</strong> assign a supervisor and each step's agent. Reusing one existing agent
+is valid; Use supervisor for all steps makes this choice explicit. An example
+does not invent agent IDs. Create an agent in the constructor if none exists.</li>
+<li><strong>Steps:</strong> select a graph card to edit its name, agent and task instruction.
+Connect a right output handle to the next card's left input. Add or remove steps
+as needed. Technical keys and bounded loop controls are in advanced step settings.</li>
+<li><strong>Check:</strong> resolve the listed missing fields, validate on the server, then save.
+Every edit invalidates validation. A server conflict or error retains the draft.</li>
+<li><strong>Launch:</strong> configure explicit workflow/dependency access, open chat, select the
+saved workflow and send the example request or your own task. Example requests
+can be copied from this step. Saving alone does not execute the process.</li>
+</ol>
+<p>Navigation asks before discarding an unsaved draft. Reloading or closing a dirty
+editor uses the browser's leave-page confirmation; the draft is not persisted in
+browser storage. A background detail refresh cannot overwrite the draft or silently
+advance its optimistic-concurrency version.</p>
+<p>Model IDs are configurable. <code>deepseek-flash-free</code> can be selected when the gateway
+reports it and the initiating user has the required live access. Model defaults
+are configuration, not access grants. Intended users need access to the workflow,
+its agents/models and any referenced skills/knowledge resources. New template
+copies do not copy permissions or enable automatic routing.</p>
+<h2 id="connections-branches-and-confirmation">Connections, branches and confirmation</h2>
+<ul>
+<li>On success runs the successor after successful execution. On failure requires an
+actual failed execution; an answer saying &quot;needs revision&quot; is still a successful
+answer and is not a business-condition branch.</li>
+<li>Multiple incoming connections use AND semantics: all predecessor outcomes must
+match. Do not merge mutually exclusive success/failure paths as an OR-join.</li>
+<li>Independent roots may run concurrently within the configured bound. An unhandled
+failure stops successful synthesis; blocked downstream tasks can be skipped.</li>
+<li>Confirmation pauses BEFORE a selected node executes. It does not approve an
+unimplemented email, payment or deployment action. The conversation owner approves
+or rejects through chat progress.</li>
+<li>Loops are outcome-based and bounded to 2–20 iterations. They are not an implicit
+quality evaluator. Nested/overlapping loop bodies, confirmation inside a loop and
+non-tail fan-out are unsupported. See <a href="ARCHITECTURE.html">architecture</a>.</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<p>The following inputs are complete illustrative tasks, not records of performed
+external operations. They require a configured agent/model and no external tools.
+Select an example to load its graph, then explicitly map the agents before saving.
+For the supervisor, use instructions to prepare specific step briefs and produce
+an evidence-based final response without claiming unperformed actions. For task
+agents, request fact/assumption separation and use of the provided context.</p>
+<h3 id="1-customer-support-reply">1. Customer support reply</h3>
+<p>Prepare a policy-compliant response to a delayed delivery, ready for an operator to send.</p>
+<p>Check facts → Draft reply → Review reply. Each step waits for its predecessor. Optional confirmation on the review step pauses before review starts.</p>
+<p>Sample chat request:</p>
+<blockquote>
+<p>Draft an English reply to Maya about order A-1042. Delivery was promised on October 20; today is October 24. Carrier update: delayed at sorting center, estimated delivery October 26. Our supplied policy allows a shipping-fee refund after more than two days of delay. The fee was EUR 8. Product refunds require a carrier investigation. Apologize, explain the available option and ask for consent. Do not claim a refund was already issued.</p>
+</blockquote>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step key</th>
+<th>Name</th>
+<th>Instruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>triage</code></td>
+<td>Check facts and policy</td>
+<td>Extract the order ID, promised and estimated delivery dates, delay duration, supplied policy and allowed remedy. List prohibited claims. Use only the user request.</td>
+</tr>
+<tr>
+<td><code>reply</code></td>
+<td>Draft the customer reply</td>
+<td>Use the predecessor facts to write a concise, empathetic reply. Present the carrier date as an estimate, offer the supplied remedy and ask for consent. Do not invent refunds or investigation outcomes.</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>Review the reply</td>
+<td>Check the draft against the supplied facts and policy. Return a corrected customer reply and a short operator note on uncertainty. Do not send anything or issue a refund.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Expected result: A customer reply citing order A-1042, the carrier’s October 26 estimate and the EUR 8 shipping-fee refund option, plus an operator note about uncertainties. No email is sent and no refund is issued.</p>
+<p>Set parallelism to 1. Leave auto-routing off for the first explicit test.</p>
+<h3 id="2-workshop-campaign-plan">2. Workshop campaign plan</h3>
+<p>Combine two parallel specialists into a practical campaign with content, a budget and metrics.</p>
+<p>Audience analysis and Content angles run independently, up to two at once. Both connect to Campaign plan, which waits for both successful results.</p>
+<p>Sample chat request:</p>
+<blockquote>
+<p>Prepare a campaign for a free 45-minute online workshop, “Automate your weekly reports”, on November 12 at 14:00 UTC. Audience: operations leads in teams of 10–50. Available channels: 800 opted-in email contacts and the company LinkedIn page. Target: 40 registrations. Budget: EUR 300. Deliver a seven-day schedule, three LinkedIn post drafts, one email draft and success metrics. Do not access accounts or promise registrations.</p>
+</blockquote>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step key</th>
+<th>Name</th>
+<th>Instruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>audience</code></td>
+<td>Analyze the audience</td>
+<td>Analyze the supplied audience, reporting pain points, constraints and registration target. Separate assumptions from supplied facts. Do not invent market statistics.</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>Develop content angles</td>
+<td>Propose three content angles for the supplied workshop, each with a value proposition, likely objection and call to action. Preserve the event details. Do not publish.</td>
+</tr>
+<tr>
+<td><code>campaign</code></td>
+<td>Build the campaign plan</td>
+<td>Combine both predecessor results into a seven-day schedule with three LinkedIn drafts, one email draft, budget totaling at most EUR 300 and measurable registration metrics. Clearly label proposals.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Expected result: A seven-day campaign schedule, three post drafts, one email draft, budget allocation of at most EUR 300 and measurable registration metrics. Nothing is published or sent.</p>
+<p>Set parallelism to 2. Leave auto-routing off for the first explicit test.</p>
+<h3 id="3-technical-incident-assessment">3. Technical incident assessment</h3>
+<p>Turn supplied logs into an evidence-based diagnosis and a reversible recovery plan.</p>
+<p>Extract evidence → Rank hypotheses → Draft runbook. The supervisor combines the completed work into the final assessment.</p>
+<p>Sample chat request:</p>
+<blockquote>
+<p>Deployment app-v42 completed at 09:12 UTC, followed by proxy 502 errors. Proxy log: connect() failed (111: Connection refused) to upstream http://app:8000/health. New application log: Server listening on 0.0.0.0:8080. The previous deployment listened on port 8000. No database errors appear in the supplied excerpt. Assess the incident and propose a reversible recovery plan. You have no cluster access. Do not execute commands or claim recovery.</p>
+</blockquote>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step key</th>
+<th>Name</th>
+<th>Instruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>evidence</code></td>
+<td>Extract incident evidence</td>
+<td>Build a timeline and list observed facts, unknowns and the relevant port mismatch. Treat the absence of a database error in this excerpt as limited evidence, not proof.</td>
+</tr>
+<tr>
+<td><code>hypotheses</code></td>
+<td>Rank likely causes</td>
+<td>Use the predecessor evidence to rank plausible causes. Explain supporting facts and read-only checks that would distinguish the causes. Separate confidence from fact.</td>
+</tr>
+<tr>
+<td><code>runbook</code></td>
+<td>Draft a recovery runbook</td>
+<td>Use the ranked causes to propose reversible recovery: verify listener/upstream configuration, align routing or roll back to the known previous deployment, verify health and traffic. Include prerequisites and rollback conditions. Claim no executed checks or recovery.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Expected result: A diagnosis grounded in the observed 8000/8080 port mismatch, a verification checklist and a reversible recovery proposal. No infrastructure checks or changes are executed.</p>
+<p>Set parallelism to 1. Leave auto-routing off for the first explicit test.</p>
+<h2 id="templates-and-diagnostics">Templates and diagnostics</h2>
+<p>Use Saved templates for capturing or copying saved, versioned definitions. Template
+archival does not alter existing copies. Templates are separate from the built-in
+local example gallery.</p>
+<p>Run diagnostics is an administrative view. Paste a workflow run UUID from chat
+progress, then request diagnostics. Missing or inaccessible runs produce an error.
+Retention may remove node output; an expired output does not mean the run never
+existed. Keep internal diagnostics out of public SSE and shared support artifacts.</p>
+<h2 id="testing-useful-tools">Testing useful tools</h2>
+<p>Workflow examples above need no tools. For independent skill/MCP integration checks,
+install the <a href="STARTER_TOOLS.html">starter tools</a>, explicitly assign the relevant skill
+to an authorized agent, then use the documented CSV, JSON, sum and text examples.
+A model answering a sum from memory does not demonstrate an actual MCP call.</p>
+<p>See <a href="TESTING.html">testing</a> for real-provider and browser acceptance contracts.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

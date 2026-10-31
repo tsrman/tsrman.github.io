@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes Agent integration design · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="hermes-agent-integration-design">Hermes Agent integration design</h1>
+<p>Status: approved design, not yet implemented (2026-10-25). Each phase below is a
+separate flag-gated change; the open questions are settled in the PR that needs
+them.</p>
+<h2 id="intent">Intent</h2>
+<p>The roadmap item reads &quot;Integrate Hermes Agent as a universal system agent within
+the existing conversation runtime, tools and workflow orchestration&quot;.
+<a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> is Nous Research's
+MIT-licensed agent runtime. It brings:</p>
+<ul>
+<li>a long-horizon tool loop with a terminal;</li>
+<li>curated memory (<code>MEMORY.md</code>, <code>USER.md</code>);</li>
+<li>skills it writes for itself;</li>
+<li>session search;</li>
+<li>subagents.</li>
+</ul>
+<p>AurumAI should offer it as one more agent people can choose. It must not become a
+second platform with its own identity, quotas or tenant model.</p>
+<p>Chosen directions:</p>
+<ol>
+<li><strong>Sandboxed process.</strong> Each session runs one Hermes process in an ephemeral
+sandbox, in the same way code-skill sessions run. Every model call and every
+AurumAI tool call goes through platform endpoints. Grants, quotas, RLS and
+audit therefore apply unchanged.</li>
+<li><strong>Selectable agent.</strong> Hermes is a system agent that can be picked in chat and
+used as a workflow node. Ordinary chat does not change. Access requires a
+capability and an operator flag, and both are off by default.</li>
+<li><strong>Per-user memory.</strong> The platform stores each user's memory under RLS. Skills
+that Hermes writes become drafts, and an administrator approves them before
+anyone else can use them.</li>
+</ol>
+<h2 id="findings">Findings</h2>
+<p>What AurumAI provides today:</p>
+<ul>
+<li><strong>Model proxy.</strong> The runner calls <code>POST /v1/chat/completions</code> on the business
+backend with an identity-only session token. Its request schema is
+<code>extra=&quot;forbid&quot;</code>, and messages carry only <code>role</code>, string <code>content</code> and
+<code>image_ids</code>. The proxy has no <code>tools</code>, <code>tool_choice</code>, assistant <code>tool_calls</code> or
+<code>role: &quot;tool&quot;</code> messages, and it always streams upstream. AurumAI's own agents
+use the text protocol <code>&lt;tool_call&gt;{...}&lt;/tool_call&gt;</code>.</li>
+<li><strong>Code-skill sandboxes.</strong> <code>skill-executor</code> creates ephemeral sandboxes on Docker
+or Kubernetes. Each has a session TTL of 1800 s and an idle TTL of 300 s, with
+256 MB and 0.5 CPU. Networking is either <code>none</code> or <code>egress</code>. On Docker, <code>egress</code>
+is the NAT bridge <code>aurum-ai-skill-egress</code>; on Kubernetes it is a label-selected
+policy. No sandbox can reach the platform's internal services.</li>
+<li><strong>Durable sessions.</strong> <code>CodeSkillSessionWorkflow</code> runs open, multi-round and close
+as bounded activities on the <code>tools</code> task queue. It uses <code>llm_call</code> with
+<code>publish_events=False</code>.</li>
+<li><strong>Narrow egress.</strong> <code>web-egress</code> and <code>maintenance-egress</code> already show how to build
+an nftables allowlisted egress sidecar.</li>
+</ul>
+<p>What Hermes provides (as of 2026-10):</p>
+<ul>
+<li><strong>API server.</strong> It is enabled by <code>API_SERVER_ENABLED</code> and <code>API_SERVER_KEY</code> and
+started by <code>hermes gateway</code>. It listens on 127.0.0.1:8642 and offers:
+<ul>
+<li><code>POST /v1/runs</code>;</li>
+<li><code>GET /v1/runs/{id}/events</code> as SSE, with <code>tool.started</code>, <code>tool.completed</code>,
+<code>message.interim</code>, <code>subagent.*</code>, <code>run.completed</code> and <code>run.interrupted</code>;</li>
+<li><code>POST /v1/runs/{id}/stop</code>, <code>/approval</code> and <code>/clarify</code>;</li>
+<li>an <code>Idempotency-Key</code> header and a <code>max_concurrent_runs</code> limit.
+It also accepts inline images.</li>
+</ul>
+</li>
+<li><strong>Main model.</strong> It can be any OpenAI-compatible endpoint, configured with
+<code>model.provider: custom</code>, <code>model.base_url</code>, <code>model.default</code> and <code>model.key_env</code>.
+It relies on native function calling.</li>
+<li><strong>Configuration.</strong>
+<ul>
+<li><code>agent.disabled_toolsets</code> turns off whole toolsets.</li>
+<li><code>mcp_servers</code> accepts <code>url</code> and <code>headers</code> servers with <code>tools.include</code>
+filters and a <code>trust</code> setting.</li>
+<li><code>skills.write_approval</code> and <code>memory.write_approval</code> stage writes for review.</li>
+<li><code>memory_char_limit</code> defaults to 2200 and <code>user_char_limit</code> to 1375.</li>
+</ul>
+</li>
+<li><strong>State.</strong> Everything lives under <code>HERMES_HOME</code>: <code>config.yaml</code>, <code>.env</code>,
+<code>memories/</code>, <code>skills/</code>, <code>state.db</code> (SQLite with FTS5) and <code>pending/</code>.</li>
+<li><strong>Multi-user.</strong> It is supported only through separate profiles. Within one
+profile, the API server gives the caller full toolset access, terminal included.</li>
+</ul>
+<h2 id="approaches">Approaches</h2>
+<ol>
+<li><strong>Selected: a Hermes process inside a platform sandbox.</strong> Hermes
+keeps its own loop, terminal and memory format. The platform owns identity, model
+access, tools, persistence and billing. The cost is a native-tools mode in the
+proxy, a narrow network path and a session bridge.</li>
+<li><strong>A shared Hermes service, one profile per organization.</strong> This is the fastest
+to build. But a shared process holding a terminal and long-lived state would sit
+outside RLS, live grant revocation and quotas, and one escape would expose every
+tenant. Not selected.</li>
+<li><strong>Reimplement the Hermes features natively.</strong> This gives full control, but it is
+a rewrite and gets none of Hermes's improvements. Not selected. It remains the
+fallback if Hermes's surface turns out to be unpinnable.</li>
+</ol>
+<h2 id="design">Design</h2>
+<h3 id="execution-model">Execution model</h3>
+<p>Hermes sessions can be long: one turn may run for hours, and a conversation
+expects its terminal files, installed tools and Hermes state to still be there on
+the next turn. The sandbox therefore belongs to the conversation, not to a turn,
+and lives across turns. The code-skill TTLs (1800 s absolute, 300 s idle) do not
+apply.</p>
+<ul>
+<li><strong>Workflow.</strong> Each conversation that uses Hermes has one long-lived
+<code>HermesSessionWorkflow</code>, started on the first Hermes turn. <code>ConversationWorkflow</code>
+and a workflow node's <code>AgentWorkflow</code> hand turns to it with a Temporal Update and
+wait for the result. One run is active per session at a time: a second turn is
+rejected the same way the composer blocks a running conversation today. The
+session workflow uses continue-as-new to keep its history bounded. It is gated
+by <code>workflow.patched(&quot;hermes-v1&quot;)</code>, and replay tests cover histories from before
+and after the gate.</li>
+<li><strong>Activities.</strong> All activities run on the <code>tools</code> queue and have bounded
+retries:
+<ol>
+<li><code>open_hermes_session</code> provisions the sandbox, or restores it from a snapshot,
+and hydrates <code>HERMES_HOME</code>.</li>
+<li><code>run_hermes_turn</code> submits <code>POST /v1/runs</code> with an <code>Idempotency-Key</code> derived
+from the turn. It then reads <code>/events</code>, heartbeats every few seconds, and
+publishes safe progress. A retry after a lost worker reattaches to the same
+<code>run_id</code> through <code>GET /v1/runs/{id}</code> and <code>/events</code>: it does not start a second
+run. The Temporal timeout of the activity is the turn deadline; the heartbeat
+timeout (about 60 s) detects a dead worker.</li>
+<li><code>snapshot_hermes_session</code> saves the workspace when the session goes idle.</li>
+<li><code>close_hermes_session</code> reads back memory and skill drafts, takes a final
+snapshot and destroys the sandbox.</li>
+</ol>
+</li>
+<li><strong>Durable sandbox ownership.</strong> Today <code>skill-executor</code> keeps sessions in memory
+and reaps orphaned sandboxes after a restart. That would kill every long Hermes
+session on a deploy. Hermes sandboxes are recorded durably instead: labels on the
+container or Pod and a <code>hermes_sessions</code> row with org, user, conversation,
+sandbox id, state and timestamps. After a restart the executor re-adopts live
+Hermes sandboxes from that record rather than reaping them; it reaps only those
+past their limits or without a row.</li>
+<li><strong>Lifetime limits.</strong> All of them are operator settings, enforced by the session
+workflow and the reaper:
+<ul>
+<li>turn deadline: default 2 h, maximum 24 h;</li>
+<li>idle TTL between turns: default 30 min; at expiry the workspace is
+snapshotted and the sandbox stopped;</li>
+<li>absolute session lifetime: default 24 h, then a snapshot and a fresh sandbox
+on the next turn;</li>
+<li>snapshot retention: default 7 days after the last turn, and deleted with the
+conversation.</li>
+</ul>
+</li>
+<li><strong>Snapshots.</strong> A snapshot is a bounded archive (default 1 GiB) of the workspace
+and the session part of <code>HERMES_HOME</code>: <code>state.db</code>, working files and installed
+tools. Memory and skills are not in it; they follow the per-user flow below. It
+goes to the business bucket under <code>hermes-sessions/{org}/{conversation}/</code>, with a
+checksum recorded in <code>hermes_sessions</code>. Restoring verifies the checksum, unpacks
+only regular files and directories, and treats the content as untrusted. The
+conversation archive removes snapshots with the rest of the conversation;
+archives do not carry them.</li>
+<li><strong>Capacity.</strong> A per-organization and an operator-wide cap on running Hermes
+sandboxes. Above the cap, the least recently used idle sandbox is snapshotted and
+stopped. If every sandbox is busy, the turn is rejected with
+<code>hermes_capacity_exhausted</code>.</li>
+<li><strong>Cancellation.</strong> A cancelled turn calls <code>/stop</code>. The sandbox stays for the next
+turn.</li>
+<li><strong>Failure.</strong> If the sandbox itself dies during a run, the turn ends as
+<code>hermes_interrupted</code>, and the next turn starts from the latest snapshot. A lost
+worker alone does not interrupt the turn, because the retry reattaches. Temporal
+records the platform's actions, not Hermes's internal state. The user and
+operator docs say so.</li>
+<li><strong>History.</strong> The final answer is persisted through <code>persist_assistant_message</code>
+as usual. PostgreSQL stays authoritative: each run receives the complete
+persistent conversation history (<code>conversation_history</code> on <code>/v1/runs</code>). Hermes's
+<code>state.db</code> is only a working cache, rebuilt from that history when a snapshot is
+missing.</li>
+<li><strong>Browser independence.</strong> A long turn runs on the server. Closing the browser
+does not stop it, and reopening the conversation shows the running turn and then
+its result, as with workflow runs today.</li>
+</ul>
+<h3 id="sandbox-image-and-limits">Sandbox image and limits</h3>
+<ul>
+<li><strong>Image.</strong> A separate <code>hermes-sandbox</code> image installs Hermes with every
+dependency pinned by hash, with no build tools on the runtime path (packages
+without a wheel cannot be installed). It ships MIT attribution in
+<code>THIRD_PARTY_NOTICES</code>, and <code>AIR_GAPPED.md</code> lists it. <code>hermes update</code> cannot
+reach anything: the sandbox's only way out is hermes-egress.</li>
+<li><strong>Resources.</strong> CPU, memory and PIDs get their own settings, well above the
+code-skill defaults: initially 2 CPU, 2 GiB of memory and 512 processes. The
+workspace volume for <code>HERMES_HOME</code> and working files has no size limit with
+Docker's local volume driver; phase 2c-ii-b adds a soft limit from Docker's
+volume usage or, by operator choice, a size-bounded tmpfs workspace. The
+lifetime limits are listed under the execution model.</li>
+<li><strong>Hermes configuration.</strong> It is generated by the platform and placed in the
+workspace before the container starts; the session token and the local API
+server key are never in the container's environment or labels. The agent can
+overwrite the file, so no platform-side control depends on its contents.
+<ul>
+<li><code>model</code>: the platform route (<code>http://hermes-egress:8080/v1/hermes</code>) with the
+session token as <code>api_key</code>. Hermes's auxiliary calls (titles, compression,
+vision) use the same endpoint and credentials without streaming, which the
+route answers with one JSON completion through the same checks and quota
+(seen in the spike and covered by route tests; Hermes does not make them on
+every run, so the sandbox acceptance checks only the main call). Hermes also
+tries to fetch model metadata from openrouter.ai; hermes-egress refuses it.</li>
+<li><code>terminal.backend: local</code>: the sandbox is the boundary, with no nested Docker.</li>
+<li><code>agent.disabled_toolsets</code>: browser, computer use, web and search, cron and
+kanban, messaging integrations, media generation and <code>clarify</code> (questions to
+the user arrive with phase 4).</li>
+<li><code>mcp_servers.aurum</code>: the platform tools at
+<code>http://hermes-egress:8080/v1/hermes/mcp</code> with the session token, the bridge's
+tools only, no preflight probe and no sampling.</li>
+<li><code>approvals.mode: off</code>: the sandbox is the boundary, and Hermes's hardline
+command patterns still apply.</li>
+<li>The API server listens on 127.0.0.1 only; skill-executor reaches it through
+<code>docker exec</code> of <code>hermes-relay</code>, whose output it treats as untrusted.</li>
+<li>Only HTTPS uses the egress proxy (<code>NO_PROXY</code> covers <code>hermes-egress</code>).</li>
+</ul>
+</li>
+</ul>
+<h3 id="network-path">Network path</h3>
+<p>This is the hardest boundary. The sandbox has no route of its own: everything
+leaves through one platform component, <code>hermes-egress</code>, which follows the
+<code>web-egress</code> pattern (nftables, a default-drop policy and readiness that proves the
+rules are in place).</p>
+<ul>
+<li>On Docker, the sandbox runs on a dedicated internal network that has no NAT. The
+sidecar is the only platform member, but every sandbox shares the segment.
+Docker bridges let containers on one network reach each other, and a container
+holding <code>NET_RAW</code> (a Docker default) could spoof the sidecar's address and read
+another sandbox's session token on the wire. Phase 2c must therefore run
+sandboxes with every capability dropped and either give each sandbox its own
+internal network that the sidecar joins (sandbox CIDRs from a pool) or accept the
+shared segment as a Docker-only limitation that Kubernetes NetworkPolicies close.
+Its acceptance probes reachability from one sandbox to another.</li>
+<li>On Kubernetes, a NetworkPolicy keyed on the Hermes sandbox label allows egress
+only to the sidecar.</li>
+<li>The existing <code>aurum-ai-skill-egress</code> network is never reused, and the backend
+never joins a network that sandboxes join.</li>
+<li>The sandbox needs no DNS of its own: the platform endpoints and the egress proxy
+are addressed by the sidecar's name, and the proxy resolves internet hosts. That
+also closes DNS as an exfiltration channel.</li>
+</ul>
+<p><code>hermes-egress</code> has two roles.</p>
+<ol>
+<li>
+<p><strong>Platform endpoints.</strong> A reverse proxy that forwards exactly two backend paths,
+the model proxy and the platform tools MCP endpoint, and nothing else.</p>
+</li>
+<li>
+<p><strong>Internet egress.</strong> A forward proxy (<code>HTTP_PROXY</code>/<code>HTTPS_PROXY</code> in the sandbox;
+<code>CONNECT</code> for HTTPS) used by <code>pip</code>/<code>uv</code>, <code>git</code>, <code>curl</code> and Hermes's terminal
+commands. Hermes works for hours and may need to install Python packages or
+fetch a file, so a closed sandbox is not enough. Three modes:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What the sandbox can reach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>Nothing beyond the two platform endpoints.</td>
+</tr>
+<tr>
+<td><code>packages</code></td>
+<td>Also the package index hosts on the operator's list, by default <code>pypi.org</code>, <code>files.pythonhosted.org</code> and <code>registry.npmjs.org</code>.</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>Also any public host on ports 80 and 443.</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Who chooses.</strong> The operator sets the maximum
+(<code>APP_HERMES_EGRESS_MAX_MODE</code>, default <code>packages</code>) and the package host list.
+The organization administrator picks a mode within that maximum, by default
+<code>packages</code>. <code>public</code> also needs the user's live <code>web.access</code> capability.</li>
+<li><strong>Per connection.</strong> The sandbox authenticates to the proxy with its Hermes
+session token (<code>Proxy-Authorization</code>). For every new connection the proxy asks
+the backend whether the session is open, unexpired, on its token version and
+bound to an active turn, and which mode applies right now. The answer is cached
+for a few seconds at most. Closing or rotating the session, ending the turn,
+lowering the organization's mode or revoking <code>web.access</code> therefore stops new
+connections. The proxy holds no platform secret beyond its own service
+credential for that check.</li>
+<li><strong>What stays closed.</strong> Every mode refuses private, loopback, link-local and
+platform ranges plus <code>WEB_EGRESS_FORBIDDEN_CIDRS</code>. The proxy checks the
+resolved address before connecting, and the nftables guard enforces the same
+ranges underneath. A host on the operator's package list is the only exception,
+and only when the operator lists it explicitly, for example an internal package
+mirror in an air-gapped installation.</li>
+<li><strong>Limits.</strong> Connection and idle timeouts, concurrent connections per session
+and bytes per turn, all operator settings.</li>
+<li><strong>Journal.</strong> Each decision is recorded with the session, host, port, mode,
+outcome and byte counts. Paths and bodies of HTTPS traffic are never seen or
+recorded.</li>
+</ul>
+</li>
+</ol>
+<p>Search and reading pages stay platform tools: <code>web.search</code> and <code>web.read</code> through
+the MCP bridge keep their SSRF policy, deadlines and citations whatever the mode.
+Hermes's own web and browser toolsets stay disabled, since they would need provider
+keys inside the sandbox. In <code>public</code> mode the terminal can still download a page or
+clone a repository directly. Installed packages and downloaded files live in the
+workspace and survive between turns through the snapshot.</p>
+<p>The risk is stated in the admin UI next to the setting. In <code>packages</code> and <code>public</code>
+modes, a prompt injection can send whatever the sandbox holds (its files and what
+the conversation gave it) to a reachable host. In <code>packages</code> mode such a host is a
+package index, which is a narrow but real channel through uploads to it. That is
+why <code>public</code> needs <code>web.access</code> and an explicit organization choice.</p>
+<p>Acceptance needs runtime evidence, not only static tests. From inside the sandbox,
+in each mode:</p>
+<ul>
+<li>probes to MinIO, PostgreSQL, Temporal, skill-executor, other backend paths and
+private ranges must fail;</li>
+<li>the two platform calls must succeed;</li>
+<li>in <code>none</code>, every internet probe fails;</li>
+<li>in <code>packages</code>, <code>pip install</code> from the listed index works and other hosts fail;</li>
+<li>in <code>public</code>, a public host works and a private one still fails;</li>
+<li>a closed session or an ended turn stops new connections.</li>
+</ul>
+<h3 id="credentials-in-the-sandbox">Credentials in the sandbox</h3>
+<p>The model has a terminal. Anything in its environment or files can be read by the
+model and by any prompt injection.</p>
+<ul>
+<li><strong>Session token.</strong> The runner's session token never enters the sandbox. When a
+session opens, the backend mints a separate Hermes session token. It:
+<ul>
+<li>is bound to the <code>hermes_sessions</code> row: organization, user and conversation;</li>
+<li>has the audience <code>hermes-session</code>;</li>
+<li>is accepted only by the native-tools proxy route, the MCP bridge and the
+<code>hermes-egress</code> forward proxy, which checks it with the backend;</li>
+<li>works only while a turn is active. The backend takes the current turn and,
+where relevant, the workflow run and node from the row, not from the token.
+Between turns every call fails with <code>hermes_turn_inactive</code>;</li>
+<li>expires with the absolute session lifetime and is revoked on close or
+snapshot. A restored sandbox gets a new token.</li>
+</ul>
+</li>
+<li><strong>What a leak can do.</strong> Model and tool calls for that conversation, only while
+one of its turns is running, and still subject to live grants and quotas. A
+sandbox that sits idle for hours can do nothing with it.</li>
+<li><strong>Hermes API key.</strong> <code>API_SERVER_KEY</code> is random per session and known only to the
+activity.</li>
+<li><strong>Provider credentials.</strong> No provider credentials enter the sandbox.</li>
+</ul>
+<h3 id="native-tools-in-the-model-proxy">Native tools in the model proxy</h3>
+<p>A separate route, <code>POST /v1/hermes/chat/completions</code>, accepts the Hermes session
+token only. It accepts:</p>
+<ul>
+<li><code>tools</code>;</li>
+<li><code>tool_choice</code>;</li>
+<li>assistant <code>tool_calls</code>;</li>
+<li><code>role: &quot;tool&quot;</code> messages;</li>
+<li>multimodal user content.</li>
+</ul>
+<p>It streams the gateway's <code>tool_calls</code> deltas back unchanged.</p>
+<ul>
+<li><strong>Checks.</strong> It enforces the same capability, model grant, vision and quota checks
+as the existing route. <code>reserve</code> and <code>complete</code> apply per call, with
+workflow-run, phase and node correlation for nodes.</li>
+<li><strong>Langfuse.</strong> Sanitization covers the new message shapes.</li>
+<li><strong>Existing route.</strong> Its schema and the text tool protocol stay unchanged.</li>
+<li><strong>Upstream failures.</strong> The sandbox gets only <code>upstream_error &lt;status&gt; &lt;type&gt;</code>,
+where the type is the provider's error type when it is a short token
+(<code>upstream_error 402 free_request_quota_exhausted</code>). The provider's message and
+the gateway's addresses stay in the backend's log. Hermes puts this text in
+the failed run's output, and tool-worker turns it into a fixed code, never
+forwarding the text: <code>hermes_model_unavailable</code> for 402 and 429 (quota, rate
+limit, payment), <code>hermes_model_error</code> for other statuses, and
+<code>hermes_run_failed</code> otherwise. The runner ends the failed turn with a reason
+the user can act on, followed by the code, and closes the turn with it: the
+reason is kept as the turn's answer, marked failed, so the history shows it
+and the runner never sends it back to a model (this holds for every failed
+chat turn).</li>
+</ul>
+<p><code>LLM_GATEWAY_URL</code> must forward native tools. Today the docs only state that it is
+OpenAI-compatible, so this becomes a documented gateway requirement. Startup does
+not check it; the first Hermes turn fails clearly if the gateway rejects <code>tools</code>.</p>
+<h3 id="platform-tools-over-mcp">Platform tools over MCP</h3>
+<p>A new MCP endpoint (HTTP/SSE) in the business backend, <code>/v1/hermes/mcp</code>, exposes
+the AurumAI tools the user may use for this turn. Hermes's <code>mcp_servers</code> config
+points at it with <code>tools.include</code>.</p>
+<ul>
+<li><strong>Tools exposed.</strong> Knowledge search, <code>web.search</code> and <code>web.read</code>, image generation
+and editing, granted MCP skills and code skills, model questions to the user, and
+<code>attach_file</code> for the files and charts it makes (see Files and charts).</li>
+<li><strong>Live authorization.</strong> Every call re-authorizes. Revoking a grant during a turn
+takes effect on the next call.</li>
+<li><strong>Delegation.</strong> Calls reuse the existing services: web through <code>web-tools</code>,
+images through <code>image_tools</code>, RAG through <code>rag-api</code>. MCP skills and code skills
+go through tool-worker activities, started by the bridge as child work of the
+session.</li>
+<li><strong>Idempotency.</strong> Hermes does not provide Temporal invocation ids. The bridge
+derives an operation id from the session, the MCP request id and a hash of the
+arguments, and records it in <code>tool_operations</code>. A retried request returns the
+stored result instead of repeating the side effect. Images remain tied to the
+turn and execution as they are today.</li>
+<li><strong>Questions to the user.</strong> These map to the existing durable <code>user_questions</code>
+flow. While a question is open, the run waits in Hermes's <code>/clarify</code> state.</li>
+</ul>
+<h3 id="memory-and-skills">Memory and skills</h3>
+<ul>
+<li><strong>Memory storage.</strong> A new table <code>hermes_memories</code> holds <code>org_id</code>, <code>user_id</code>,
+<code>kind</code> (<code>memory</code> or <code>user</code>), <code>content</code>, <code>updated_at</code> and a <code>version</code>. It has
+FORCE RLS, and only the owning user can read or write it.</li>
+<li><strong>Memory in a session.</strong> When a session opens, the user's memory is written into
+<code>HERMES_HOME/memories</code> within the configured character limits. When it closes,
+the files are read back. The content is treated as untrusted:
+<ul>
+<li>it is cut to the limits;</li>
+<li>it is stored only if the version did not change in the meantime;</li>
+<li>it is never shown to other users.
+The memory can be viewed and cleared in the user's settings, and it is deleted
+when the user is deleted. It is excluded from conversation archives, with a
+documented lifecycle position.</li>
+</ul>
+</li>
+<li><strong>Skill drafts.</strong> After every turn (phase 5b; the design said when a session
+closes), the platform diffs <code>HERMES_HOME/skills</code> against what it hydrated. New or changed skills become drafts in a new
+<code>hermes_skill_drafts</code> table owned by the user.
+<ul>
+<li>Hermes's <code>skills.write_approval</code> is not trusted as the gate, because the
+terminal can write the directory directly.</li>
+<li>Approved drafts become ordinary platform skills: zipped <code>SKILL.md</code> and
+scripts, under the existing code-skill bundle validation.</li>
+<li>Ordinary resource grants then control who can use them.</li>
+</ul>
+</li>
+<li><strong>Hydrated skills.</strong> The platform skills the user can access are hydrated
+read-only (phase 5c: code skills, before every turn).</li>
+<li><strong><code>state.db</code> and session search.</strong> <code>state.db</code> lives in the conversation's
+snapshot, so session search covers that conversation. Search across the user's
+other conversations can later be offered as a platform tool scoped to the user's
+own conversations.</li>
+</ul>
+<h3 id="chat-and-workflow-surface">Chat and workflow surface</h3>
+<ul>
+<li><strong>Picking Hermes in chat.</strong> Hermes is a system agent definition with type
+<code>hermes</code>. It is listed in the agent and workflow picker for users who have the
+new <code>agents.hermes</code> capability. The operator switch is <code>HERMES_ENABLED</code>, off by
+default. The organization chooses the Hermes model, which must be a model it has
+granted.</li>
+<li><strong>Public SSE.</strong> It carries the answer text and safe tool progress: tool names,
+bounded status and sources. Reasoning, raw tool output, terminal output and
+memory content stay internal. Images appear under the answer as in ordinary chat.</li>
+<li><strong>Workflow node.</strong> A node may use an agent definition of type <code>hermes</code>. The node
+brief and dependency outputs become the run input, and the node result is the
+final answer. Billing and correlation use the existing run, phase and node
+fields. Graph limits and concurrency are unchanged. A Hermes node counts as one
+node, and its subagents are bounded by Hermes limits set by the platform.</li>
+</ul>
+<h2 id="constraints">Constraints</h2>
+<ul>
+<li>No change to existing Temporal command histories without a <code>patched</code> gate, and
+no change to the text tool protocol, RLS, grant semantics or public-event privacy.</li>
+<li>Default-deny. There is no implicit capability for new or existing organizations,
+and no Hermes access without both the flag and the capability.</li>
+<li>Hermes is pinned and attributed. An upgrade is a deliberate PR with a re-run of
+the acceptance.</li>
+<li>English source and docs. Russian UI text goes only in <code>messages/ru.json</code>.</li>
+</ul>
+<h2 id="phasing">Phasing</h2>
+<p>Each phase is a separate PR behind the flag:</p>
+<ol>
+<li>
+<p><strong>Native tools in the proxy.</strong> The new route, a Hermes session token and quota
+correlation. Tested with a scripted gateway stream against a real database;
+acceptance through the deterministic gateway follows with the chat agent in
+phase 4, the first caller of the route.</p>
+<p>Implemented. Phase 2's session records (below) later replaced its short token
+expiry with revocation and its conversation-only billing with the bound turn's
+workflow correlation.</p>
+<p>Compose passes <code>APP_HERMES_ENABLED</code> with the <code>docker-compose.hermes.yml</code>
+overlay; the Helm chart does not yet. Like the runner route, the Hermes route always streams
+and ignores <code>stream: false</code>.</p>
+</li>
+<li>
+<p><strong>Sandbox and network.</strong> The <code>hermes-sandbox</code> image, its resources, durable
+sandbox ownership and re-adoption after an executor restart, snapshots, the
+<code>hermes-egress</code> sidecar on Docker and Kubernetes, and runtime egress probes.
+Split into three changes:</p>
+<ul>
+<li>2a, implemented: <code>hermes_sessions</code> rows with FORCE RLS, one open session per
+conversation, runner routes to open (rotating the token), bind a turn with its
+workflow correlation, unbind and close; tokens carry a token version, and an
+open unexpired session blocks archiving while the purge removes session rows.
+Sandbox id, snapshot and capacity columns arrive with 2c;
+Opening rotates the token, and a long-lived sandbox reads its token once at
+start: phase 4 opens a session only when it provisions or restores a sandbox,
+and every turn only binds and unbinds;</li>
+<li>2b, implemented for Docker Compose: <code>docker-compose.hermes.yml</code> with the
+guard (a <code>hermes</code> mode of the web-egress image) and the stdlib proxy, the
+backend's per-connection check and organization setting, accepted at runtime
+by <code>./smoke-test-hermes-egress.sh</code>. The forward proxy accepts <code>CONNECT</code> only;
+its journal is structured log lines. Docker's embedded DNS answers no external
+names on the internal sandbox network (checked by the acceptance). Still
+open: Kubernetes (Helm, NetworkPolicies, and no kube-dns for sandbox pods so
+CoreDNS cannot become a DNS channel) and the Admin UI control (phase 4);</li>
+<li>2c-i, implemented for Docker: the <code>hermes-sandbox</code> image and long-lived
+sandboxes in <code>skill-executor</code> (create, re-adopt, run, events, stop, close,
+idle and absolute lifetimes, guard reconnection), each on its own internal
+network in isolated gateway mode, accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code>. Deviations from the text above:
+<ul>
+<li>Hermes first came from PyPI (<code>hermes-agent==0.19.0</code>, the newest release
+published there); see &quot;Hermes 0.22&quot; below for how it is installed now;</li>
+<li>Hermes 0.19 did not replay <code>Idempotency-Key</code>, so <code>hermes-relay</code> records
+each run id in the workspace and a retried run attaches to it (kept with
+0.22, whose idempotency store would also do);</li>
+<li>ownership is in Docker labels only; linking a sandbox to its
+<code>hermes_sessions</code> row is phase 4's, because skill-executor has no database;</li>
+<li>the Kubernetes runtime refuses Hermes sandboxes explicitly;</li>
+<li>known window: the relay records a run id only after Hermes accepts the
+run, so a relay that dies in between can make a retry start a second run;</li>
+<li>attaching to a run was expected to replay its events from the start.
+Hermes 0.19 handed them to one subscriber only, once; 0.22 replays them
+(see &quot;Hermes 0.22&quot;), and the relay still falls back to polling the run's
+status when they are gone;</li>
+<li>skill-executor's Hermes routes trust any caller that knows a session id,
+like its code-skill routes; phase 4 keeps it reachable only from the tools
+worker;</li>
+</ul>
+</li>
+<li>2c-ii, split into two changes:
+<ul>
+<li>2c-ii-a, implemented for Docker: workspace snapshots. A sandbox past its
+idle or absolute lifetime is stopped, snapshotted and removed, and the
+session's next create restores the snapshot into a new sandbox, under
+fresh secrets. <code>POST /hermes/sandboxes/{id}/snapshot</code> takes one in place
+and <code>DELETE ...?snapshot=true</code> takes the final one; both return
+<code>{sha256, size, created_at}</code>. Accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code> with a disposable MinIO. Deviations:
+<ul>
+<li>skill-executor writes the snapshot itself, stored by its SHA-256 next
+to a <code>latest.json</code> pointer, and a restore is checked against the
+object's name. Until phase 4 records the checksum in the session row
+(and passes it as <code>snapshot_sha256</code>), whoever can write the prefix can
+replace a snapshot, so operators scope skill-executor's credentials to
+<code>hermes-sessions/*</code>;</li>
+<li>an idle sandbox is removed once its snapshot is stored. If the
+snapshot fails, it stays stopped with its volume, is retried, can be
+resumed by the next create with a new token, and is removed after the
+snapshot retention;</li>
+<li>snapshots keep regular files and directories only (links, including
+those of a virtualenv, are dropped) and never contain the generated
+config, <code>.aurum/</code>, logs, memory or skills;</li>
+<li>a snapshot in place reads a running sandbox, so <code>state.db</code> may be
+mid-write; it is only a cache, rebuilt from the conversation history;</li>
+<li>retention is enforced by skill-executor (objects older than seven
+days); deleting a conversation's snapshots in the archive purge comes
+with phase 4, so until then they outlive a purge by up to the
+retention;</li>
+</ul>
+</li>
+<li>2c-ii-b, implemented for Docker: capacity caps with least-recently-used
+eviction and workspace disk limits, accepted by the same acceptance.
+Deviations:
+<ul>
+<li>&quot;busy&quot; is an open stream from skill-executor or a run the relay
+(<code>hermes-relay active</code>) reports as queued, running or waiting; that is
+the sandbox's own word, so a sandbox claiming to be busy is still
+retired at its idle or absolute lifetime;</li>
+<li>the disk limit is soft by default (Docker's volume usage, checked
+periodically; over it, active runs are stopped and new ones refused),
+or a size-bounded tmpfs workspace by operator choice. A tmpfs
+sandbox is paused instead of stopped when its snapshot fails and is
+never resumed, since its Hermes would keep the old token;</li>
+<li>a workspace without the platform's own files (a tmpfs workspace after
+a restart), or one over the snapshot bound, is removed without a
+snapshot, so the last snapshot that fit stays the latest;</li>
+<li>eviction snapshots the victim while the capacity lock is held, so
+creations wait for it.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>MCP bridge.</strong> Split into two changes:</p>
+<ul>
+<li>3a, implemented: <code>POST /v1/hermes/mcp</code> with knowledge search, <code>web.search</code>,
+<code>web.read</code>, image generation and editing; hermes-egress forwards it, and the
+generated Hermes config connects to it. Accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code>: Hermes generates an image through
+hermes-egress as a completed operation of the bound execution, and between
+turns the sandbox lists the tools but cannot call them. Deviations:
+<ul>
+<li>binding a turn also names the registered execution acting in it (a new
+<code>hermes_sessions.active_execution_id</code>, kept inside the bound turn by a
+foreign key; its phase and node must match the binding's). Web and image
+calls are durable operations of that execution and reuse the existing
+services unchanged: live capabilities, per-turn budgets, quota, sources
+and images. The invocation id is derived from the session, the JSON-RPC
+id, the tool and a hash of the arguments, so a reused id with the same
+arguments returns the stored result;</li>
+<li>Hermes connects to the bridge and lists its tools once, when the sandbox
+starts, which is usually between turns. The handshake, <code>ping</code> and
+<code>tools/list</code> therefore need only an open session on the token's version,
+not an active turn, and the catalogue is fixed (it follows only the
+operator switches); every call is authorized live. This narrows &quot;between
+turns every call fails&quot; to calls that read or do something;</li>
+<li>the bridge is Streamable HTTP without a session, written as a small
+JSON-RPC route rather than the MCP SDK's server: one JSON answer per POST,
+no <code>Mcp-Session-Id</code>, so the client never opens the server stream that
+hermes-egress would refuse. Calls the bridge denies or cannot complete
+are tool errors with bounded codes, not HTTP errors, which Hermes counts
+towards pausing the server; the ordinary rate limit still answers 429;</li>
+<li>knowledge search covers only the files attached to the conversation, as
+for an ordinary chat agent; the Hermes agent definition's knowledge bases
+follow with phase 4;</li>
+<li>questions to the user move to phase 4: they wait in Hermes's <code>clarify</code>
+state, answered through the durable <code>user_questions</code> flow by the session
+workflow, not over a tool call bounded by its timeout;</li>
+</ul>
+</li>
+<li>3b, implemented: platform skills. Two fixed tools, <code>list_skills</code> and
+<code>run_skill</code>, since Hermes lists the bridge's tools only once. Accepted at
+runtime by <code>./smoke-test-hermes-sandbox.sh</code>: Hermes runs a granted MCP skill
+through tool-worker against the reference MCP server. Deviations:
+<ul>
+<li>only MCP and tool skills qualify, and only those the user holds a grant
+for (a Hermes token always acts as a member); a conversation's own
+attachment search is <code>knowledge_search</code>. Code skills reach Hermes with
+phase 5, hydrated into its skills and run in its own terminal, which
+settles that open question; agent skills are not offered;</li>
+<li>the listing holds ids, names, descriptions and input schemas only, never
+endpoints or credentials;</li>
+<li>a run is a <code>HermesSkillCallWorkflow</code> on tool-worker's queue that runs
+<code>execute_skill</code>, as the runner's calls do; tool-worker remains the only
+service that reaches skill endpoints. Its workflow id, derived like the
+3a invocation ids, is the record instead of <code>tool_operations</code>: a
+repeated request attaches to the same run, until Temporal's retention
+ends it. A failed skill is a bare <code>skill_failed</code>; the bridge waits
+<code>APP_HERMES_SKILL_TIMEOUT_SECONDS</code> (240) and then answers
+<code>skill_timeout</code> while the run continues, so a retry attaches to it;</li>
+<li>tool-worker fetches the skill with a runner session token for the
+conversation, which the bridge mints for each run with the Hermes
+token's generation. That token is stronger than the Hermes token (thirty
+minutes, whether a turn is active or not, and the runner's internal
+routes); it never reaches the sandbox, and it is in the workflow's
+history as it already is in the runner's skill calls;</li>
+<li>skill runs have no per-turn budget; the ordinary rate limit bounds them.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Chat agent.</strong> Split into three changes:</p>
+<ul>
+<li>4a, implemented: the runtime and the API. A chat request with
+<code>agent: &quot;hermes&quot;</code> runs on the organization's Hermes model (set through
+<code>PUT /v1/admin/settings/hermes</code>), needs the switch and both capabilities,
+and is signalled to the runner as a Hermes turn. <code>ConversationWorkflow</code>
+(behind <code>workflow.patched(&quot;hermes-v1&quot;)</code>, evaluated only for Hermes turns)
+registers the turn's ordinary execution, hands the turn to the
+conversation's <code>HermesSessionWorkflow</code> on tool-worker's queue, waits for
+its result and persists the answer. Accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code> with a conversation runner in direct mode
+and the turn signalled through Temporal; the chat route itself is covered
+by route tests. Deviations:
+<ul>
+<li>Python workflow code cannot send another workflow an Update, so the turn
+is handed over with signal-with-start (from a runner activity) and
+answered with a <code>hermes_turn_result</code> signal; a cancelled turn is
+signalled as well;</li>
+<li>the session workflow keeps the sandbox only as long as turns arrive:
+after the idle time (<code>hermes_idle_seconds</code>, 30 minutes) it snapshots and
+removes the sandbox and closes the session, revoking its token, and ends;
+the next turn starts a new run. It continues-as-new after 50 turns.
+Capacity, the absolute lifetime and re-adoption stay with skill-executor;</li>
+<li>a running sandbox keeps the token it read at its start, so the session
+workflow reuses an open session whose sandbox runs (a new runner route
+returns it without rotating the token), and otherwise opens one, which
+rotates the token, and creates, restores or resumes the sandbox with it.
+The sandbox id is the session row's id, which links the two;</li>
+<li>every backend call of the session workflow takes a fresh runner token
+from the waiting runner (<code>get_session_token</code> on its task queue, bounded
+at two minutes so a runner that is gone fails the turn instead of
+hanging the session), since a runner token lives thirty minutes and a
+turn for hours. The runner keeps itself and its token alive while it
+waits: every five minutes it calls <code>POST /v1/internal/hermes/turns/{turn}/touch</code>, which does what a chat request
+does for other turns. An idle close whose runner has gone leaves the
+session to expire;</li>
+<li>the run activity heartbeats on a timer, and the turn deadline covers
+every attempt; a lost worker's retry attaches to the same run by its
+key. A sandbox retired between preparing and running is prepared again
+once. A cancelled turn reaches its run within seconds (tool-worker's
+heartbeat throttle is five seconds), and a turn the session never
+answers is cancelled after its deadline. The session remembers its last
+hundred turns, so a repeated hand-off never runs one twice;</li>
+<li>the public stream carries the answer at the end, with the progress of
+4b. Images in a Hermes turn are refused for now;</li>
+</ul>
+</li>
+<li>4b, implemented: the composer offers Hermes Agent (from <code>GET /v1/chat/agents</code>, only when a turn would be accepted) and keeps it chosen for
+the conversation; the Models page of the Admin UI sets the Hermes model and
+the egress mode (modes above the operator's maximum are disabled); the run's
+progress reaches the chat stream; English and Russian strings. Accepted at
+runtime by <code>./smoke-test-hermes-sandbox.sh</code>: a chat turn's tool card, its
+result and keepalives reach the conversation's channel, a tool argument
+never does, and the answer is persisted with the card. Deviations:
+<ul>
+<li>tool-worker publishes the progress to the conversation's event channel
+itself (it already had the Redis URL), as tool cards: <code>tool.started</code> and
+<code>tool.completed</code> become <code>tool-calls</code> and <code>tool-result</code>, paired by tool
+name in order since Hermes's events carry no call id. Only an allowlisted
+kind leaves the worker (<code>hermes.terminal</code>, <code>hermes.files</code>,
+<code>hermes.knowledge</code>, ..., else <code>hermes.other</code>), never the tool's name as
+Hermes sent it, its arguments, previews, reasoning or output; at most 50
+cards a turn. The answer persists with the cards of the attempt that
+finished, so a reload shows them;</li>
+<li>no live answer deltas: the answer arrives with <code>message-end</code>. A delta
+stream could not be deduplicated after a reattach;</li>
+<li>keepalives every 30 s, from preparing the sandbox (a restore takes
+minutes) to the run's end, hold the chat stream open past
+<code>EVENT_SUBSCRIBE_TIMEOUT</code>; the stream drops them. The turn routes'
+stream projects durable status only and is unchanged;</li>
+<li>Hermes 0.19 handed a run's events to one subscriber, once: a retried run
+activity saw the events from its reattach on, under call ids that
+carried the attempt, and the relay, finding no events (404) or only
+keepalives of a queue another subscriber holds, polls the run's status
+for the result (covered by the relay's tests, not exercised at runtime).
+With 0.22 a reattach replays the run's events and cards take their ids
+from Hermes's tool call ids, hashed, so the replay updates the cards the
+lost attempt showed and the answer persists all of them;</li>
+<li>a reopened conversation starts in the ordinary chat; Hermes is chosen
+again for the next turn;</li>
+<li>sources and images under the answer, which ordinary chat shows, come
+later: the bridge's results are not read back into the answer yet;</li>
+</ul>
+</li>
+<li>4c, split into two changes:
+<ul>
+<li>4c-i, implemented: questions to the user through Hermes's <code>clarify</code>
+(Hermes 0.22). Accepted at runtime by <code>./smoke-test-hermes-sandbox.sh</code>:
+a question becomes the turn's question card, the user's answer through
+the ordinary answer route reaches Hermes, and with questions off the
+question is skipped. How it works:
+<ul>
+<li>skill-executor enables <code>clarify</code> for the API server
+(<code>platform_toolsets.api_server</code>, which leaves it out by default) and
+sets Hermes's own wait (<code>agent.clarify_timeout</code>) past the platform
+question's hour; answers go through <code>hermes-relay clarify</code> from a
+file and <code>POST /hermes/sandboxes/{id}/runs/{run}/clarify</code>;</li>
+<li>the run activity forwards each <code>clarify.request</code> and
+<code>clarify.settled</code> to the conversation workflow, bounded: an id of a
+fixed shape, the question without Hermes's reply hint (4000
+characters), at most eight choices without its &quot;(Recommended)&quot; mark;</li>
+<li>the conversation workflow asks it as an ordinary question of the turn
+(one at a time, as Hermes asks them) inside its five-minute touches,
+and signals the answer to the session workflow, which answers the run
+while it follows it. A chosen option goes back as the choice's text;</li>
+<li>a question the user cannot be asked (questions off, the turn's limit)
+or does not answer before the card expires is answered <code>skip</code>; a
+question Hermes settles itself (its timeout, the run ended) loses its
+card. Several answers to a multi-select question are typed as text;</li>
+<li>a <code>clarify</code> card shows &quot;Asking you&quot; while Hermes waits.</li>
+</ul>
+</li>
+<li>4c-ii, implemented: the archive purge removes a conversation's Hermes
+sandboxes and workspace snapshots. The backend's object store
+credentials are scoped to <code>conversation-images/</code>, and only tool-worker
+reaches skill-executor, so the maintenance worker's purge starts
+tool-worker's <code>HermesConversationPurgeWorkflow</code> (one id per
+conversation; a resumed purge attaches or repeats it) and waits for it.
+It runs after the image purge and before the rows go, and only for a
+conversation with <code>hermes_sessions</code> rows, which the row purge removes,
+so a crash in between repeats it; a purge that cannot reach it, or a
+worker without it, leaves the conversation in place. skill-executor's
+<code>DELETE /hermes/conversations/{org}/{conversation}</code> closes the
+conversation's sandboxes without a snapshot (waiting for one in
+progress) and then deletes every object under its
+<code>hermes-sessions/{org}/{conversation}/</code> prefix. Workspaces are runtime
+state, not history: they are not archived, and a restored conversation
+starts Hermes in a fresh one. Accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code> through the workflow itself; the
+archive saga's step is covered by the backend's archive tests. A
+versioned bucket keeps the deleted objects' older versions; that is
+the operator's retention to set. The snapshot checksum is not recorded
+in the session row: skill-executor retires sandboxes on its own and
+the backend never sees it, and the purge needs only the prefix.</li>
+</ul>
+</li>
+<li>Hermes 0.22, implemented: the sandbox runs Hermes 0.22.5. Hermes no longer
+ships as a package (its build refuses outside Nix, and PyPI ends at 0.19.0),
+so the image installs the release's source tree from its GitHub tag
+archive, verified by its sha256, on Python 3.14, which 0.22 requires; its
+dependencies are exported from Hermes's own <code>uv.lock</code> (the <code>mcp</code> and <code>sms</code>
+extras, the latter for aiohttp) and installed by hash, as wheels only
+(<code>hermes-sandbox/update-requirements.sh</code>). Changes the upgrade brought:
+<ul>
+<li>MCP tools sit behind a <code>tool_search</code> bridge by default, which would
+hide the platform tools' names from the model; the config turns it off;</li>
+<li>a <code>connections</code> toolset reaches Nous's connector gateway; it is
+disabled, with connectors and update checks off in the config;</li>
+<li>the API server refuses a key shorter than 16 characters (skill-executor
+generates 43) and warns when it is PID 1, so sandboxes run with an init;</li>
+<li>run events are numbered and replayed to every subscriber, tool events
+carry <code>tool_call_id</code>, and <code>tool.completed</code> carries a redacted preview of
+the tool's output, which the worker never forwards;</li>
+<li>Hermes copies <code>config.yaml</code>, the session token and API key included, to
+<code>.hermes/backups/config/</code> whenever it parses; snapshots exclude
+<code>.hermes/backups</code> as they exclude the config;</li>
+<li>the gateway opens a loop-liveness ping on a random 127.0.0.1 port (its
+Unix socket path would be too long); it carries no control, and the
+acceptance still checks that nothing listens beyond loopback;</li>
+<li>Debian's SQLite (3.46) predates Hermes's WAL fix, so Hermes uses its
+rollback journal instead.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Memory and skill drafts.</strong> Split into three changes:</p>
+<ul>
+<li>5a, implemented: memory. <code>hermes_memories</code> (organization, user, <code>memory</code> or
+<code>user</code>, content within Hermes's 2200 and 1375 characters, version) has
+FORCE RLS by organization, and every query also names the owning user; it
+cascades with the user (the platform has no user deletion path yet, as for
+<code>user_settings</code>). It is not conversation data: conversation archives
+neither carry nor remove it. Accepted at runtime by
+<code>./smoke-test-hermes-sandbox.sh</code>: what Hermes's memory tool writes in a turn
+is stored for the user, and a fresh sandbox, which snapshots never carry
+memory into, starts with it. How it works:
+<ul>
+<li>while the turn is bound, the session workflow writes the user's memory
+into the sandbox before the run (<code>hermes_load_memory</code>) and reads it back
+after it, before unbinding (<code>hermes_save_memory</code>); the activities carry
+only versions and hashes, so the memory stays out of Temporal history.
+The steps are gated by <code>workflow.patched(&quot;hermes-memory&quot;)</code>, and a
+failed step never fails the turn;</li>
+<li>what comes back is the sandbox's: <code>hermes-relay memory-read</code> takes only
+regular files (no links or FIFOs), bounded and valid UTF-8, and the
+backend cuts it to the limits at an entry boundary;</li>
+<li>it is stored only on the version it was written at
+(<code>PUT /v1/internal/hermes/memory</code> with <code>baseVersion</code>; a missing row is
+version 0), so a turn in another conversation, or the user clearing
+it, wins over an older read. Clearing keeps the rows, empty, on a new
+version;</li>
+<li>Hermes freezes the memory into a session's prompt at the session's
+first run: a sandbox that keeps running sees changes made elsewhere in
+its files (its own writes merge with them) but in its prompt only after
+it starts again, at the latest after its idle time;</li>
+<li>users see and clear their own memory in their settings
+(<code>GET</code>/<code>DELETE /v1/hermes/memory</code>), shown where Hermes can be used.</li>
+</ul>
+</li>
+<li>5b, implemented: skill drafts and their approval by an administrator.
+<code>hermes_skill_drafts</code> (organization, author, the skill's directory, name
+and description from <code>SKILL.md</code>, a hash of the file set, the bundle, a
+status of <code>pending</code>, <code>approved</code>, <code>rejected</code> or <code>dismissed</code>, and the skill
+an approval made) has FORCE RLS by organization; the user routes also
+name the author, and rows cascade with the user. Drafts are user data, not
+conversation data: conversation archives neither carry nor remove them.
+Accepted at runtime by <code>./smoke-test-hermes-sandbox.sh</code>: none of the turns
+before drafts bundled skills, a skill Hermes writes with <code>skill_manage</code> is
+drafted once for the user without the sandbox's secrets, and neither the
+unchanged skill nor the draft the user withdrew comes back on later turns.
+The approval itself is covered by the backend's tests, since the
+acceptance stack has no admin backend. How it works, and where it departs
+from the design above:
+<ul>
+<li>the skills are read after every turn, while the turn is still bound,
+not when the session closes: <code>.hermes/skills</code> is not in snapshots and
+skill-executor retires sandboxes on its own, so a read at close would
+miss skills. The session workflow's <code>hermes_save_skills</code> step follows
+the memory read-back, is gated by
+<code>workflow.patched(&quot;hermes-skill-drafts&quot;)</code>, carries only counts, and
+never fails the turn;</li>
+<li>the baseline is the image's read-only <code>/opt/hermes/skills</code>, not
+Hermes's <code>.bundled_manifest</code>, which the agent can rewrite: a skill
+directory whose files equal the bundled copy's is skipped, a changed or
+new one is read. Hermes's own state at the root of <code>skills/</code> (dot
+files, <code>.hub</code>, <code>.archive</code>, <code>.locks</code>) and caches are never read;</li>
+<li><code>hermes-relay skills-read</code> reads the same way as <code>memory-read</code>: a
+<code>skills</code> directory that is a link is no skills, links are never
+followed, and only regular, valid UTF-8 text files count. A skill
+with anything else (a link, a binary, more than 32 files, a file over
+64 KiB or more than 96 KiB in all) is skipped whole, and at most 16
+skills are read per turn, one line each, the most recently changed
+first, so skills read on earlier turns do not crowd out a new one;</li>
+<li>the backend checks the paths and bounds again, builds the bundle
+itself (stored zip entries, fixed timestamps, so the same files give
+the same checksum) and validates it as an uploaded code skill. A
+draft is keyed by its file set's hash per user across every status,
+so a skill seen again after a rejection or a withdrawal is not
+drafted again; a changed skill replaces its directory's open draft,
+and a user has at most 50 open drafts. Hermes's own
+<code>skills.write_approval</code> stays off: the terminal writes the directory
+anyway;</li>
+<li>administrators review on the Admin UI's Skills page, which shows every
+file. A decision names the bundle checksum of the version on screen
+and is refused (<code>hermes_skill_draft_changed</code>) if a later turn replaced
+the draft's files meanwhile. Approval checks the stored bundle against
+its checksum and
+makes a code skill owned by the reviewer, with read access for the
+author, both grants audited as the reviewer's; others get access
+through ordinary grants. Approving a later
+version of an approved skill directory replaces that skill's bundle
+instead of adding a skill. Users see their drafts in their settings
+and can withdraw an open one (<code>GET</code>/<code>DELETE /v1/hermes/skill-drafts</code>);</li>
+<li>bundles are stored like uploaded ones, by checksum under
+<code>skills/{org}/</code>, and like a replaced bundle, a declined or withdrawn
+draft's object is not removed.</li>
+</ul>
+</li>
+<li>5c, implemented: platform code skills in the sandbox, read-only. Accepted
+at runtime by <code>./smoke-test-hermes-sandbox.sh</code>: a code skill granted to
+the user is in the running sandbox before the next turn with read-only
+files the sandbox cannot write, Hermes's <code>skills_list</code> lists it, it is no
+draft, and once the grant is revoked the next turn's sandbox no longer
+has it and Hermes no longer lists it. How it works:
+<ul>
+<li>after binding and before the run, the session workflow's
+<code>hermes_hydrate_skills</code> step (gated by
+<code>workflow.patched(&quot;hermes-platform-skills&quot;)</code>) lists the conversation
+owner's code skills (<code>GET /v1/internal/hermes/platform-skills</code>: the
+code skills the user may read, without per-conversation ones, at most
+32), and skill-executor fetches each bundle, checks it against its
+checksum, and unpacks it into a staging directory, which <code>hermes-relay skills-hydrate</code> swaps into <code>/workspace/.aurum/platform-skills</code>, one
+directory per skill (<code>{name}-{id prefix}</code>);</li>
+<li>it fails closed. A skill that does not verify or fit the bounds (512
+entries, 8 MiB each, 32 MiB in all, well below the workspace limit;
+bundles are fetched again for every turn) is left out, staging that
+a failed hydration left behind is removed by the next one; when the list cannot be had or written, the directory is
+emptied instead; and when even that fails, the turn does not run, so
+a revoked skill is not offered from the next turn on (a turn already
+running, which a question can keep open for over an hour, keeps what
+it started with). Revoking cannot take back what the
+agent already copied elsewhere in its workspace, which snapshots keep;</li>
+<li>the directory is one of Hermes's <code>skills.external_dirs</code>. Hermes keeps
+the external directories it found at its start, by their real path,
+so skill-executor creates the directory with the config and only its
+entries change; a sandbox adopted from before this change sees the
+skills after its next start. Hermes's <code>skills_list</code> and <code>skill_view</code>
+read the directory on every call, but the skill index in a running
+session's prompt does not show a skill granted after the session
+started (seen in the acceptance): Hermes finds it when it lists its
+skills, and in the index after it starts again;</li>
+<li>&quot;read-only&quot; means the copy is restored from the platform before every
+turn and never written back: the files are 0444 (0555 when
+executable) in 0555 directories, and Hermes's curator does not touch
+external skills, but the sandbox user owns them and could change the
+modes. The relay replaces the directory's entries without following
+links, so a link the agent put there never makes it remove anything
+else;</li>
+<li>an unchanged copy of a platform skill in Hermes's own skills is no
+draft; a changed copy is a draft of a new skill, since a draft updates
+only the skill its own directory became. Edits to the hydrated copy
+itself are never drafted, unlike the design above, which diffed
+against what was hydrated;</li>
+<li>the skills' scripts run in Hermes's terminal under the sandbox's
+egress mode, not the skill's <code>network_policy</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Workflow node</strong>, implemented. An agent definition has a kind: <code>agent</code>
+or <code>hermes</code>, fixed at creation. A Hermes Agent definition runs workflow
+nodes; it takes no skills or knowledge bases (Hermes brings the platform's
+tools and its own skills), its system prompt becomes its instructions, and
+it never supervises a workflow, which plans and synthesizes in the text
+protocol (refused on save and on template import). Accepted in the browser
+by <code>./smoke-test-hermes-ui.sh</code>: a workflow whose one node is a Hermes Agent
+answers through Hermes in the conversation's sandbox. How it works:</p>
+<ul>
+<li>a Hermes node runs on the organization's Hermes model, not the
+definition's: a running sandbox keeps the model it started with, as in
+chat. The run's snapshot carries the kind and that model; the run does
+not start without the operator switch, both Hermes capabilities and an
+organization Hermes model, and every step checks them again, with the
+model still the organization's, before it runs (synthesis too, as for
+every node agent);</li>
+<li><code>AgentWorkflow</code> takes the Hermes path only for a Hermes definition,
+behind <code>workflow.patched(&quot;hermes-node-v1&quot;)</code>: it registers the node's
+execution, hands the node to the conversation's Hermes session with the
+brief and the predecessors' outputs as input (no chat history), and
+waits for its answer, asking or skipping Hermes's questions and keeping
+the runner alive as a chat turn does. The node's result is Hermes's
+answer; images and sources Hermes produces stay in its workspace. A
+failed run fails the node with the session's code, so <code>on_failure</code>
+edges apply; a cancelled run cancels the node's Hermes turn, so the
+session moves on;</li>
+<li>nodes of one chat turn share its turn id, so each node execution has its
+own key in the session (<code>{turn}:{execution}</code>) for its queue entry, its
+run and its answer, and the binding carries the run, phase and node, so
+the node's model calls are billed to its step. A node's progress stays
+off the chat stream;</li>
+<li>parallel Hermes nodes of one conversation run one after another: the
+session runs one turn at a time and queues the rest, chat turns
+included. A node waits for the nodes ahead of it within its budget,
+which covers a workflow's four parallel nodes (four turn deadlines and a
+quarter of an hour).</li>
+</ul>
+</li>
+</ol>
+<p>Recommended v1 for real use: phases 1–4. Memory, drafts and nodes follow.</p>
+<h3 id="files-and-charts">Files and charts</h3>
+<p>Hermes makes charts and files in its terminal (the image carries matplotlib,
+pandas and openpyxl, pinned by hash in <code>hermes-sandbox/requirements-data.txt</code>)
+and gives them to the user with the bridge's <code>attach_file</code> tool and a path in
+its workspace:</p>
+<ul>
+<li>the bridge reserves a <code>file_attach</code> operation of the bound execution, at most
+ten per turn, counted from the turn's operations under its lock rather than in
+a turn column the archive would carry. It commits, then starts a
+<code>HermesFileAttachWorkflow</code> on tool-worker's queue, keyed by the operation;</li>
+<li>tool-worker reads the file through skill-executor, whose <code>hermes-relay file-read</code> takes only a regular file in the workspace with one link, reached
+component by component without following links, outside what snapshots leave
+out, at most 20 MiB, and streams it in base64 lines that must add up to the
+size and SHA-256 of its closing line. The bytes go straight to the backend's
+runner-only upload route, never into workflow history;</li>
+<li>the backend recognises the bytes, never trusting the name: PNG, JPEG and WebP
+become a generated conversation image of the turn (outside the image budget),
+anything else must be one of the conversation file types and becomes a
+conversation file;</li>
+<li>the bridge waits <code>APP_HERMES_FILE_TIMEOUT_SECONDS</code>; a call that gives up fails
+its operation, so bytes arriving later are refused instead of being attached
+twice when the model tries again;</li>
+<li>the runner never sees Hermes's tool results, so when an answer is persisted
+the backend shows every image of its turn after the ones the runner claimed,
+and every file of the turn, which the message lists with its name, type and
+size. Workflow nodes share the turn, so a Hermes node's files reach the final
+answer.</li>
+</ul>
+<h3 id="files-the-user-gives-hermes">Files the user gives Hermes</h3>
+<p>In a Hermes conversation the user attaches files to a message (spreadsheets,
+CSV, documents; the conversation file types; and PNG, JPEG or WebP pictures,
+which only uploads may be, recognised and bounded as image uploads) and Hermes
+works on them in its terminal: its code reads a picture, and the model sees it
+through Hermes's <code>vision_analyze</code> (below), for example to build a pivot table and a presentation from several
+workbooks. The image carries python-pptx, python-docx and pypdf for that:</p>
+<ul>
+<li>the composer uploads each file (<code>POST /v1/conversations/&lt;id&gt;/files</code>) and the
+message carries their ids; only a Hermes turn takes them. Sending claims them
+for the turn, the user's message lists them, and each gets a workspace name in
+<code>/workspace/inputs/</code>: its own, numbered when an earlier upload has it, never
+changed once given;</li>
+<li>the runner receives the turn's text with a note naming those paths, so the
+stored message keeps the user's own words;</li>
+<li>before every turn, after the platform skills, the session workflow runs
+<code>hermes_sync_inputs</code> (patch <code>hermes-inputs</code>): tool-worker lists the
+conversation's claimed uploads from the backend, asks skill-executor what the
+sandbox holds (<code>hermes-relay inputs-list</code>: regular, singly linked files with
+their SHA-256), and writes only what is missing or changed, each checked
+against the recorded size and SHA-256, through a staging folder that
+<code>hermes-relay inputs-write</code> moves into the inputs folder, read-only. A
+replacement sandbox gets them again. The files never enter workflow history;</li>
+<li>a turn whose files cannot be written does not run: it ends with
+<code>hermes_inputs_unavailable</code> and a reason the user reads, since its text names
+files that would be missing;</li>
+<li>the bounds (ten files a message, twenty and 200 MiB a conversation, 20 MiB a
+file) keep one sync within its ten minutes and a snapshot within its limit.
+Inputs are part of the workspace and its snapshots.</li>
+</ul>
+<h3 id="web-applications">Web applications</h3>
+<p>Hermes can build a web application prototype, check that it works and hand
+over its code. The image carries what that takes, all verified:</p>
+<ul>
+<li>Node.js (the official LTS release, pinned by hash per architecture) with npm,
+next to Python. npm reaches <code>registry.npmjs.org</code> through hermes-egress in
+<code>packages</code> mode with the same HTTPS proxy as pip, set in the environment by
+<code>start.sh</code>, never in a file the workspace or its snapshots keep. Global
+installs go to <code>/workspace/.local</code>; native addons cannot build (no
+compilers);</li>
+<li>Debian's Chromium headless shell (<code>/usr/bin/chromium-headless-shell</code>) with
+fonts that cover Cyrillic, and Playwright for Python.
+The agent starts the app on 127.0.0.1 and checks it in headless Chromium
+(<code>--no-sandbox</code>, <code>--disable-dev-shm-usage</code>, a profile in <code>/tmp</code>), clicking
+through it and attaching screenshots. npm packages never download a browser
+the proxy would refuse (<code>PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD</code>,
+<code>PUPPETEER_SKIP_DOWNLOAD</code>); they use the system Chromium. Hermes's own
+browser toolset stays off;</li>
+<li>package caches (pip, npm) live in <code>/workspace/.cache</code>, which snapshots leave
+out, so a snapshot holds one copy of what is installed. A typical
+<code>node_modules</code> (tens of thousands of entries) fits the snapshot bounds; over
+them the last snapshot that fit stays the latest;</li>
+<li>nothing in the sandbox is reachable from outside: the user runs the app from
+the ZIP Hermes attaches, whose README says how. Code files keep their names.</li>
+<li>Hermes is told all this on every turn: skill-executor's <code>SANDBOX_INSTRUCTIONS</code>
+reach its system prompt as the runs API's <code>instructions</code> (the relay forwards
+them), which a turn Hermes runs itself uses, and as the generated config's
+<code>agent.system_prompt</code>, which a turn its session worker runs reads instead.
+The notes are neutral about the network mode, which the organization picks.</li>
+</ul>
+<h3 id="pictures-for-the-model">Pictures for the model</h3>
+<p>Hermes looks at a picture, one the user gave or one it made, with its own
+<code>vision_analyze</code> tool and the picture's path. The generated config routes that
+tool's vision request to the organization's Hermes model through the platform
+route (<code>auxiliary.vision</code>, with <code>agent.image_input_mode: text</code>, so pictures
+never travel inside tool results). The route checks the picture and passes it
+only when the organization marked that model as taking images (Admin UI →
+Models → Images, with <code>APP_IMAGES_ENABLED</code>); otherwise the model is told it
+cannot see it and says so. The request is billed like any of its calls.</p>
+<h3 id="previews-of-running-apps">Previews of running apps</h3>
+<p>The user can open an app Hermes runs in its sandbox, at an origin of its own,
+never the platform's. Off until the operator sets <code>APP_HERMES_PREVIEW_ENABLED</code>,
+an origin template <code>APP_HERMES_PREVIEW_ORIGIN</code> with <code>{preview}</code> (a wildcard
+domain with TLS in production; <code>http://{preview}.preview.localhost:&lt;port&gt;</code> in
+development, which browsers resolve to the machine itself) and the preview
+service's secret <code>APP_HERMES_PREVIEW_SERVICE_SECRET</code>:</p>
+<ul>
+<li>Hermes starts the app in the background on 127.0.0.1 and calls the bridge's
+<code>share_preview</code> with its port (1024 or above). The backend records a preview
+of the session for its owner and the turn; its answer lists it;</li>
+<li>opening it, the UI asks for a one-time ticket (60 s) that names the preview,
+the owner and the conversation's generation, and opens the preview's origin
+with it in a new tab. The preview service exchanges it (once) for a grant,
+kept in a host-only cookie of that origin, and checks the grant with the
+backend on every new connection. Tickets and grants are tokens of their own
+type and audience, carrying identity only;</li>
+<li>a check passes only for the preview the grant names, its owner, both Hermes
+capabilities, the conversation's current generation and an open, unexpired
+session; previews and tickets are runtime state that goes with the session;</li>
+<li>the preview service (<code>hermes-preview</code>, Compose profile <code>hermes-preview</code>) is
+the one thing browsers reach at a preview's origin. It sets the grant as a
+<code>__Host-</code> cookie (HttpOnly, Secure, SameSite=Lax) and redirects so the ticket
+leaves the address bar, then forwards each request to the app: <code>Host</code> becomes
+<code>localhost:&lt;port&gt;</code> (dev servers check it), its own cookie is removed,
+redirects to localhost are rewritten to the preview's origin, and the app
+cannot set that cookie or a cookie for another domain. An upgraded
+connection (WebSocket, a dev server's reload) is spliced as bytes and
+rechecked every <code>HERMES_PREVIEW_RECHECK_SECONDS</code>, so closing the session cuts
+it. It bounds connections per preview, request bodies and idle time, and
+journals each request (preview, method, path, status, bytes);</li>
+<li>it reaches the app through skill-executor's <code>/hermes/sandboxes/&lt;id&gt;/connect</code>
+WebSocket, which takes only the preview service's secret and runs
+<code>hermes-relay connect &lt;port&gt;</code> in the sandbox: a byte stream to 127.0.0.1 on
+port 1024 or above, nothing else. The sandbox gains no network; preview
+traffic does not keep it from idling;</li>
+<li>the answer shows an &quot;Open prototype&quot; card; the tab opens at once, while the
+click counts for popup blockers, without a handle on the chat page, and then
+goes to the ticket's URL. Hermes's sandbox notes tell it to start the app in
+the background and call <code>share_preview</code>, and still to hand over the ZIP.</li>
+</ul>
+<h3 id="idle-sessions">Idle sessions</h3>
+<p>The session workflow retires an idle sandbox after its idle time (1800 s) and
+then closes the session with the conversation runner's token. That token
+lives thirty minutes and only chat requests renew it, so by then it has
+expired, and the close is refused: tool-worker leaves it at that instead of
+retrying. The backend closes the sessions left open itself: every
+maintenance interval it closes sessions open without a turn for
+<code>APP_HERMES_SESSION_IDLE_CLOSE_SECONDS</code> (2700, at least 900) in every
+organization, through the bounded <code>close_idle_hermes_sessions</code> function, which
+clears the binding and revokes every token as closing does. A session bound to
+a turn is never closed this way.</p>
+<h2 id="validation">Validation</h2>
+<ul>
+<li><strong>Code.</strong> TDD per phase. Replay tests for the <code>hermes-v1</code> gate. RLS tests for the
+new tables. Proxy tests for native tool shapes and quota correlation.</li>
+<li><strong>Network.</strong> Runtime egress probes on Docker and in a Kubernetes test cluster.</li>
+<li><strong>Isolation.</strong> Credentials are proven absent from the sandbox: no runner token
+and no provider key in its environment or files.</li>
+<li><strong>Acceptance.</strong> Deterministic acceptance with the test gateway scripting native
+tool calls. Then a few paid real-provider checks: a chat turn with web and an
+image, and a workflow node.</li>
+<li><strong>Long sessions.</strong> Deterministic tests for a turn that outlives several
+heartbeats, a worker killed mid-run that reattaches without a second run, an
+executor restart that re-adopts the sandbox, idle snapshot and restore with the
+workspace intact, an expired token between turns, and capacity eviction.</li>
+<li><strong>Reporting.</strong> Which runtime combinations were actually exercised is reported
+separately.</li>
+</ul>
+<h2 id="open-questions-for-review">Open questions for review</h2>
+<ul>
+<li>Settled in 3b: code skills are not reachable through the bridge; they arrive
+with phase 5's hydrated skills and run in Hermes's own terminal.</li>
+<li>Default resource limits, lifetime limits and the capacity caps.</li>
+<li>Egress defaults: bytes per turn and concurrent connections, and whether the
+default package list should also cover npm or Git hosts.</li>
+<li>Settled in 6: a conversation's Hermes nodes run one at a time, queued in its
+one session, each billed through its own binding.</li>
+</ul>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

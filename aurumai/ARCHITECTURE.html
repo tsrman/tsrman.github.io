@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AurumAI architecture · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="aurumai-architecture">AurumAI architecture</h1>
+<p>AurumAI is an organization-scoped AI application platform. Temporal coordinates
+durable execution; PostgreSQL holds application state and permissions; a separate
+conversation runner executes each conversation's workflow tree. The public source
+retains established technical identifiers for deployment/replay compatibility.</p>
+<h2 id="components-and-data-flow">Components and data flow</h2>
+<pre class="mermaid">flowchart LR
+    Chat[Chat UI] --&gt; Business[Business API]
+    Admin[Admin UI] --&gt; Management[Admin API]
+    Chat --&gt; Identity[Keycloak]
+    Admin --&gt; Identity
+    Business --&gt; DB[(PostgreSQL)]
+    Management --&gt; DB
+    Business --&gt; Cache[(Redis)]
+    Business --&gt; Temporal[Temporal]
+    Temporal --&gt; Runner[Conversation runner]
+    Runner --&gt; Business
+    Business --&gt; Gateway[LLM gateway]
+    Runner --&gt; Tools[Tool worker]
+    Tools --&gt; MCP[MCP services]
+    Tools --&gt; Sandbox[Skill executor and sandbox]
+    Tools --&gt; RAG[RAG API]
+    Business --&gt; Web[Isolated web tools]
+    Web --&gt; Search[SearXNG and public sources]
+    RAG --&gt; Vectors[(Milvus)]
+    RAG --&gt; Storage[(MinIO)]
+</pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Execution boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main_business.py</code></td>
+<td>User chat, conversations, settings, runtime/internal APIs on port 8000</td>
+</tr>
+<tr>
+<td><code>main_admin.py</code></td>
+<td>Skills/grants/agent and workflow authoring on port 8001</td>
+</tr>
+<tr>
+<td><code>business-ui</code></td>
+<td>Chat/history/knowledge/workflow/question browser application</td>
+</tr>
+<tr>
+<td><code>admin-ui</code></td>
+<td>Separate browser application and Keycloak client for administration</td>
+</tr>
+<tr>
+<td><code>conversation-runner</code></td>
+<td>One isolated container/Pod per conversation; Temporal worker</td>
+</tr>
+<tr>
+<td><code>tool-worker</code></td>
+<td>Shared bounded skill/MCP execution activities</td>
+</tr>
+<tr>
+<td><code>skill-executor</code></td>
+<td>Creates and controls an ephemeral sandbox for a code-skill session</td>
+</tr>
+<tr>
+<td><code>rag-api</code></td>
+<td>Authorized document/search metadata and Milvus operations</td>
+</tr>
+<tr>
+<td><code>rag-worker</code></td>
+<td>Durable parsing, chunking, embedding/indexing operations</td>
+</tr>
+<tr>
+<td><code>web-tools</code></td>
+<td>Independent authenticated search/read adapter and outbound policy</td>
+</tr>
+<tr>
+<td>Identity/data workers</td>
+<td>Optional durable identity admission and lifecycle observers</td>
+</tr>
+</tbody>
+</table></div>
+<p>The backend's <code>ConversationWorkflow</code> is a typed client-side signal stub. Actual
+execution is in <code>conversation-runner/src/workflows/conversation.py</code>. Signal
+signatures must remain synchronized. Agent nodes do not create one runner each:
+ConversationWorkflow → MultiAgentWorkflow → AgentWorkflow children all execute in
+the same conversation runner.</p>
+<h2 id="chat-lifecycle">Chat lifecycle</h2>
+<ol>
+<li>Authenticate the browser, resolve the tenant and check <code>chat.send</code>/model access.</li>
+<li>Admit a durable interaction turn and obtain an owned runner resource.</li>
+<li>Send the turn signal to Temporal; the runner loads complete persistent history.</li>
+<li>Execute streaming model/tool rounds through the backend gateway proxy.</li>
+<li>Persist the final assistant response and publish safe terminal/progress events.</li>
+<li>Optionally start a background evaluator configured with an explicit model.</li>
+</ol>
+<p>The runner calls <code>http://backend:8000/v1/chat/completions</code> with its identity-only
+session token. The API authorizes the actual current tenant/resource access and
+proxies to <code>LLM_GATEWAY_URL</code> with the operator credential. Gateway requests remain
+streaming; changing to <code>stream: false</code> or adding unsupported <code>response_format</code>
+is not a compatible replacement for the <code>llm_call</code> activity.</p>
+<p>Redis event channels are tenant-prefixed. SSE distinguishes assistant text/tool
+presentation from durable turn/question snapshots. A final <code>done</code> event closes
+chat transport even on cancellation/failure paths; optional evaluation is a later
+score update, not a second assistant message.</p>
+<p>History is ordered by durable turn/role structure, with a deterministic cursor
+key rather than relying on timestamps alone. GET conversation pages use limit
+1–200 (default 50), <code>hasMore</code> and message-UUID cursors. UI and runner load all pages
+before replacing their history. Missing/repeated cursors and partial-page failure
+must not silently publish an incomplete conversation.</p>
+<h2 id="authentication-and-authorization">Authentication and authorization</h2>
+<p>Browser APIs validate Keycloak issuer/signature/audience. Business and admin clients
+have different audiences (<code>business-ui</code> and <code>admin-ui</code>); one plane's token is not
+accepted by the other. <code>org_admin</code> is the administrative role; membership is owned
+by Keycloak, while capabilities/resource grants are owned by the platform.</p>
+<p>Capabilities govern operations. Resource grants govern specific models, skills,
+knowledge bases, agent/workflow resources as appropriate. Access is default-deny;
+there is no parallel permission catalog or authoritative settings-based allowlist.
+The organization default model/temperature are configuration, not access grants.
+Same-organization administrative bypass does not bypass RLS or runtime-owner rules.</p>
+<p>Service calls use <code>get_current_user_or_session</code> and <code>get_service_db_session</code>.
+Browser-only <code>get_current_user</code>/<code>get_org_db_session</code> dependencies must not replace
+those on routers consumed by runner/tool-worker. Service session tokens contain
+identity only; privileges are resolved live, so grant revocation takes effect
+between workflow steps. Do not store permission snapshots in a session token.</p>
+<p>PostgreSQL runtime roles use FORCE ROW LEVEL SECURITY. Request/session dependencies
+set <code>app.current_org_id</code> transaction context. Migration and lifecycle roles are
+separate; ordinary API/RAG roles do not own schemas or receive archive privileges.
+A connection reused for another organization must not inherit its previous context.</p>
+<p>New organizations are provisioned on first verified login with the documented base
+capabilities/model/global-skill grants. Existing organizations require a deliberate
+provisioning preview/apply. Do not add capabilities implicitly to every new tenant.</p>
+<p>Optional identity synchronization uses a durable inbox and generation fencing.
+The signed <code>platform_groups_complete</code> claim distinguishes an explicitly empty
+membership from an incomplete token claim. Worker outage gives bounded
+<code>identity_sync_pending</code> admission for changed identities rather than stale privilege
+acceptance. JWT/refresh tokens are not copied into inbox or Temporal history.</p>
+<h2 id="skills-and-isolated-code">Skills and isolated code</h2>
+<p>The common model wire format is <code>&lt;tool_call&gt;{...}&lt;/tool_call&gt;</code>, parsed by the shared
+runner parser. Tenant MCP uses SSE. Stdio is permitted only for explicitly
+operator-global skills (<code>org_id=NULL</code>), not resources with an omitted owner.
+Changing endpoint/transport must not carry a saved token to the new destination
+without explicit replacement credentials.</p>
+<p>The backend exposes camelCase JSON; tool-worker normalizes it to its snake_case
+internal fields. Global or tenant ownership is explicit. A hidden attachment-search
+skill is scoped to the exact conversation and its session claim.</p>
+<p>Code skills are source ZIP bundles with SKILL.md and optional scripts. A bounded
+CodeSkillSessionWorkflow opens an ephemeral sandbox, executes multiple model-driven
+commands, feeds results back to the next round, and closes the session. Tenant code
+never executes with the shared tool-worker's environment. Sandbox namespace/RBAC
+are separate because <code>pods/exec</code> cannot be safely constrained by labels alone.</p>
+<h2 id="multi-agent-workflows">Multi-agent workflows</h2>
+<p>Definitions and templates are persisted/versioned. Admission creates an immutable
+execution snapshot of definitions/model dependencies. The snapshot fixes
+configuration, not access: preparation, each node and synthesis recheck live grants.
+Explicit picker selection has priority; opt-in classification can route an ordinary
+turn only among accessible auto-routable definitions. Classification failures or
+malformed/inaccessible selections fall back safely for an ordinary unselected turn.</p>
+<p>The scheduler supports fixed graphs (up to 20 nodes, concurrency up to 4), lexical
+ready order, conditional <code>on_success</code>/<code>on_failure</code> edges, AND-join and skip cascade.
+Unhandled failures do not synthesize or persist a false successful assistant answer.
+Only successful supervisor synthesis is exposed as the final answer. Node briefs,
+internal outputs/thoughts and raw tool payloads are not public SSE progress.</p>
+<p>Human confirmation is a durable owner-controlled signal with bounded waits and
+runner activity renewal. Rejection, timeout and exact-run cancellation preserve
+terminal durable status and do not cancel an unrelated later turn. Production
+confirmation timeout is 1800 seconds; a test image can use a shorter explicit
+65-second timeout without claiming production-deadline acceptance.</p>
+<h3 id="loops">Loops</h3>
+<p>Loop-back edges carry <code>is_loop_back</code> and <code>max_iterations</code> (2–20). The structural
+graph remains acyclic after removing loop-back edges. A loop body is the intersection
+of target descendants and tail ancestors. Nested/overlapping bodies, confirmation
+nodes inside a body and fan-out from a non-tail body node are rejected.</p>
+<p>When the tail outcome matches the edge condition below its iteration cap, capture
+terminal body results, reset the body and persist <code>pending</code> immediately. Iteration
+N+1 receives <code>context.previous_iteration</code> with every terminal result of iteration
+N in stable node-key order. Completed entries carry output and allowed source IDs;
+handled failures carry a stable error code. Current-pass <code>predecessor_outputs</code>
+remain separate. Replace the snapshot at each loop-back; never accumulate older
+passes. Accepted output bounds are 64 KiB per node and 512 KiB aggregate.</p>
+<p>PostgreSQL reuses the latest node diagnostic row; Temporal child inputs/results
+are the durable per-pass record. <code>loop-iteration-context-v1</code> is a permanent replay
+marker. A wall-clock loop budget and nested/overlapping loops are not implemented.</p>
+<h3 id="templates-billing-and-diagnostics">Templates, billing and diagnostics</h3>
+<p>Template capture/replace and copies are administrative, version-checked operations.
+Copies use fresh definitions and explicit grants, defaulting to non-auto-routable.
+Archiving a template does not mutate its existing copies. Model/skill/KB grants remain
+live references, not permissions embedded in a template.</p>
+<p>All node model calls use the same backend quota/usage ledger and initiating
+user/organization correlation. Request limits and exact reported provider-token
+usage are accounted over the current UTC month. Analytics totals for an arbitrary
+reporting period must not be mistaken for monthly quota consumption.</p>
+<p>Run/node diagnostics are organization-scoped and retained by configured policy.
+Workflow progress contains allowlisted metadata only. Billing/usage/audit/history
+are preserved by acceptance cleanup even when owned fixture metadata is removed.</p>
+<h2 id="durable-questions">Durable questions</h2>
+<p><code>ask_user</code> is server-owned/default-off. The backend sends its flag on each turn;
+workflow code must not read a mutable runtime flag after import. Existing durable
+questions remain readable/answerable/consumable/expirable after disabling new
+reservations. Preserve <code>user-questions-v1</code> for old histories.</p>
+<p>Limits are one pending question per execution, four concurrent questions per turn
+and ten created questions per turn, with a real 3600-second deadline. Durable rows,
+operation reservations and outbox dispatch make retry/consume identity explicit.
+Causal consumption stores at least <code>answered_at</code> even if DB wall-clock time moves
+backward. A lost SSE wake-up is recovered through durable snapshots/reconnection.</p>
+<p>Answer races, revoke, cancel, late answer and next-turn lock release are distinct
+checks. Worker restart acceptance answers while the exact owned worker is stopped,
+then proves consume after that same worker returns; a short test does not prove
+real one-hour idle/lease protection.</p>
+<h2 id="web-tools-and-network-isolation">Web tools and network isolation</h2>
+<p>Web search/read is a separate default-off capability (<code>web.access</code>) and adapter.
+The runner cannot acquire direct unrestricted internet access instead. URL policy,
+DNS/address pinning, redirects, bounded parsing, service credentials and kernel/CNI
+outbound enforcement form different parts of the boundary.</p>
+<p>Required deny ranges are synchronized between adapter, Docker guard and Helm.
+<code>WEB_EGRESS_FORBIDDEN_CIDRS</code> adds operator restrictions consistently. IPv4/private
+and IPv6/ULA TCP80/443 negatives require reachable positive controls: unavailable
+IPv6 is incomplete coverage, not a successful deny test. Controlled public-looking
+fixtures stay in isolated test networks; never add a production private allow-all.</p>
+<p>Operations have durable reservations, bounded attempts/shared deadlines, current
+pre-I/O and pre-persist authorization, and explicit cancellation. Nonretryable
+429/4xx stay nonretryable across service boundaries. Late results after cancellation
+or revocation must not persist sources or a false final response.</p>
+<p>Source IDs remain conversation/execution-owned. Child web citations are validated
+and propagated through workflow synthesis and loop feedback. Real provider/search
+availability is independent from controlled policy/Temporal acceptance.</p>
+<h2 id="hermes-agent">Hermes Agent</h2>
+<p>Hermes Agent is an opt-in system agent with a runtime of its own (Docker only). A
+conversation's turn goes from the runner to a <code>HermesSessionWorkflow</code> on tool-worker's
+queue, and skill-executor starts one long-lived sandbox for the conversation, on its
+own internal network. The sandbox's only way out is <code>hermes-egress</code>: the platform path
+to the backend (model completions and the MCP bridge of platform tools), and CONNECT
+tunnels up to the network mode the organization chose. Its token holds identity only
+and has an audience of its own. Workspaces are snapshotted to object storage.</p>
+<p><code>hermes-preview</code> is the one thing browsers reach at a preview's origin. It streams
+into the sandbox through skill-executor, and the sandbox gains no network for it.</p>
+<p>See <a href="HERMES_AGENT.html">the design</a>, <a href="guides/hermes-agent.html">the guide</a> and
+<a href="CONFIGURATION.html#hermes-agent">the settings</a>.</p>
+<h2 id="rag-attachments-and-storage">RAG, attachments and storage</h2>
+<p>Uploads go through the backend into MinIO, with explicit file/knowledge-base metadata
+and direct conversation ownership. The RAG worker downloads/parses source files,
+chunks and embeds them, and records index receipt/generation. Hybrid retrieval
+combines Milvus search with the configured reranker. No RAG database/HTTP ports are
+published by the ordinary profile solely for browser convenience.</p>
+<p>Chat attachments create their own conversation-scoped KB/search skill. Knowledge
+base deletion, upload, indexing and archive lifecycle admission share fences so
+unresolved external writes cannot become detached/orphaned data. Preserve canonical
+source ownership; a legacy ambiguous owner is a block, not an inferred global owner.</p>
+<h3 id="partitions-and-archive-lifecycle">Partitions and archive lifecycle</h3>
+<p>Conversations/messages/audit payloads use monthly UTC partitions and permanent UUID
+identity registries. Foreign keys, unique/idempotency keys and FORCE RLS remain
+valid across payload movement. pg_partman 5.5.0 is installed before migrations;
+existing-table conversion requires backup and a writer-free maintenance window.</p>
+<p>Archiving uses MinIO/Parquet with independent checks before purge. Default retention
+is 180 days by last effective conversation activity, not creation age alone.
+Archived conversations disappear from user UI/API; operator export/restore preserves
+UUIDs, grants, typed payload, file checksums and original dense vectors. Billing and
+usage registries remain. Restoring does not replay historical workflows or re-embed
+content. A new restore generation fences old callbacks.</p>
+<p>Observers preserve exact terminal receipts before Temporal history retention
+expires, independently of the new-archive flag. Missing established history,
+unknown children, incomplete provenance and ambiguous external-operation replies
+block purge. See <a href="operations/data-archive.html">archive operations</a>.</p>
+<h2 id="runtime-ownership-and-recovery">Runtime ownership and recovery</h2>
+<p>SessionManager binds/reuses runners through owned Redis records and labels. Docker
+runs on the configured runner network, not the default network. Kubernetes verifies
+release/conversation labels and UID before Pod deletion. Idle reaping and startup
+cleanup must not remove an unrelated runtime.</p>
+<p>Private acceptance journals record exact fixture identities and previous grants.
+Before metadata/runtime removal, prove the exact Temporal tree: root input/queue,
+saved run UUID, reciprocal parent/run/initiation and allowed child identities.
+Terminate only verified RUNNING exact handles; preserve closed history. Missing
+history, foreign children or a changed continue-as-new chain fail closed.</p>
+<p>Questions/web Kubernetes wrappers retain cluster, release, Temporal namespace,
+Compose dependencies, kubeconfig and journal on failed cleanup/verification.
+Never replace these checks with prefix SQL or broad terminate/search. Browser flows
+use Helm Ingress through loopback k3d NodePort mapping, not SSE port-forward.</p>
+<h2 id="frontend-configuration-and-observability">Frontend, configuration and observability</h2>
+<p>Both UIs use Next.js, TypeScript, Tailwind, TanStack Query and Keycloak browser
+identity. Chat streams update owned message/tool identities; tool-call cards merge
+by call ID rather than replacing the previous batch. Durable question reconnects
+use bounded backoff and stop on permanent authorization denial/cancellation.</p>
+<p>Server <code>RUNTIME_*</code> values are read per request and safely serialized into
+<code>window.__RUNTIME_CONFIG__</code>. Do not replace them with build-time <code>NEXT_PUBLIC_*</code>
+URLs. API/admin/source links support deployment origins without an image rebuild.
+<code>/about</code> and local <code>/LICENSE</code> expose project licensing; source URLs are validated
+HTTP(S) without URL credentials.</p>
+<p>Langfuse/structured logs provide optional tracing and scores. Configure full-content
+capture deliberately; internal prompts/documents may be sensitive. Never put tokens,
+raw HTTP, browser storage state or private journals into public release reports.</p>
+<p>New evaluation uses a durable configuration activity and requires an explicit
+model. <code>evaluator-explicit-model-v1</code> protects histories recorded before this policy.
+Mutable pool-mode session token/conversation settings are read in activities outside
+the Temporal sandbox; importing settings into workflow code does not refresh them.</p>
+<h2 id="api-and-deployment-references">API and deployment references</h2>
+<p>Business API exposes conversation/history/chat, user settings, documents and runtime
+control. Admin API owns authoring/grants/models/analytics. Internal service endpoints
+require session-aware authorization and scoped database dependencies. <code>/health</code> is
+liveness; <code>/ready</code> checks required application dependencies. The
+<a href="reference/api.html">API reference</a> lists the routes of both planes.</p>
+<p>See <a href="CONFIGURATION.html">configuration</a>, <a href="https://github.com/tsrman/AurumAI/blob/main/charts/aurum-ai/README.md">Helm</a>,
+<a href="TESTING.html">testing</a>, <a href="https://github.com/tsrman/AurumAI/blob/main/README.md#components">service guides</a> and current source
+routers for complete request schemas. FastAPI documentation is not enabled by
+turning off production auth or weakening RLS.</p>
+<p>Authorization UI acceptance: <code>./smoke-test-authorization-ui.sh</code> verifies both Keycloak audiences and live resource grants. Run it exclusively with trace capture disabled; keep the private journal if exact-owned recovery fails. See the testing guide for prerequisites.</p>
+<p>Knowledge UI acceptance: <code>./smoke-test-knowledge-ui.sh</code> verifies Admin UI → Business UI → MinIO/Temporal/Milvus lifecycle. It must not overlap organization mutations. It requires the current stack APP_SECRET_KEY, uses a private recovery journal and preserves it on cleanup failure.</p>
+<p>For deterministic MCP/code acceptance, export the existing stack secret before applying the overlay:</p>
+<pre><code class="language-bash">export APP_SECRET_KEY=&lt;current-stack-secret&gt;
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile mcp --profile skills-exec build backend backend-admin tool-worker mcp-everything mcp-fetch skill-executor test-gateway
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile mcp --profile skills-exec up -d --no-build backend backend-admin tool-worker mcp-everything mcp-fetch skill-executor
+# Run one exclusive acceptance scenario, then restore the ordinary gateway:
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml rm -sf test-gateway
+docker compose -f docker-compose.yml up -d --force-recreate backend
+</code></pre>
+<p>Keep the exact-owned recovery journal if cleanup fails; restore infrastructure only as the scenario's recovery contract permits.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"default"});</script>
+</body>
+</html>
