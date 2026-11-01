@@ -541,9 +541,10 @@ chart: a restricted namespace, the guard running the proxy without nftables,
 default-deny NetworkPolicies in which a sandbox Pod reaches only the guard,
 and no DNS at all for sandbox Pods (<code>dnsPolicy: None</code> with an unanswered
 resolver and a <code>hostAliases</code> entry for the guard), so CoreDNS cannot become a
-DNS channel. Accepted on k3d, whose policy controller enforces it: from a
-sandbox only the guard answers, and the guard reaches only DNS, the backend
-and public addresses;</li>
+DNS channel. Accepted on k3d with k3s's own policy controller and with Calico
+(<code>HERMES_K8S_CNI=calico</code>): from a sandbox only the guard answers, and the
+guard reaches only DNS, the backend and public addresses. Both treat a
+Service address alike: the policy sees the Pod after the translation;</li>
 <li>2c-i, implemented for Docker: the <code>hermes-sandbox</code> image and long-lived
 sandboxes in <code>skill-executor</code> (create, re-adopt, run, events, stop, close,
 idle and absolute lifetimes, guard reconnection), each on its own internal
@@ -675,7 +676,21 @@ the acceptance on a disposable k3d cluster: the guard under Pod Security
 the runtime end to end with the real image. <code>./smoke-test-hermes-k8s-egress.sh</code>
 checks the egress modes against the real internet, and
 <code>./smoke-test-hermes-k8s-nodes.sh</code> the behaviour on three nodes: a cold pull,
-capacity and workspace eviction, a PID limit and a lost node.</li>
+capacity and workspace eviction, a PID limit and a lost node. On the whole
+platform (<code>K8S_TEST_ACCEPTANCE=hermes ./smoke-test-k8s.sh</code>: the chart's backend,
+tool-worker and skill-executor over the Compose data plane) Hermes turns run
+end to end: a chart and a CSV made in the sandbox and attached (and a platform
+secret refused), the MCP bridge, memory carried to a new conversation, a skill
+written by Hermes arriving as a draft for an administrator, an idle sandbox
+snapshotted to MinIO and restored into a new Pod, two uploaded workbooks pivoted
+into an attached workbook and deck, and a web app in the sandbox opened through
+traefik over TLS at a preview origin of its own (the one-time ticket, the
+host-only <code>__Host-</code> cookie, an app that is told nothing of it, a WebSocket, and
+revoking <code>agents.hermes</code> ending the open connection and refusing the next
+request); and, on a real model, a turn that installs a package through the
+guard, authorized per connection by the real backend, and attaches the result.
+That run found that the preview service answered a WebSocket handshake without
+<code>Connection: Upgrade</code>, which browsers, and traefik, refuse: fixed.</li>
 </ul>
 </li>
 </ul>

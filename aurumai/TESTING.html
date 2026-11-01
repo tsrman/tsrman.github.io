@@ -242,7 +242,11 @@ MCP/code need profiles <code>mcp</code> and <code>skills-exec</code> and a built
 </tr>
 <tr>
 <td><code>./smoke-test-k8s.sh</code></td>
-<td>Fresh owned k3d/Helm install/upgrade, runner/sandbox/RBAC</td>
+<td>Fresh owned k3d/Helm install/upgrade, runner/sandbox/RBAC; with <code>K8S_TEST_ACCEPTANCE=hermes</code>, Hermes Agent on the whole platform (files in and out, MCP bridge, memory, skill drafts, snapshot and restore, previews over TLS through the Ingress with a WebSocket and revocation; optionally one real-model turn)</td>
+</tr>
+<tr>
+<td><code>./smoke-test-hermes-k8s.sh</code>, <code>./smoke-test-hermes-k8s-egress.sh</code>, <code>./smoke-test-hermes-k8s-nodes.sh</code></td>
+<td>Hermes on a disposable k3d cluster: the guard boundary and runtime (optionally on Calico), the egress modes with real internet traffic, and three nodes with eviction, a PID limit and a lost node</td>
 </tr>
 <tr>
 <td><code>./smoke-test-user-questions-k8s.sh</code></td>
