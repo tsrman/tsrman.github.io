@@ -62,8 +62,9 @@ assistant's own answers are not translated: they follow the language you write i
 <h2 id="the-chat-window">The chat window</h2>
 <p><img src="../assets/screenshots/chat-empty.png" alt="An empty chat with the agent list, the composer and the pickers" /></p>
 <ul>
-<li><strong>Sidebar.</strong> <strong>New chat</strong> starts a conversation. <strong>Agents</strong> lists the assistants
-your organization offers, each with its own instructions, tools and knowledge.
+<li><strong>Sidebar.</strong> <strong>New chat</strong> starts a conversation. <strong>Agents</strong> lists the ordinary chat and
+the agents your administrator created and granted to you, each with its own model,
+instructions, tools and knowledge.
 <strong>History</strong> lists your recent conversations. <strong>Knowledge bases</strong> and <strong>History</strong> below it
 open the pages of the same name. At the bottom are the sidebar toggle, the theme
 switch, the language switcher and sign-out.</li>
@@ -88,9 +89,21 @@ Your choice applies to the conversation. Without a choice, your default from
 <p><strong>Model settings</strong> (the sliders button) sets the temperature for this conversation
 only. By default the agent's or organization's value is used.</p>
 <h3 id="agents">Agents</h3>
-<p>An agent is a model with instructions, allowed tools and knowledge bases.
-Pick one in the sidebar or the agent picker. If you have the capability to create
-agents, ask your administrator or see the <a href="admin-guide.html#agents">administrator guide</a>.</p>
+<p>An agent is a model with instructions, allowed tools and knowledge bases, created by an
+administrator (see the <a href="admin-guide.html#agents">administrator guide</a>). Pick one in the
+sidebar or the agent picker, then write as usual:</p>
+<ul>
+<li>The turn runs on the agent's model and instructions, and the agent has only the skills
+and knowledge bases it was given. Web search, image tools and questions to you are
+available if the administrator switched them on for the agent and you may use them. The
+model picker shows the agent's model and cannot change it.</li>
+<li>The agent stays chosen for the conversation, also after a reload. Choosing a workflow or
+Hermes Agent for a turn replaces the agent for that turn.</li>
+<li>You see only agents granted to you. An agent that was archived or whose access was
+withdrawn disappears from the list, and an open conversation goes back to the ordinary chat.</li>
+<li>The temperature you set for the conversation wins over the agent's own value, which wins
+over the organization's.</li>
+</ul>
 <h3 id="workflows">Workflows</h3>
 <p>A workflow is a repeatable multi-step process several agents carry out: a supervisor
 prepares tasks, agents work on connected steps, and the supervisor combines their

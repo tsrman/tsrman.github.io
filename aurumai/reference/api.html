@@ -103,13 +103,18 @@ browser tokens, and are not a client API.</li>
 </thead>
 <tbody>
 <tr>
+<td><code>GET /v1/chat/agent-definitions</code></td>
+<td>The administrator's agents the user may chat with now: granted, active, on a model the user may use; Hermes-kind agents (<code>kind: &quot;hermes&quot;</code>) only where a Hermes turn would be accepted</td>
+<td><code>chat.send</code></td>
+</tr>
+<tr>
 <td><code>GET /v1/chat/agents</code></td>
 <td>Agents the user may chat with (Hermes only if a Hermes turn would be accepted)</td>
 <td><code>chat.send</code></td>
 </tr>
 <tr>
 <td><code>POST /v1/chat/stream</code></td>
-<td>Send a message and stream the answer (SSE); <code>agent: &quot;hermes&quot;</code> selects Hermes Agent</td>
+<td>Send a message and stream the answer (SSE); <code>agent: &quot;hermes&quot;</code> selects Hermes Agent; <code>agentDefinitionId</code> runs the turn on an administrator's agent (its model, instructions, skills and knowledge bases; only one of <code>agent</code>, <code>agentDefinitionId</code> and <code>workflowId</code> may be given). A missing, archived or ungranted agent is 404, one whose dependencies the user cannot use is 403. A Hermes-kind agent runs a Hermes turn (files allowed, images refused) on the organization's Hermes model with the agent's instructions; the conversation's workspace belongs to the first Hermes agent that ran in it, another one is 409</td>
 <td><code>chat.send</code></td>
 </tr>
 <tr>
@@ -244,13 +249,33 @@ browser tokens, and are not a client API.</li>
 <tbody>
 <tr>
 <td><code>GET /v1/agent-definitions</code>, <code>POST /v1/agent-definitions</code></td>
-<td>List and create agents</td>
+<td>List (<code>includeArchived=true</code> adds archived agents) and create agents</td>
 <td><code>workspace.agents.create</code> to create</td>
 </tr>
 <tr>
 <td><code>GET/PATCH/DELETE /v1/agent-definitions/{id}</code>, <code>GET .../{id}/execution</code></td>
 <td>Read, edit, delete an agent; its execution settings</td>
 <td>grant / owner</td>
+</tr>
+<tr>
+<td><code>POST /v1/admin/settings/hermes/model-check</code> body <code>{model}</code></td>
+<td>Whether the model answers with native tool calls (<code>toolCalls</code>: true, false, or null when the gateway did not answer); 403 for a model the organization does not grant</td>
+<td>organization admin</td>
+</tr>
+<tr>
+<td><code>POST/PATCH /v1/agent-definitions</code> Hermes-kind fields <code>hermesEgressMode</code> (<code>none</code>/<code>packages</code>/<code>public</code>, null follows the organization), <code>useOrgHermesModel</code>, <code>hermesSkillsScope</code> (<code>all</code>/<code>selected</code>); a Hermes agent may also carry <code>skillIds</code> and <code>knowledgeBaseIds</code></td>
+<td>Lowers, never raises, the organization's internet mode; 422 on an ordinary agent</td>
+<td><code>workspace.agents.create</code> / write grant</td>
+</tr>
+<tr>
+<td><code>POST/PATCH /v1/agent-definitions</code> fields <code>webEnabled</code>, <code>imagesEnabled</code>, <code>askUserEnabled</code></td>
+<td>Built-in capabilities of the agent in chat (default true); they narrow, never widen, the platform's switches and the user's rights</td>
+<td><code>workspace.agents.create</code> / write grant</td>
+</tr>
+<tr>
+<td><code>POST /v1/agent-definitions/{id}/archive</code>, <code>POST .../{id}/unarchive</code></td>
+<td>Archive or restore an agent (idempotent); an archived agent is hidden from lists, refused for new use and keeps its history</td>
+<td>write grant</td>
 </tr>
 <tr>
 <td><code>GET /v1/skills/</code>, <code>GET /v1/skills/{id}</code></td>

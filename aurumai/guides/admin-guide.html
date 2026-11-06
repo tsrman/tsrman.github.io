@@ -160,6 +160,46 @@ bases, offered to users in chat. Create, edit and delete them here; people with
 <code>workspace.agents.create</code> can create their own. An agent works only with the skills
 and knowledge bases it has been granted, and a person using it must be granted the
 agent itself.</p>
+<h3 id="creating-and-configuring-an-agent">Creating and configuring an agent</h3>
+<p><strong>New agent</strong> opens a step-by-step wizard (editing an agent uses the same steps and can be
+saved from any of them):</p>
+<ol>
+<li><strong>Type.</strong> An ordinary <strong>Agent</strong>, or a <strong>Hermes Agent</strong> (a workflow node that runs in a
+workspace of its own). The type is fixed once the agent exists.</li>
+<li><strong>Basics.</strong> Name, description and the model (a Hermes Agent runs on the organization's
+Hermes model unless you give it a model of its own).</li>
+<li><strong>Instructions.</strong> The system prompt and the temperature (or inherit the organization's).</li>
+<li><strong>Tools and knowledge.</strong> The skills and knowledge bases the agent may use, and nothing
+else. A Hermes Agent chooses between all the skills the person may run and only the
+selected ones.</li>
+<li><strong>Capabilities.</strong> Three built-in capabilities, each on its own switch: <strong>web search and
+reading pages</strong>, <strong>image generation and editing</strong> and <strong>questions to the user</strong>. All are on
+for a new agent. A Hermes Agent also sets the internet access of its workspace here, which
+can only lower the organization's mode.</li>
+<li><strong>Review</strong> and create.</li>
+</ol>
+<p>The capability switches only narrow what a chat turn on the agent may use. The platform's
+own switches (web, images, user questions) and the person's rights (<code>web.access</code>,
+<code>images.generate</code>) still apply, so an agent never gets more than the person may do. They
+apply to chat turns on the agent; a workflow's tools are set on the workflow run.</p>
+<h3 id="archiving-and-deleting">Archiving and deleting</h3>
+<p>An agent that nothing ever used can be <strong>deleted</strong>. An agent a workflow or a run has ever
+referred to cannot: its history stays intact, so you <strong>archive</strong> it instead. An archived
+agent disappears from chat, lists and pickers (turn on <strong>Show archived</strong> to see it), nothing
+new can run it or add it to a workflow, and past runs keep their history. <strong>Restore</strong> brings
+it back. Its name stays taken while it is archived.</p>
+<p>When an action is refused, the message says why and names the workflows involved:</p>
+<ul>
+<li><em>Used by active workflows</em>: remove the agent from them, or archive those workflows, first.
+Archiving a workflow keeps its nodes, so a workflow that is only archived still holds its
+agents for history: archive them instead of deleting.</li>
+<li><em>Appears in history</em>: the agent took part in a past run or an archived workflow; archive it.</li>
+<li><em>In a running workflow</em>: wait for the run to finish or cancel it.</li>
+</ul>
+<p>A <strong>Hermes Agent</strong> can be chosen in chat too: its instructions become its role in its
+sandbox (the platform's own rules about where files come in and go out always come first),
+and it runs on the organization's Hermes model unless it has one of its own. Give it to people with <strong>Access</strong>; they
+also need the <code>agents.hermes</code> capability. See <a href="hermes-agent.html#administration">Hermes Agent</a>.</p>
 <p>Agent kinds include ordinary agents and, when Hermes Agent is on, an agent that runs on
 Hermes (usable as a workflow node, marked with a <strong>Hermes Agent</strong> badge).</p>
 <h2 id="skills-and-tools">Skills and tools</h2>

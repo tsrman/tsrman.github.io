@@ -56,9 +56,11 @@ design and its reasoning in the <a href="../HERMES_AGENT.html">design document</
 matplotlib, openpyxl, python-pptx, python-docx, pypdf), Node.js 24 with npm, a
 headless Chromium and Playwright.</li>
 <li><strong>Work on your files.</strong> Files you attach appear in <code>/workspace/inputs/</code> in its
-sandbox, with stable numbered names.</li>
-<li><strong>Hand files back.</strong> Charts, spreadsheets, documents, presentations and archives
-appear in the answer as downloads; pictures show under the answer.</li>
+sandbox, with stable numbered names. The platform tells Hermes this on every turn,
+together with the list of the files that came with the message.</li>
+<li><strong>Hand files back.</strong> Hermes saves what it makes for you in <code>/workspace/outputs/</code> and
+attaches it; charts, spreadsheets, documents, presentations and archives appear in the
+answer as downloads, pictures show under the answer.</li>
 <li><strong>Use platform tools</strong> through a bridge: knowledge search, web search and read,
 image generation and editing, skills it is granted, and questions to you.</li>
 <li><strong>Look at pictures</strong> when the organization marks its model as taking images.</li>
@@ -135,8 +137,34 @@ within the deployment's maximum; a mode above the maximum is shown as such and r
 </li>
 <li><strong>Users → Groups.</strong> Grant <code>agents.hermes</code> to the people who should have it. Nobody
 has it by default.</li>
-<li><strong>Workflows and Agents.</strong> A Hermes Agent can be a workflow node (&quot;Hermes Agent
-(workflow nodes)&quot; kind) and runs on the organization's Hermes model.</li>
+<li><strong>Workflows and Agents.</strong> An administrator can create <strong>Hermes Agents</strong> of their own
+(the &quot;Hermes Agent&quot; type in the agent wizard): the instructions you write become the
+agent's role, and the platform adds its own rules about the sandbox before them. A Hermes
+Agent runs on the organization's Hermes model, is chosen in chat like any other agent
+(given to people through its <strong>Access</strong> action, and only to those who also have
+<code>agents.hermes</code>) and can be a workflow node.
+<ul>
+<li>A conversation's workspace belongs to the first Hermes Agent that ran in it; choosing
+another Hermes Agent in the same conversation is refused, start a new conversation.</li>
+<li>It follows the organization's internet mode unless the wizard lowers it (<strong>None</strong>,
+<strong>Package registries only</strong>); an agent can never raise it above the organization's mode or
+the operator's maximum. <strong>Public internet</strong> still needs the person's web access right.</li>
+<li>By default it runs on the organization's Hermes model. Turn that off to give it a model of
+its own, which must support native tool calling; the sandbox cannot pick another model.
+People who may not use that model cannot choose the agent.</li>
+<li><strong>Skills:</strong> every platform skill the person may run (default), or only those you select.</li>
+<li><strong>Knowledge bases:</strong> the ones you select, restricted to what the person may read. They are
+named in the agent's instructions and searched with <code>knowledge_search</code>; without a base id
+the search covers the files attached to the conversation.</li>
+<li>The web, image and question switches work as for an ordinary agent: a switched-off tool is
+neither offered nor accepted by the platform. They apply in workflows too: a node's tools,
+internet mode, own model and question switch come from its agent (a question it may not ask
+is answered &quot;skip&quot; so the run goes on).</li>
+<li><strong>Check tool calling</strong> in the wizard sends one tiny request to the chosen model and tells
+you whether it answers with native tool calls. A model that does not cannot use Hermes's
+tools. The check is a diagnostic for administrators and is not billed to a conversation.</li>
+</ul>
+</li>
 </ul>
 <p>If the page says Hermes is switched off on this deployment, <code>HERMES_ENABLED</code> is not set.</p>
 <h3 id="reviewing-skills-hermes-wrote">Reviewing skills Hermes wrote</h3>
@@ -271,6 +299,10 @@ and the service re-checks it continuously; ending the session cuts it.</li>
 <tr>
 <td><em>Open prototype</em> does nothing</td>
 <td>Previews are off, the wildcard DNS or TLS is wrong, or the service secrets differ</td>
+</tr>
+<tr>
+<td>Every turn fails with <code>hermes_run_failed</code> after the backend was recreated</td>
+<td>The egress guard resolves the backend's address once, when it starts; restart <code>hermes-egress-guard</code> and <code>hermes-egress</code> after recreating the backend</td>
 </tr>
 </tbody>
 </table></div>
