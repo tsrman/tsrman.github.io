@@ -52,7 +52,8 @@ operator. The deployment-specific procedures are in
 <li><strong>Keycloak</strong> authenticates people (OpenID Connect). The platform stores no passwords.</li>
 <li>Two browser audiences, one per plane: a chat token does not open the Admin API.</li>
 <li>The <code>org_admin</code> role lives in Keycloak. Group membership comes from the signed
-<code>groups</code> claim.</li>
+<code>groups</code> claim, plus the people an administrator adds by hand (sign-in never
+touches those).</li>
 <li>Runners, tool workers and Hermes sandboxes use <strong>session tokens</strong> that carry identity
 only, have their own audience, and are valid only while their conversation, turn or
 session is open. No other route accepts a Hermes token.</li>
@@ -90,6 +91,8 @@ network policies, in three separate namespaces.</li>
 policy; they are off by default.</li>
 <li>Browser-facing ports bind to loopback unless you change <code>PUBLIC_BIND_ADDRESS</code>.
 Docker-published ports bypass host firewalls, so publish through the proxy overlay.</li>
+<li>Each feature that reaches outside has one enforced way out; the map and the checks are
+in <a href="../operations/network-enforcement.html">network enforcement</a>.</li>
 <li>Internal service routes (<code>/v1/internal/*</code>) require service credentials and are not
 meant to be reachable from browsers.</li>
 </ul>

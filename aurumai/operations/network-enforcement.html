@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network enforcement · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+.bar a[aria-current]{color:var(--accent);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html" aria-current="page">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="network-enforcement">Network enforcement</h1>
+<p>Where AurumAI keeps untrusted code and optional features from reaching what they must
+not, how that is enforced on Compose and on Kubernetes, and how to check it after you
+change something. The details of each feature are in the pages linked below; this page
+is the map an operator needs.</p>
+<h2 id="the-rule">The rule</h2>
+<p>A feature that reaches outside the platform gets exactly one controlled way out, and
+the rule is enforced by the network, not only by application checks. If a check fails,
+fix the cause. <strong>Never open outbound access to make a failing check pass</strong>, and never
+count an unavailable positive control (a probe that could not even reach the allowed
+target) as a passed deny test.</p>
+<h2 id="what-is-enforced-where">What is enforced where</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Boundary</th>
+<th>Compose</th>
+<th>Kubernetes (Helm)</th>
+<th>Configure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runners (conversation code)</td>
+<td>Their own bridge network (<code>RUNNER_DOCKER_NETWORK</code>); the model gateway is reached through the backend's proxy</td>
+<td>NetworkPolicies in the runner namespace: DNS, backend <code>8000</code> and listed destinations</td>
+<td><code>RUNNER_DOCKER_NETWORK</code>; chart values</td>
+</tr>
+<tr>
+<td>Skill sandboxes</td>
+<td>No network by default</td>
+<td>Sandbox namespace policy: <code>none</code> denies, <code>egress</code> permits bounded public IPv4 and DNS, not private or metadata ranges</td>
+<td>Skill settings; chart values</td>
+</tr>
+<tr>
+<td>Web search and read</td>
+<td><code>web-tools</code> behind <code>web-tools-egress</code> and <code>searxng-egress</code> guards (nftables) on separate networks; profile <code>web</code></td>
+<td>Policies for the web namespace</td>
+<td><code>WEB_ENABLED</code>, <code>WEB_EGRESS_FORBIDDEN_CIDRS</code></td>
+</tr>
+<tr>
+<td>Hermes sandboxes</td>
+<td>One internal network per sandbox with no NAT and no DNS; <code>hermes-egress</code> is the only way out; <code>hermes-egress-guard</code> (nftables) closes the rest</td>
+<td><code>hermes-egress</code> Deployment; NetworkPolicies are the packet filter</td>
+<td><code>HERMES_EGRESS_MAX_MODE</code>, <code>HERMES_SANDBOX_POOL</code>, <code>HERMES_EGRESS_PACKAGE_HOSTS</code></td>
+</tr>
+<tr>
+<td>Background identity worker</td>
+<td><code>identity-egress</code> guard allows the platform and the gateway only; profile <code>maintenance</code></td>
+<td>Chart policies</td>
+<td><code>LLM_GATEWAY_URL</code></td>
+</tr>
+<tr>
+<td>Archive worker</td>
+<td><code>data-egress</code> guard allows PostgreSQL, Temporal, object storage and the RAG archive endpoint; profile <code>archive</code></td>
+<td>Chart policies</td>
+<td><code>APP_ARCHIVE_*</code> endpoints</td>
+</tr>
+<tr>
+<td>Browser-facing ports</td>
+<td>Bound to <code>PUBLIC_BIND_ADDRESS</code> (loopback by default); publish through the proxy overlay</td>
+<td>Ingress</td>
+<td><code>PUBLIC_BIND_ADDRESS</code>, <code>PUBLIC_DOMAIN</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The guards are containers with <code>NET_ADMIN</code> and nothing else (<code>cap_drop: ALL</code>,
+<code>no-new-privileges</code>): they write the packet filter for their network and hold no
+application data.</p>
+<h2 id="always-closed-ranges">Always-closed ranges</h2>
+<p>Private, loopback, link-local and platform ranges are refused <strong>after name resolution</strong>,
+and a connection goes to the address that was checked. <code>WEB_EGRESS_FORBIDDEN_CIDRS</code>
+adds ranges of your own (your VPN, a metadata service, an internal subnet) to the
+application, the guards and the Helm policies at once. Do not remove the required
+ranges. The one exception is an exact <code>host:port</code> in
+<code>HERMES_EGRESS_INTERNAL_PACKAGE_HOSTS</code>, meant for an internal package mirror.</p>
+<h2 id="hermes-three-caps-that-stack">Hermes: three caps that stack</h2>
+<ol>
+<li><code>HERMES_EGRESS_MAX_MODE</code> (<code>none</code>, <code>packages</code>, <code>public</code>) is the operator's ceiling for
+the whole deployment: the backend, the proxy and the guard's public ports all follow it.</li>
+<li>The organization's <strong>egress mode</strong> (Admin → Models) chooses within it.</li>
+<li>An agent can lower the mode further for its own sessions; it can never raise it.</li>
+</ol>
+<p><code>public</code> also needs the person's <code>web.access</code> capability. Every decision is a JSON line in
+the <code>hermes-egress</code> log: session, turn, host, port, mode, outcome and bytes.</p>
+<h2 id="subnets">Subnets</h2>
+<p>Compose networks use fixed ranges (runner <code>172.28.0.0/24</code>, skills <code>172.29.0.0/24</code>,
+RAG <code>172.30.0.0/24</code>) and, for Hermes, a pool from which every sandbox gets its own
+<code>/28</code> (<code>HERMES_SANDBOX_POOL</code>, default <code>172.31.0.0/16</code>). They must not overlap your
+corporate or VPN ranges, or each other. Set the Hermes pool <strong>before</strong> the first sandbox
+is created, and pick a pool that is free on the host.</p>
+<h2 id="after-you-change-something">After you change something</h2>
+<p>Order matters; a guard that started before its target changed holds the old picture.</p>
+<ol>
+<li>Recreate the services you changed.</li>
+<li>If the <strong>backend</strong> was recreated, restart <code>aurum-ai-hermes-egress-guard</code> and
+<code>aurum-ai-hermes-egress-1</code>. The guard resolves the backend's address once at start;
+until then Hermes turns fail with <code>hermes_run_failed</code>.</li>
+<li>Check <code>/ready</code>, then try the feature's allowed path and one refused path (a private
+address, a host outside the mode).</li>
+<li>For a change to ranges, modes or networks, run the matching acceptance on a
+disposable project, not on the live stack:</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web boundary</td>
+<td><code>WEB_ACCEPTANCE_EXCLUSIVE=1 WEB_ACCEPTANCE_KIND=controlled ./smoke-test-web-tools.sh</code> (<code>public</code> for the internet path)</td>
+</tr>
+<tr>
+<td>Hermes egress</td>
+<td><code>./smoke-test-hermes-egress.sh</code> (needs internet; not at the same time as the sandbox acceptance, because there is one guard)</td>
+</tr>
+<tr>
+<td>Kubernetes policy</td>
+<td><code>./smoke-test-web-tools-k8s.sh</code>, <code>./smoke-test-hermes-k8s-egress.sh</code> and the other <code>k8s</code> scripts in <a href="../TESTING.html">testing</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="kubernetes">Kubernetes</h2>
+<p>The CNI must <strong>enforce</strong> NetworkPolicy; a cluster that accepts the objects and ignores
+them is the most common silent failure. k3s's built-in controller and Calico were
+checked; verify any other controller (Cilium, a cloud CNI) with the acceptance above
+before you rely on it: that a sandbox Pod reaches only the guard, that no DNS escapes,
+and that the guard's exclusions hold. The Pod API has no portable PID limit, so a
+RuntimeClass or node setting must provide it. Production values must list explicit
+external CIDRs and ports; the development private-range defaults are not an allowance.
+See the <a href="https://github.com/tsrman/AurumAI/blob/main/charts/aurum-ai/README.md">chart guide</a>.</p>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="../reference/security.html#network">Security model</a></li>
+<li><a href="../CONFIGURATION.html#hermes-sandbox-egress">Hermes sandbox egress</a> and
+<a href="../CONFIGURATION.html#hermes-on-kubernetes">Hermes on Kubernetes</a></li>
+<li><a href="../CONFIGURATION.html#questions-and-web">Questions and web</a></li>
+<li><a href="../AIR_GAPPED.html">Air-gapped deployment</a></li>
+</ul>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

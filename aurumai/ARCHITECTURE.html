@@ -155,7 +155,7 @@ must not silently publish an incomplete conversation.</p>
 <p>Browser APIs validate Keycloak issuer/signature/audience. Business and admin clients
 have different audiences (<code>business-ui</code> and <code>admin-ui</code>); one plane's token is not
 accepted by the other. <code>org_admin</code> is the administrative role; membership is owned
-by Keycloak, while capabilities/resource grants are owned by the platform.</p>
+by Keycloak plus the people an administrator adds by hand, while capabilities/resource grants are owned by the platform.</p>
 <p>Capabilities govern operations. Resource grants govern specific models, skills,
 knowledge bases, agent/workflow resources as appropriate. Access is default-deny;
 there is no parallel permission catalog or authoritative settings-based allowlist.
@@ -361,6 +361,6 @@ docker compose -f docker-compose.yml up -d --force-recreate backend
 
 </main>
 <footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
-<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"default"});</script>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"default"});</script>
 </body>
 </html>

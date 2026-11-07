@@ -247,7 +247,12 @@ to untrusted clients; use Helm when you need stronger isolation.</li>
 <li>Keep code execution, MCP and public web behind their opt-in policies. Do not open
 outbound network access to make a failing check pass.</li>
 <li>Decide deliberately whether Langfuse captures full prompts and documents.</li>
-<li>Back up PostgreSQL, MinIO and the <code>.env</code> secrets (see <a href="operations.html">operations</a>).</li>
+<li>Back up PostgreSQL, MinIO and the <code>.env</code> secrets, and rehearse a restore
+(<a href="../operations/backup-recovery.html">backup and recovery</a>).</li>
+<li>Check that no secret in <code>.env</code> is empty, because Compose falls back to publicly known
+defaults, and know how each is rotated (<a href="../operations/secrets.html">secrets</a>).</li>
+<li>Know which network boundaries you rely on and how to verify them after a change
+(<a href="../operations/network-enforcement.html">network enforcement</a>).</li>
 </ul>
 <h2 id="kubernetes-with-helm">Kubernetes with Helm</h2>
 <p>The chart deploys the two APIs, both apps, tool-worker and skill-executor. The API starts

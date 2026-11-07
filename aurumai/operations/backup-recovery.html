@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backup and recovery · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+.bar a[aria-current]{color:var(--accent);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html" aria-current="page">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="backup-and-recovery">Backup and recovery</h1>
+<p>What to back up on a Compose deployment, in which order, and how to restore it. The
+procedures below were run against a live stack: all five databases and the roles were
+dumped, then restored into a new PostgreSQL container started from the same image on an
+empty volume. The migration revision and row counts matched and the application role
+signed in with its old password. Your hosts, versions and data differ, so rehearse the
+restore yourself before you need it.</p>
+<p>For long-lived payload data that you archive on purpose, see
+<a href="data-archive.html">data archive</a>; an archive is not a backup of the live database.</p>
+<h2 id="what-holds-state">What holds state</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application data, authorization, settings, workflows</td>
+<td>PostgreSQL database <code>aurum_ai</code> (<code>postgres_data</code>)</td>
+<td>Keycloak's accounts, roles and clients are <strong>in the same database</strong></td>
+</tr>
+<tr>
+<td>Knowledge-base metadata</td>
+<td><code>rag_platform</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Workflow engine</td>
+<td><code>temporal</code>, <code>temporal_visibility</code></td>
+<td>Running and finished workflow histories</td>
+</tr>
+<tr>
+<td>Tracing</td>
+<td><code>langfuse</code> (PostgreSQL) and ClickHouse (<code>clickhouse_data</code>)</td>
+<td>Optional; traces only</td>
+</tr>
+<tr>
+<td>Uploads, images, files, Hermes workspace snapshots, archives</td>
+<td>MinIO (<code>minio_data</code>)</td>
+<td>Rows in the database point at these objects</td>
+</tr>
+<tr>
+<td>Knowledge-base vectors</td>
+<td>Milvus and etcd (<code>milvus_data</code>, <code>etcd_data</code>)</td>
+<td>Rebuildable from the documents</td>
+</tr>
+<tr>
+<td>Secrets</td>
+<td><code>.env</code></td>
+<td>Without it the data cannot be used; see <a href="secrets.html">secrets</a></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>docker compose down</code> keeps the volumes. <code>docker compose down -v</code> deletes them; it is
+never a repair step.</p>
+<h2 id="backing-up">Backing up</h2>
+<p>Take the database first and the objects second. A row can then never point at an
+object the copy lacks; the reverse (an object nobody references) is harmless. Do not
+run a backup while an archive sweep is deleting verified data.</p>
+<ol>
+<li>
+<p><strong>Databases.</strong> One custom-format dump per database, from the running container:</p>
+<pre><code class="language-bash">for db in aurum_ai rag_platform temporal temporal_visibility langfuse; do
+  docker compose exec -T postgres pg_dump -U postgres -Fc &quot;$db&quot; &gt; &quot;backup/$db.dump&quot;
+done
+docker compose exec -T postgres pg_dumpall -U postgres --globals-only &gt; backup/globals.sql
+</code></pre>
+<p><code>globals.sql</code> carries the roles (<code>aurum_ai_app</code> and the knowledge-base role) with
+their password hashes. Dumps do not include them, and a new server needs them first.</p>
+</li>
+<li>
+<p><strong>Objects.</strong> Copy the MinIO volume while MinIO is stopped, or mirror the buckets with
+<code>mc mirror</code> from a client. Buckets are <code>aurum-ai-business</code>, <code>langfuse</code> and the
+archive buckets you configured.</p>
+</li>
+<li>
+<p><strong>Configuration.</strong> Copy <code>.env</code> and any override files into the same encrypted
+location. Record the image tags or the commit you ran.</p>
+</li>
+<li>
+<p><strong>Check the copy.</strong> A backup you have not restored is a hope. Restore the <code>aurum_ai</code>
+dump into a scratch database (below) after each change to the procedure.</p>
+</li>
+</ol>
+<h2 id="restoring">Restoring</h2>
+<h3 id="into-a-scratch-database-check-a-backup">Into a scratch database (check a backup)</h3>
+<pre><code class="language-bash">docker compose exec -T postgres psql -U postgres -c &quot;CREATE DATABASE restore_check&quot;
+docker compose exec -T postgres pg_restore -U postgres -d restore_check --exit-on-error &lt; backup/aurum_ai.dump
+docker compose exec -T postgres psql -U postgres -d restore_check -Atc \
+  &quot;SELECT version_num FROM alembic_version; SELECT count(*) FROM users; SELECT count(*) FROM messages;&quot;
+docker compose exec -T postgres psql -U postgres -c &quot;DROP DATABASE restore_check&quot;
+</code></pre>
+<p>The restore brings the <code>vector</code> and <code>pg_partman</code> extensions with it; their packages
+must be installed in the target server (the stack's PostgreSQL image has them). Compare
+the revision and the counts with the live database.</p>
+<h3 id="a-whole-deployment">A whole deployment</h3>
+<ol>
+<li>
+<p>Bring up PostgreSQL alone from the <strong>same image version</strong> as the backup
+(<code>docker compose up -d postgres</code>), on an empty <code>postgres_data</code>.</p>
+</li>
+<li>
+<p>Load the roles, then replace each database with its dump:</p>
+<pre><code class="language-bash">docker compose exec -T postgres psql -U postgres -f - &lt; backup/globals.sql
+for db in aurum_ai rag_platform temporal temporal_visibility langfuse; do
+  docker compose exec -T postgres psql -U postgres -qc &quot;DROP DATABASE IF EXISTS $db&quot; -c &quot;CREATE DATABASE $db&quot;
+  docker compose exec -T postgres pg_restore -U postgres -d &quot;$db&quot; --exit-on-error &lt; &quot;backup/$db.dump&quot;
+done
+</code></pre>
+<p>A new server has already created <code>aurum_ai</code>, <code>rag_platform</code> and <code>langfuse</code> from the
+init scripts, which is why the databases are dropped and created again. Loading
+<code>globals.sql</code> reports that the roles <code>postgres</code> and <code>rag_app</code> already exist; that is
+expected, and the statements that follow set their attributes and passwords.</p>
+</li>
+<li>
+<p>Restore <code>.env</code> unchanged. <strong>The roles come back with the passwords they had</strong>, so
+<code>APP_DATABASE_ROLE_PASSWORD</code> must be the old value, not a freshly generated one.</p>
+</li>
+<li>
+<p>Restore MinIO's volume or mirror the buckets back.</p>
+</li>
+<li>
+<p>Start the rest of the stack with the same profiles as before. Do not run a newer
+version first: migrations are applied on start, so restore with the version that took
+the backup and upgrade afterwards (see <a href="../guides/operations.html#upgrades">operations</a>).</p>
+</li>
+<li>
+<p>Check <code>/ready</code> on both APIs, sign in, open an old conversation with an attachment and
+send one message. Knowledge bases whose vectors were not restored are rebuilt from
+their documents; allow time for indexing.</p>
+</li>
+<li>
+<p>For Hermes, restart <code>aurum-ai-hermes-egress-guard</code> and <code>aurum-ai-hermes-egress-1</code>
+after the backend is up.</p>
+</li>
+</ol>
+<h3 id="after-a-partial-loss">After a partial loss</h3>
+<ul>
+<li><strong>Only MinIO is lost.</strong> Conversations load but their files and images do not. Restore
+the buckets; do not edit rows to hide the gap.</li>
+<li><strong>Only the database is lost.</strong> Objects without rows are unreachable. Restore the dump
+taken before the objects you still have, then expect objects newer than the dump to be
+unreferenced.</li>
+<li><strong>Keycloak data is wrong.</strong> It is part of <code>aurum_ai</code>: restoring that database restores
+accounts and clients. Realm import runs only on a fresh database, so a realm change
+needs a reviewed upgrade, not a re-import.</li>
+<li><strong>Ambiguity.</strong> If you cannot tell what a failed lifecycle or restore step did, stop and
+keep the volumes, dumps and logs as they are. Recovery evidence is more valuable than a
+quick retry.</li>
+</ul>
+<h2 id="how-often">How often</h2>
+<p>Match the interval to the data you can afford to redo: daily dumps and a daily object
+copy suit most teams. Keep several generations, keep one copy off the host, and store the
+secrets copy separately from the data copy. Rehearse a full restore after every
+upgrade of PostgreSQL or of the platform's major components.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

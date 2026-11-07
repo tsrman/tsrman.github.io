@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changing models and providers · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+.bar a[aria-current]{color:var(--accent);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="../index.html">AurumAI docs</a>
+<a href="../guides/user-guide.html">User guide</a>
+<a href="../guides/admin-guide.html">Administrator</a>
+<a href="../guides/hermes-agent.html">Hermes Agent</a>
+<a href="../guides/deployment.html">Installation</a>
+<a href="../guides/operations.html" aria-current="page">Operations</a>
+<a href="../reference/api.html">API</a>
+<a href="../reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="changing-models-and-providers">Changing models and providers</h1>
+<p>How AurumAI knows which models exist, where a model's name is stored, and what to do
+when your gateway adds, renames, replaces or removes one. AurumAI does not version
+models: a model is the <strong>exact id</strong> your gateway publishes. A provider's new revision
+is, to the platform, a different model.</p>
+<h2 id="where-the-catalog-comes-from">Where the catalog comes from</h2>
+<p>The Admin app's <strong>Models</strong> page reads <code>GET &lt;LLM_GATEWAY_URL&gt;/v1/models</code> from the
+gateway, using <code>GATEWAY_API_KEY</code>, each time it is opened. Nothing is copied into a
+local catalog. The status bar shows the gateway's state:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Available</td>
+<td>The gateway answered with a list</td>
+</tr>
+<tr>
+<td>Unavailable</td>
+<td>The request failed or the answer was not a model list; the page lists nothing and saving model settings returns <code>503</code></td>
+</tr>
+<tr>
+<td>Mock</td>
+<td>Only in development (<code>APP_DEBUG=true</code>) with no gateway key: three sample ids</td>
+</tr>
+</tbody>
+</table></div>
+<p>Only chat models are offered. Ids that mark embedding, realtime speech, transcription,
+text-to-speech or reranking models (<code>text-embedding</code>, <code>speech-realtime</code>, <code>/rerank</code>,
+<code>whisper</code>, <code>tts-</code>) are hidden from chat pickers, because those models reject chat
+completions. Image models are chosen separately under <strong>Models → Images</strong>.</p>
+<h2 id="where-a-models-id-is-stored">Where a model's id is stored</h2>
+<p>An id is copied into each of these. A rename in the gateway does not follow it:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Stored in</th>
+<th>Set in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access grants (who may use the model)</td>
+<td>Admin → Models, per model</td>
+</tr>
+<tr>
+<td>The organization's default model</td>
+<td>Admin → Models → Defaults</td>
+</tr>
+<tr>
+<td>An agent's model</td>
+<td>The agent's editor</td>
+</tr>
+<tr>
+<td>The organization's Hermes model</td>
+<td>Admin → Models, Hermes</td>
+</tr>
+<tr>
+<td>The organization's image generation and editing models, and the chat models marked as taking images</td>
+<td>Admin → Models → Images</td>
+</tr>
+<tr>
+<td>The evaluator</td>
+<td><code>EVALUATOR_MODEL</code> in <code>.env</code> (with <code>EVALUATOR_ENABLED=true</code>)</td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td>Through the agents on their nodes</td>
+</tr>
+</tbody>
+</table></div>
+<p>Access is <strong>default-deny</strong>: a new id exists for nobody until you grant it. When a model
+disappears from the gateway, its grants stay in the database but the Models page stops
+listing it, and the default shows as unavailable. A request that still names it reaches
+the gateway, which will not serve it.</p>
+<h2 id="adding-a-model">Adding a model</h2>
+<ol>
+<li>Add it in the gateway and check that <code>GET /v1/models</code> lists it.</li>
+<li>Admin → Models: grant it to the organization, groups or people who should use it
+(preview first, then apply).</li>
+<li>Optionally make it the default, mark it as taking images, or pick it for an agent.</li>
+</ol>
+<h2 id="replacing-a-model-a-new-revision-a-rename-a-provider-switch">Replacing a model (a new revision, a rename, a provider switch)</h2>
+<p>Do it in this order so nobody is left without a working model:</p>
+<ol>
+<li>Add the <strong>new</strong> id in the gateway and grant it exactly as the old one was granted.</li>
+<li>Move the places in the table above: the default, the Hermes model, image models,
+the evaluator, then the agents that named the old id. Try each with one message.</li>
+<li>Only then remove the old id from the gateway.</li>
+<li>Remove the old grants if you want the list tidy; they grant nothing once the id is gone.</li>
+</ol>
+<p>An agent or workflow you forget to move keeps naming the old id and fails once the
+gateway stops serving it; try each one before step 3.</p>
+<h2 id="removing-a-model">Removing a model</h2>
+<p>Find what names it first: the default, the Hermes and image settings, the evaluator and
+the agents. Archive or edit those, then remove the id from the gateway. Every
+conversation stores the model it started with: past ones stay readable, but continuing
+one needs a model you still serve.</p>
+<h2 id="switching-the-gateway">Switching the gateway</h2>
+<p>A different gateway means a different set of ids. Set <code>LLM_GATEWAY_URL</code> and
+<code>GATEWAY_API_KEY</code> in <code>.env</code> and recreate both API planes
+(<code>docker compose up -d --force-recreate backend backend-admin</code>), then work through
+&quot;Replacing a model&quot; for every id that differs. Keep <code>GATEWAY_API_KEY</code> in the secret
+store (<a href="secrets.html">secrets</a>); the runner always calls the backend's proxy with its own
+session token, so authorization and the monthly quota apply whichever gateway sits behind.</p>
+<h2 id="checks">Checks</h2>
+<ul>
+<li>The Models page says <strong>Available</strong> and lists the new id.</li>
+<li>A member with access sends one message on it; a member without access cannot pick it.</li>
+<li>Hermes, image tools and workflows each run once if the change touched their settings.</li>
+<li>Usage analytics (Admin → Analytics) shows requests and tokens under the new id; the
+monthly request and token limits belong to the organization, not to a model, so a
+switch does not reset them.</li>
+</ul>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+
+</body>
+</html>

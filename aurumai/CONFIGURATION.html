@@ -349,11 +349,10 @@ operation, so a late upload is refused.</li>
 </ul>
 <h3 id="hermes-sandbox-egress">Hermes sandbox egress</h3>
 <p><code>docker-compose.hermes.yml</code> (profile <code>hermes</code>) adds <code>hermes-egress</code>, the only way
-out of a Hermes sandbox. Sandboxes join <code>aurum-ai-hermes-sandbox</code>
-(<code>HERMES_SANDBOX_SUBNET</code>, default <code>172.31.250.0/24</code>), an internal network without
-NAT or external DNS where the egress guard is the only platform member. The backend
-never joins it. Sandboxes share this segment; sandbox isolation from one another
-arrives with the sandboxes themselves.</p>
+out of a Hermes sandbox. Each sandbox runs on a network of its own, a <code>/28</code> carved from
+<code>HERMES_SANDBOX_POOL</code> (default <code>172.31.0.0/16</code>): an internal network without NAT or
+external DNS where the egress guard is the only platform member, so sandboxes cannot
+reach one another. The backend never joins it.</p>
 <ul>
 <li>
 <p><strong>Platform path.</strong> <code>hermes-egress:8080</code> forwards exactly
@@ -582,9 +581,12 @@ create restores the last snapshot that fit.</p>
 deletion for these groups, and the API rejects it: deleting only the local copy
 would allow synchronization to recreate it with a new identity. Groups created
 locally and not yet synchronized can still be deleted in Admin UI.
-Group membership always comes from the Keycloak <code>groups</code> claim at sign-in: a group
-created locally with the same name as a Keycloak group picks up its members, and
-the Members tab of the group dialog shows them read-only.</p>
+Group membership has two sources. The Keycloak <code>groups</code> claim is applied at every
+sign-in: a group created locally with the same name as a Keycloak group picks up its
+members, and these memberships are read-only in Admin UI. Administrators can also
+add people to any group by hand (Members tab, <strong>Add people</strong>); those memberships
+stay until removed there and sign-in never adds or removes them. A person named by
+the claim and also added by hand keeps the manual membership.</p>
 <p><code>APP_IDENTITY_SYNC_ENABLED=false</code> is the default. Install/verify the signed complete-
 groups mapper on both clients, apply migrations and start the maintenance worker/
 egress guard before enabling. <code>APP_IDENTITY_SYNC_WAIT_SECONDS</code> defaults to 10;

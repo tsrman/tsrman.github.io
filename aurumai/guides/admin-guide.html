@@ -57,10 +57,10 @@ has three groups:</p>
 <li><strong>Monitoring</strong>: Analytics</li>
 </ul>
 <p><img src="../assets/screenshots/admin-users.png" alt="The Users page" /></p>
-<p>Roles, accounts and group membership live in <strong>Keycloak</strong>
-(<code>http://localhost:8080</code> locally). The Admin app shows them after a person signs in
-but does not edit them. Membership is synchronised from the <code>groups</code> claim on every
-sign-in, so change it in Keycloak.</p>
+<p>Roles and accounts live in <strong>Keycloak</strong> (<code>http://localhost:8080</code> locally). The Admin
+app shows them after a person signs in but does not edit them. Group membership has
+two sources: the <code>groups</code> claim, applied on every sign-in (change it in Keycloak),
+and people you add to a group by hand (see <a href="#groups-and-default-permissions">Groups</a>).</p>
 <h2 id="how-access-works">How access works</h2>
 <p>Access is <strong>default-deny</strong> and has two layers.</p>
 <ol>
@@ -127,6 +127,12 @@ permissions</strong> to set capabilities every member has, whatever their groups
 group to give its members more on top of those defaults. Turn a capability on only
 when you want everyone it covers to be able to add something other members then
 see (an agent, a skill, a knowledge base).</p>
+<p>The <strong>Members</strong> tab of a group shows who is in it and where each membership comes
+from. People from Keycloak are marked <em>Keycloak</em> and are managed there. Choose <strong>Add
+people</strong> to search the organization and add anyone by hand; these people are marked
+<em>Added here</em>, keep their place when they sign in again, and can be removed with
+<strong>Remove</strong>. A person Keycloak also puts in the group keeps the manual membership.
+Access changes at once.</p>
 <p>Before you save a change, the preview shows the effective result for a user or group.</p>
 <h3 id="resource-access">Resource access</h3>
 <p>Each agent, skill, workflow, knowledge base and model has an <strong>Access</strong> action. Grant
@@ -141,7 +147,8 @@ docker compose exec backend python -m src.cli.provision_org --all --apply
 <h2 id="models">Models</h2>
 <p><img src="../assets/screenshots/admin-models.png" alt="Models page: defaults and image settings" /></p>
 <p><strong>Models</strong> lists what the gateway publishes. The status bar says whether the gateway
-is reachable.</p>
+is reachable. When the gateway adds, renames or removes a model, follow
+<a href="../operations/model-changes.html">changing models and providers</a>.</p>
 <ul>
 <li><strong>Defaults.</strong> The default model offered to users who have not chosen one, and the
 default temperature for agents that inherit the organization's value (unset means

@@ -104,7 +104,8 @@ volumes.</p>
 <p>Archive format versions are forward-only for jobs already started; an older job refuses
 content its version cannot carry.</p>
 <h2 id="backups">Backups</h2>
-<p>Back up these; the stack's state is split across them:</p>
+<p>Back up these; the stack's state is split across them. The procedure, its order and a
+tested restore are in <a href="../operations/backup-recovery.html">backup and recovery</a>.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -126,7 +127,7 @@ content its version cannot carry.</p>
 <td>Generated secrets; without them the data cannot be used</td>
 </tr>
 <tr>
-<td>Keycloak's database</td>
+<td>Keycloak's data (in the <code>aurum_ai</code> database)</td>
 <td>Accounts, roles, clients</td>
 </tr>
 <tr>
@@ -228,7 +229,11 @@ groups when they log in.</p>
 </tr>
 <tr>
 <td>Web search or read refuses</td>
-<td><code>WEB_ENABLED</code>, the <code>web</code> profile, secrets and the enforcement checks; never open outbound access to make it work</td>
+<td><code>WEB_ENABLED</code>, the <code>web</code> profile, secrets and the enforcement checks; never open outbound access to make it work (<a href="../operations/network-enforcement.html">network enforcement</a>)</td>
+</tr>
+<tr>
+<td>A model vanished or a default shows as unavailable</td>
+<td>The gateway no longer publishes the id: <a href="../operations/model-changes.html">changing models</a></td>
 </tr>
 <tr>
 <td>Hermes: see its table</td>
@@ -237,8 +242,10 @@ groups when they log in.</p>
 </tbody>
 </table></div>
 <h2 id="security-hygiene">Security hygiene</h2>
-<p>Rotate generated secrets deliberately and recreate both API planes afterwards. Keep the
-development accounts out of anything reachable by others. Report vulnerabilities as
+<p>Rotate generated secrets deliberately; some are applied only once (the application
+database role, the Keycloak administrator) and need more than an edit of <code>.env</code>: see
+<a href="../operations/secrets.html">secrets and credentials</a>. Keep the development accounts out of
+anything reachable by others. Report vulnerabilities as
 described in <a href="https://github.com/tsrman/AurumAI/blob/main/SECURITY.md">SECURITY.md</a>.</p>
 
 </main>
