@@ -105,6 +105,22 @@ publishes only <code>sha-&lt;commit&gt;</code>. Authentication uses the workflow
 <p>Packages created by the first run are private on GitHub. Make each one public in
 its package settings if the images should be pullable anonymously. Deploy the
 chart with <code>image.registry=ghcr.io/&lt;owner&gt;</code> and <code>image.tag=&lt;version&gt;</code>.</p>
+<h2 id="documentation-site">Documentation site</h2>
+<p>The pages of <code>docs/</code> are published at https://tsrman.github.io/aurumai/ by
+<code>.github/workflows/publish-docs.yml</code> whenever a <code>vX.Y.Z</code> tag is pushed (a prerelease such as
+<code>v1.2.0-rc.1</code> is not published). The workflow builds the site with
+<code>scripts/build-docs-site.py</code> and replaces the <code>aurumai/</code> folder of the
+<code>&lt;owner&gt;.github.io</code> repository with it in one commit.</p>
+<p>Build the site locally to see what a release will publish (the output directory must be empty):</p>
+<pre><code class="language-bash">uv run --script scripts/build-docs-site.py --source docs --output /tmp/aurumai-site
+</code></pre>
+<p>Pushing to the other repository needs a token. Create a fine-grained personal access token
+with <strong>Contents: read and write</strong> on the <code>&lt;owner&gt;.github.io</code> repository only, and store it as the
+repository secret <code>DOCS_SITE_TOKEN</code>. Without it the workflow still builds the site, which
+proves the documentation builds, and says that nothing was published. A manual run of the
+workflow builds the site and publishes it only when <code>publish</code> is ticked.</p>
+<p><code>docs/superpowers</code> (design notes) is not published. A new page is published when its Markdown
+file is under <code>docs/</code>; to mark its section in the navigation bar, add it to <code>CURRENT</code> in the script.</p>
 
 </main>
 <footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
