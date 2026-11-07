@@ -69,6 +69,14 @@ uses its own settings prefix. Do not copy every root variable into a service dot
 <td>Scoped runtime database connection</td>
 </tr>
 <tr>
+<td><code>APP_DB_POOL_SIZE</code>, <code>APP_DB_MAX_OVERFLOW</code>, <code>APP_DB_POOL_TIMEOUT</code></td>
+<td>Connections one API process keeps (20), may add under load (40), and how many seconds a request waits for one (30); see <a href="guides/operations.html#database-connections">database connections</a></td>
+</tr>
+<tr>
+<td><code>POSTGRES_MAX_CONNECTIONS</code>, <code>POSTGRES_SHARED_BUFFERS</code>, <code>POSTGRES_EFFECTIVE_CACHE_SIZE</code></td>
+<td>Compose only: PostgreSQL server settings (200, 256MB, 1GB by default); the budget is in <a href="guides/operations.html#database-connections">database connections</a></td>
+</tr>
+<tr>
 <td><code>APP_MIGRATION_DATABASE_URL</code></td>
 <td>Separate privileged migration connection</td>
 </tr>
