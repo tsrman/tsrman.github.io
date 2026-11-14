@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.50</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.51</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.50/CarRulesVoice-1.50-ru-release.apk">CarRulesVoice-1.50-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.50/CarRulesVoice-1.50-en-release.apk">CarRulesVoice-1.50-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.50/CarRulesVoice-1.50-fa-release.apk">CarRulesVoice-1.50-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.51/CarRulesVoice-1.51-ru-release.apk">CarRulesVoice-1.51-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.51/CarRulesVoice-1.51-en-release.apk">CarRulesVoice-1.51-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.51/CarRulesVoice-1.51-fa-release.apk">CarRulesVoice-1.51-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -359,6 +359,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.51</strong> — исправлено действие «Громкость»: раньше оно писало через AudioManager, а для стороннего приложения на этой платформе это ничего не меняет (настоящая громкость защищена сигнатурным правом). Теперь пишется настоящий ключ громкости — так же, как её меняют кнопки на руле.</li>
 <li><strong>v1.50</strong> — главный выключатель программы в «Настройках»; исправлен параметр «Открыта любая дверь» (раньше не срабатывал); лючок зарядки и лючок бака доступны как триггеры и условия; новое действие «Экран (подсветка)» — выключить / включить.</li>
 <li><strong>v1.49</strong> — новые параметры и действия: «Задержка выключения фар (провожающий свет)» (выкл, 15, 30, 60 с), «Световая анимация при запирании» и «при отпирании» (вкл/выкл).</li>
 <li><strong>v1.48</strong> — компаньон больше не устанавливается из приложения (установка APK через ADB заблокирована прошивкой): приложение проверяет его наличие и при необходимости включает (pm enable), устанавливать компаньон нужно самому; если компаньон уже включён, приложение на загрузке само запускает его сервис.</li>
@@ -634,6 +635,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.51</strong> — fixed the “Volume” action: it used to write through AudioManager, which does nothing for a 3rd-party app on this platform (the real volume is behind a signature permission). It now writes the real volume key — the same one the steering-wheel buttons change.</li>
 <li><strong>v1.50</strong> — a master on/off switch in “Settings”; fixed the “Any door open” parameter (it never fired before); the charge port and fuel flap are available as triggers and conditions; new “Screen (backlight)” action — switch off / on.</li>
 <li><strong>v1.49</strong> — new parameters and actions: “Headlight switch-off delay (follow me home)” (off, 15, 30, 60 s), “Lock light animation” and “Unlock light animation” (on/off).</li>
 <li><strong>v1.48</strong> — the app no longer installs the companion (installing an APK through ADB is blocked by the firmware): it checks that it is present and enables it (pm enable) if needed — you install the companion yourself; if the companion is already enabled, the app starts its service at boot.</li>
@@ -905,6 +907,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.51</strong> — عمل «صدا» اصلاح شد: پیش‌تر از طریق AudioManager می‌نوشت که برای یک برنامهٔ ثالث در این سیستم‌عامل هیچ اثری ندارد (صدای واقعی پشت یک مجوز امضایی محافظت می‌شود). اکنون کلید واقعی صدا نوشته می‌شود — همان که دکمه‌های روی فرمان تغییرش می‌دهند.</li>
 <li><strong>v1.50</strong> — کلید اصلی خاموش/روشن برنامه در «تنظیمات»؛ پارامتر «باز بودن هر در» اصلاح شد (پیش‌تر کار نمی‌کرد)؛ دریچهٔ شارژ و درب باک به‌عنوان محرک و شرط در دسترس‌اند؛ عمل جدید «صفحه‌نمایش (نور پس‌زمینه)» — خاموش / روشن.</li>
 <li><strong>v1.49</strong> — پارامترها و عملیات جدید: «تأخیر خاموش شدن چراغ‌ها (روشنایی همراه)» (خاموش، ۱۵، ۳۰، ۶۰ ثانیه)، «انیمیشن نوری هنگام قفل کردن» و «هنگام باز کردن قفل» (روشن/خاموش).</li>
 <li><strong>v1.48</strong> — برنامه دیگر همراه را نصب نمی‌کند (نصب APK از طریق ADB توسط سیستم‌عامل مسدود است): فقط وجود آن را بررسی می‌کند و در صورت نیاز فعالش می‌کند (pm enable) — همراه را باید خودتان نصب کنید؛ اگر همراه از پیش فعال باشد، برنامه هنگام بوت سرویس آن را اجرا می‌کند.</li>
