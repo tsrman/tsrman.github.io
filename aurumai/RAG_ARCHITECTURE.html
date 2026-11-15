@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AurumAI RAG architecture · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+.bar a[aria-current]{color:var(--accent);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="aurumai-rag-architecture">AurumAI RAG architecture</h1>
+<p>This document describes how AurumAI stores, indexes and retrieves organization knowledge:
+knowledge bases, uploaded documents, chat attachments, the ingestion pipeline, hybrid
+retrieval, tenant isolation, consistency under failure, and the archive lifecycle. It is
+written for architects and operators and describes the code on <code>main</code>. For the whole
+platform see the <a href="TECHNICAL_ARCHITECTURE.html">technical architecture</a>; for the short rules
+contributors must keep see the <a href="ARCHITECTURE.html">architecture overview</a>; for settings see
+the <a href="CONFIGURATION.html">configuration reference</a>.</p>
+<p>Contents:</p>
+<ol>
+<li><a href="#1-summary">Summary</a></li>
+<li><a href="#2-components-and-trust-boundaries">Components and trust boundaries</a></li>
+<li><a href="#3-data-model">Data model</a></li>
+<li><a href="#4-tenancy-and-access-control">Tenancy and access control</a></li>
+<li><a href="#5-knowledge-bases-and-their-owners">Knowledge bases and their owners</a></li>
+<li><a href="#6-ingestion">Ingestion</a></li>
+<li><a href="#7-chunking-and-contextual-retrieval">Chunking and contextual retrieval</a></li>
+<li><a href="#8-retrieval">Retrieval</a></li>
+<li><a href="#9-consistency-model-and-failure-handling">Consistency model and failure handling</a></li>
+<li><a href="#10-archive-export-and-restore">Archive, export and restore</a></li>
+<li><a href="#11-operations-and-capacity">Operations and capacity</a></li>
+<li><a href="#12-design-notes-and-known-limits">Design notes and known limits</a></li>
+<li><a href="#13-source-map">Source map</a></li>
+</ol>
+<h2 id="1-summary">1. Summary</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit of knowledge</td>
+<td>A <strong>knowledge base</strong> (KB) owned by an organization, holding <strong>documents</strong>. A hidden, per-conversation KB holds chat attachments.</td>
+</tr>
+<tr>
+<td>Authoritative stores</td>
+<td>PostgreSQL <code>aurum_ai</code> (KB metadata, grants, file metadata), PostgreSQL <code>rag_platform</code> (documents, ingestion state, lifecycle fences), MinIO (original files).</td>
+</tr>
+<tr>
+<td>Derived store</td>
+<td>Milvus: one collection, dense and sparse vectors per chunk. It can be rebuilt from the other stores.</td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td>Upload through the Business API into MinIO, then a durable Temporal workflow (<code>IndexDocumentWorkflow</code>) on the <code>rag-ingest</code> queue: parse, chunk, contextualize, embed, upsert.</td>
+</tr>
+<tr>
+<td>Retrieval</td>
+<td>Hybrid search: dense cosine and sparse BM25 in one Milvus call, fused by reciprocal-rank fusion (RRF), filtered against live PostgreSQL state and, when a reranker is configured, re-ordered by a cross-encoder. The model sees the larger parent window of each hit.</td>
+</tr>
+<tr>
+<td>Access control</td>
+<td>Live KB grants evaluated by the Business API; the RAG service is an internal trust boundary that applies the organization and KB it is given to every query; row-level security in <code>rag_platform</code>.</td>
+</tr>
+<tr>
+<td>Consistency</td>
+<td>Writes are fenced by a per-KB <strong>generation</strong>; every external side effect (a Milvus write or delete) is recorded as an <strong>intent</strong> before it happens and settled after; an uncertain outcome blocks further changes instead of being guessed.</td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td>One embedding model behind an OpenAI-style <code>/embeddings</code> endpoint (the <code>reranker</code> Compose service runs Infinity with <code>gte-Qwen2-1.5B-instruct</code>, 1536 dimensions). The Compose service named <code>reranker</code> only serves embeddings; cross-encoder reranking is a separate, optional service (<code>rag-rerank</code>, section 8.1).</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three decisions explain most of the structure:</p>
+<ol>
+<li><strong>The RAG service never decides who may see what.</strong> It is told the organization and KB by
+the Business API, which has already evaluated the caller's live grant. This keeps one
+authorization implementation for the whole platform and keeps RAG simple.</li>
+<li><strong>Search results are accepted only if PostgreSQL agrees.</strong> Milvus is eventually
+consistent with deletes; every search re-checks that the KB is active and that each hit's
+document still exists.</li>
+<li><strong>Archive safety drives the write protocol.</strong> Because a KB can be archived and purged while
+indexing is in flight, writes carry a generation and external effects carry intents, so an
+archive can prove nothing is half-done before it deletes anything.</li>
+</ol>
+<h2 id="2-components-and-trust-boundaries">2. Components and trust boundaries</h2>
+<pre class="mermaid">flowchart LR
+    UI[Browser] --&gt; BA["Business API"]
+    BA --&gt;|"X-Org-Id, X-Knowledge-Base-Id"| RA["rag-api :8110"]
+    TW["Tool worker"] --&gt;|"session token"| BA
+    BA --&gt; S3[(MinIO)]
+    RA --&gt; PGR[(rag_platform)]
+    RA --&gt; EMB["Embedding service (Infinity)"]
+    RA --&gt; MV[(Milvus)]
+    RA --&gt;|start workflow| TMP[Temporal]
+    TMP --&gt; RW["rag-worker (rag-ingest queue)"]
+    RW --&gt; S3
+    RW --&gt; PGR
+    RW --&gt; EMB
+    RW --&gt; MV
+    RW -. contextual call .-&gt; GW[LLM gateway]
+    DW["Data worker"] --&gt;|private secret| RX["rag-archive (separate process)"]
+    RX --&gt; PGR
+    RX --&gt; MV
+    RX --&gt; S3A[(Archive bucket)]
+</pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Role</th>
+<th>Notable properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Business API (<code>routers/documents.py</code>, <code>knowledge_bases.py</code>)</td>
+<td>Public face: upload, list, delete, search; evaluates KB grants; stores sources; records file metadata</td>
+<td>The only caller of <code>rag-api</code>; sends the organization and KB as headers.</td>
+</tr>
+<tr>
+<td><code>rag-api</code></td>
+<td>Internal document API and search</td>
+<td>No port published to the browser; on the <code>rag-control-net</code> and <code>rag-net</code> networks only; own database role <code>rag_app</code>.</td>
+</tr>
+<tr>
+<td><code>rag-worker</code></td>
+<td>Temporal worker for <code>IndexDocumentWorkflow</code></td>
+<td>Reads sources from MinIO, runs Docling, calls the embedding service and Milvus.</td>
+</tr>
+<tr>
+<td>Embedding service</td>
+<td><code>/embeddings</code> over HTTP</td>
+<td>Same model for indexing and querying; configured by <code>*_RERANKER_URL</code> and <code>*_EMBEDDING_MODEL</code>.</td>
+</tr>
+<tr>
+<td>Milvus (+ etcd)</td>
+<td>Vector index</td>
+<td>One collection; reachable only from the RAG services (and the archive process).</td>
+</tr>
+<tr>
+<td><code>rag-archive</code></td>
+<td>Private archive/export/restore process</td>
+<td>A separate process and port, never mounted in the ordinary API, with its own secret and a <code>rag_lifecycle</code> database role.</td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td>Original source files</td>
+<td>Keys encode ownership: <code>documents/{org}/{kb}/{uuid}{.ext}</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Tool worker and the runner do <strong>not</strong> talk to <code>rag-api</code>. A model's search goes
+<code>tool worker → Business API → rag-api</code>, so every query passes through the platform's
+authorization and audit paths.</p>
+<h2 id="3-data-model">3. Data model</h2>
+<h3 id="31-aurum_ai-application-database">3.1 <code>aurum_ai</code> (application database)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>knowledge_bases</code></td>
+<td><code>id</code>, <code>org_id</code>, <code>name</code> (unique per organization), <code>description</code>, <code>created_by</code>, and <code>owning_conversation_id</code> (unique, set only for the hidden attachment KB; cascades with the conversation).</td>
+</tr>
+<tr>
+<td><code>access_grants</code></td>
+<td>The KB grants (<code>resource_type = knowledge_base</code>, principal organization, group or user, permission <code>read</code> or <code>write</code>).</td>
+</tr>
+<tr>
+<td><code>file_metadata</code></td>
+<td>One row per stored source: <code>storage_key</code>, filename, content type, size, uploader, <code>document_id</code>, and <code>owning_conversation_id</code> for attachments. A partial index serves the conversation-owned lookups.</td>
+</tr>
+<tr>
+<td><code>skills</code></td>
+<td>For attachments: a hidden skill of type <code>tool</code> bound to the <code>execute_hybrid_search</code> activity with the KB id fixed as a constant in its input schema, owned by the conversation.</td>
+</tr>
+<tr>
+<td><code>conversation_operations</code></td>
+<td>Lifecycle operation receipts for document create, upload and delete (<code>document_create</code>, <code>document_upload</code>, <code>document_delete</code>) on conversation-owned KBs.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-rag_platform-rag-database">3.2 <code>rag_platform</code> (RAG database)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td><code>id</code>, <code>org_id</code>, <code>knowledge_base_id</code>, <code>title</code>, inline <code>content</code> <strong>or</strong> <code>source_key</code> plus <code>source_filename</code>, <code>parsed_markdown</code> (cache of the parse), <code>status</code> (<code>pending</code>, <code>indexing</code>, <code>indexed</code>, <code>failed</code>), <code>error</code>, <code>chunk_count</code>, <code>uncontextualized_chunks</code> and <code>truncated_chunks</code> (how the finished document differs from the ideal, see sections 6.4 and 7), timestamps.</td>
+</tr>
+<tr>
+<td><code>rag_kb_lifecycle</code></td>
+<td>One row per KB: <code>state</code> (<code>active</code>, <code>archiving</code>, <code>archived</code>, <code>restore_pending</code>), <code>generation</code>, <code>archive_id</code>, <code>provenance_complete</code>. The fence.</td>
+</tr>
+<tr>
+<td><code>rag_index_executions</code></td>
+<td>One row per indexing operation: operation id (idempotency key), document, generation, the exact Temporal <code>workflow_id</code>, <code>run_id</code>, task queue, terminal status and close time.</td>
+</tr>
+<tr>
+<td><code>rag_external_operations</code></td>
+<td>Intents for Milvus writes and deletes (<code>vector_upsert</code>, <code>vector_delete</code>) with a <code>settled</code> flag.</td>
+</tr>
+<tr>
+<td><code>rag_archive_jobs</code>, <code>rag_archive_steps</code></td>
+<td>The archive saga state and its step receipts.</td>
+</tr>
+</tbody>
+</table></div>
+<p>All of the lifecycle tables have <code>FORCE ROW LEVEL SECURITY</code> with a tenant policy on
+<code>app.current_org_id</code>. <code>documents</code> is guarded by a trigger that makes <code>(id, org_id, knowledge_base_id)</code> immutable and, for ordinary roles, requires the writer fence to pass
+on every insert, update and delete. Privileged functions are <code>SECURITY DEFINER</code> with
+pinned <code>search_path</code>, owned by an isolated schema-owner role; the runtime role <code>rag_app</code> can
+read the lifecycle tables but changes them only through those functions.</p>
+<h3 id="33-milvus-collection">3.3 Milvus collection</h3>
+<p>A single collection (<code>milvus_collection</code>, default <code>documents</code>) holds every tenant's chunks:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pk</code></td>
+<td>VARCHAR(128), primary</td>
+<td><code>{document_id}:{chunk_index}</code>: deterministic, so a retried upsert overwrites instead of duplicating</td>
+</tr>
+<tr>
+<td><code>org_id</code></td>
+<td>VARCHAR(64), <strong>partition key</strong></td>
+<td>Milvus groups data by organization, which keeps per-tenant filtered searches from scanning other tenants' segments</td>
+</tr>
+<tr>
+<td><code>knowledge_base_id</code>, <code>document_id</code></td>
+<td>VARCHAR</td>
+<td>Filter and delete keys</td>
+</tr>
+<tr>
+<td><code>chunk_index</code></td>
+<td>INT64</td>
+<td>Position in the document</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>VARCHAR(65535), analyzer enabled</td>
+<td>The indexed (contextualized) text; feeds the BM25 function</td>
+</tr>
+<tr>
+<td><code>dense</code></td>
+<td>FLOAT_VECTOR(<code>embedding_dim</code>)</td>
+<td>Default 1536; index <code>AUTOINDEX</code>, metric <code>COSINE</code></td>
+</tr>
+<tr>
+<td><code>sparse</code></td>
+<td>SPARSE_FLOAT_VECTOR</td>
+<td>Generated by a Milvus BM25 function from <code>content</code>; index <code>SPARSE_INVERTED_INDEX</code>, metric <code>BM25</code></td>
+</tr>
+<tr>
+<td><code>parent_content</code>, <code>acl_json</code>, <code>document_title</code></td>
+<td>dynamic fields</td>
+<td>The window shown to the model; a constant empty list kept for the stored and archived row shape (see 4.4); the title</td>
+</tr>
+</tbody>
+</table></div>
+<p>The service verifies at boot that an existing collection has the required fields. A
+collection created before <code>knowledge_base_id</code> existed is reported as an error: its chunks
+are invisible to filtered search until the collection is dropped and every document is
+re-indexed.</p>
+<h3 id="34-object-keys">3.4 Object keys</h3>
+<ul>
+<li>Knowledge-base documents: <code>documents/{org_id}/{knowledge_base_id}/{uuid}{suffix}</code>. The key
+is assigned by the server; the RAG service accepts a <code>source_key</code> only if it matches this
+exact pattern for the organization and KB it was told about (<code>owns_source</code>). A legacy or
+shared key is not considered owned and is never purged by inference.</li>
+<li>Conversation attachments use the same pattern with the hidden KB's id.</li>
+</ul>
+<h2 id="4-tenancy-and-access-control">4. Tenancy and access control</h2>
+<p>Every request passes five independent layers; a flaw in one is not enough to cross a
+tenant boundary.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Where</th>
+<th>What it enforces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Capability and grant</td>
+<td>Business API (<code>_require_knowledge_access</code>)</td>
+<td><code>workspace.knowledge.create</code> for creating; a live <code>read</code> grant for list, get and search, a live <code>write</code> grant for upload and delete. Administrators are bounded by their own organization.</td>
+</tr>
+<tr>
+<td>2. Conversation fence</td>
+<td>Business API</td>
+<td>For a conversation-owned KB the owning conversation must be live and, for a runner's token, on the token's generation; a frozen conversation hides the KB (<code>404</code> for reads).</td>
+</tr>
+<tr>
+<td>3. Canonical scope</td>
+<td><code>rag-api</code></td>
+<td>The organization and KB come from headers set by the Business API; a body that names a different KB is rejected (<code>422</code>); a <code>source_key</code> outside the pattern is rejected.</td>
+</tr>
+<tr>
+<td>4. Row-level security</td>
+<td><code>rag_platform</code></td>
+<td>Every query runs under <code>app.current_org_id</code>; lifecycle tables are <code>FORCE</code> RLS.</td>
+</tr>
+<tr>
+<td>5. Vector filter and live check</td>
+<td>Milvus and <code>rag-api</code></td>
+<td>Every search filters on <code>org_id</code> and <code>knowledge_base_id</code>; results are then restricted to documents that exist in PostgreSQL in a KB whose lifecycle state is <code>active</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Callers authenticated by a <strong>session token</strong> (a runner or tool worker) reach search through
+the same <code>get_current_user_or_session</code> route, so a model's search is authorized for the
+<strong>person</strong> the conversation belongs to, against current grants, not against a snapshot
+taken when the agent was configured. Revoking a KB grant stops the next search, including
+inside a running turn.</p>
+<h3 id="41-what-the-model-can-name">4.1 What the model can name</h3>
+<p>Hermes Agent reaches knowledge the same way, through the <code>knowledge_search</code> tool of its MCP bridge
+(<code>/v1/hermes/mcp</code>): the conversation's attachments by default, or, by <code>knowledgeBaseId</code>, one of the
+knowledge bases of the session's Hermes agent definition (any other id is refused). The bridge
+authorizes the person the session belongs to against the live KB grant and then calls the Business
+API search path, so everything in this section, including reranking, applies unchanged; the sandbox
+itself has no route to the RAG service.</p>
+<p>For an ordinary KB the model calls a search skill with a <code>knowledge_base_id</code> argument; the
+backend checks the caller's grant on <strong>that</strong> id at search time, so a model that invents or
+is tricked into another KB's id is refused. For attachments the hidden skill's schema pins
+the id with a constant, and the grants it relies on belong to the conversation's owner.</p>
+<h3 id="42-result-shaping">4.2 Result shaping</h3>
+<p>The Business API returns only <code>results</code> and a sanitized <code>warnings</code> field: when the RAG
+service reports any degradation the caller sees a fixed generic string, not provider or
+infrastructure detail. The tool worker forwards only each hit's <code>content</code> and
+<code>relevance_score</code> to the model.</p>
+<h3 id="43-roles-in-rag_platform">4.3 Roles in <code>rag_platform</code></h3>
+<p><code>rag_app</code> (API and worker) cannot create objects in the schema and has read access to
+lifecycle tables; <code>rag_lifecycle</code> (the archive process only) can modify them;
+<code>rag_schema_owner</code> owns the tables and functions and never logs in. The ordinary
+RAG API and the archive process therefore hold different credentials, and archive powers are
+unreachable from any route the Business API calls.</p>
+<h3 id="44-chunks-inherit-the-knowledge-bases-grants">4.4 Chunks inherit the knowledge base's grants</h3>
+<p>A chunk has no access list of its own. What a person may find is <strong>exactly what the grants of
+its knowledge base say, evaluated live</strong> on every search (section 4, layer 1): a grant to the
+person, to a group they belong to or to the organization, where <code>write</code> includes <code>read</code>; a
+grant on one KB never opens another; a revoked grant stops the next search. Nothing about
+access is copied into Milvus, so there is no snapshot that could go stale when grants change,
+and no re-indexing is needed to change who can see a KB.</p>
+<p>The consequence is that the unit of access control is the knowledge base: content that has
+different audiences belongs in different knowledge bases. Chunks written by older versions
+carry an <code>acl_json</code> list (<code>org:{id}</code> or <code>public</code>); it is never read. New chunks store a
+constant empty list there so the stored and archived row shape (and therefore export and
+restore) stays unchanged.</p>
+<h2 id="5-knowledge-bases-and-their-owners">5. Knowledge bases and their owners</h2>
+<pre class="mermaid">flowchart TB
+    KB["Knowledge base (organization-owned)"] --&gt; D1[Document]
+    KB --&gt; D2[Document]
+    CONV[Conversation] --&gt;|"owns (unique)"| HKB["Hidden attachment KB"]
+    HKB --&gt; D3[Document]
+    CONV --&gt;|"owns"| HS["Hidden search skill (tool: execute_hybrid_search)"]
+    HS --&gt;|"fixed kb id"| HKB
+</pre>
+<p><strong>Ordinary KBs</strong> are created and filled by users with <code>workspace.knowledge.create</code> in the
+chat application; the Admin application decides who can use each KB (grants). Names are
+unique per organization. The model searches a KB through a skill of type <code>tool</code> whose
+<code>activity_name</code> is <code>execute_hybrid_search</code> (the attachment feature creates one automatically,
+see below); an agent definition lists the KBs it may use, and the runner puts their ids and
+names in the agent's prompt so the model can pass the right <code>knowledge_base_id</code>.</p>
+<p><strong>Attachment KBs</strong> are created lazily when a user attaches a file to a conversation. The
+first attachment creates, in one transaction, the hidden KB (named
+<code>__conversation_attachments__{conversation_id}</code>, excluded from every list), a hidden search
+skill that fixes the KB id, and two provisioning grants for the conversation's owner (write
+on the KB, read on the skill). Later attachments reuse them. Everything cascades with the
+conversation. Because the KB's identity is tied to the conversation, deleting, archiving or
+restoring the conversation fences the KB with it.</p>
+<p><strong>Locks.</strong> Writes to a KB take a row lock on it (<code>lock_for_write</code>) before the grant check,
+so concurrent upload, delete and archive admission serialize on one KB rather than
+interleaving.</p>
+<h2 id="6-ingestion">6. Ingestion</h2>
+<pre class="mermaid">sequenceDiagram
+    participant U as Browser
+    participant B as Business API
+    participant S as MinIO
+    participant R as rag-api
+    participant P as rag_platform
+    participant T as Temporal
+    participant W as rag-worker
+    participant E as Embedding service
+    participant M as Milvus
+    U-&gt;&gt;B: POST /v1/documents/upload (file)
+    B-&gt;&gt;B: write grant, suffix and size checks
+    B-&gt;&gt;S: put source (documents/org/kb/uuid.ext)
+    B-&gt;&gt;R: POST /v1/documents (source_key, operation_id)
+    R-&gt;&gt;P: writer fence, insert document pending, prepare index execution
+    R-&gt;&gt;T: start IndexDocumentWorkflow (reject duplicate id)
+    R-&gt;&gt;P: register run id
+    R--&gt;&gt;B: 202 (document pending)
+    B-&gt;&gt;B: record file metadata, settle operation, commit
+    T-&gt;&gt;W: IndexDocumentWorkflow
+    W-&gt;&gt;P: register execution, fence, status indexing
+    W-&gt;&gt;S: download source
+    W-&gt;&gt;W: parse, chunk, contextualize
+    W-&gt;&gt;E: embed (batches of 32)
+    W-&gt;&gt;P: begin vector intent
+    W-&gt;&gt;M: upsert chunks
+    W-&gt;&gt;P: settle intent, status indexed
+</pre>
+<h3 id="61-admission-business-api">6.1 Admission (Business API)</h3>
+<ul>
+<li><strong>Accepted types:</strong> <code>.pdf</code>, <code>.docx</code>, <code>.doc</code>, <code>.pptx</code>, <code>.html</code>, <code>.htm</code>, <code>.md</code>, <code>.txt</code>.
+Anything else is <code>415</code>. The size limit is 25 MB (<code>413</code>), an empty file is <code>422</code>. The file
+is read into memory under the limit and stored with a server-assigned key.</li>
+<li><strong>Order matters.</strong> The source is stored first, then the document is created in <code>rag-api</code>,
+then the metadata row is written. A lost reply from <code>rag-api</code> leaves the stored source in
+place on purpose: deleting it could race a worker that already accepted the document.
+Cleanup of such orphans is an explicit, retryable operation, never an inference.</li>
+<li><strong>Inline text</strong> (<code>POST /v1/documents</code> with <code>content</code>) is accepted up to 2 MB
+(<code>document_max_content_bytes</code>) and stored in the <code>documents</code> row; exactly one of <code>content</code>
+and <code>source_key</code> must be given.</li>
+<li><strong>Chat attachments</strong> go through the same function after the hidden KB exists.</li>
+</ul>
+<h3 id="62-rag-api-creates-the-document-and-starts-the-workflow">6.2 <code>rag-api</code> creates the document and starts the workflow</h3>
+<ol>
+<li>It takes the <strong>writer fence</strong>, which returns the KB's current generation or fails with
+<code>rag_frozen</code> (<code>409</code>) if the KB is archiving or archived.</li>
+<li>It computes the operation id (supplied by the caller for idempotent retries) and the
+workflow id <code>rag-index-{document_id}-{operation_id}</code>.</li>
+<li>A repeated request with the same operation id returns the <strong>same</strong> document: the stored
+title, content, source key and filename must match (else <code>409 rag_operation_payload_conflict</code>),
+and the generation must be unchanged (else <code>409 rag_operation_generation_conflict</code>).</li>
+<li>A new document is inserted <code>pending</code> and an execution row is prepared in the same
+transaction.</li>
+<li>After commit the workflow is started with <code>REJECT_DUPLICATE</code>. If the start succeeded but
+the reply was lost, a retry does not start again: it <strong>verifies the exact workflow
+history</strong> (below) and adopts its run id. If Temporal's history has been retired, a missing
+history never means &quot;start again&quot;.</li>
+<li>The run id is registered; any failure here returns <code>503 rag_index_start_unsettled</code> and the
+intent stays durable for reconciliation.</li>
+</ol>
+<h3 id="63-the-workflow">6.3 The workflow</h3>
+<p><code>IndexDocumentWorkflow(document_id, org_id, knowledge_base_id, generation, operation_id)</code>
+runs two kinds of activity, each with bounded retries:</p>
+<ul>
+<li><code>register_index_execution</code> (30 s, 3 attempts): records the exact workflow and run identity
+in <code>rag_index_executions</code>. Gated by the replay marker <code>rag-lifecycle-v1</code>, so histories
+from before this activity existed still replay.</li>
+<li><code>index_document</code> (10 minutes, heartbeat 1 minute, 3 attempts): the whole pipeline.</li>
+<li>On a final failure, <code>mark_document_failed</code> sets <code>status = failed</code> and a short error and
+re-raises.</li>
+</ul>
+<h3 id="64-the-index_document-activity">6.4 The <code>index_document</code> activity</h3>
+<ol>
+<li>Reads the document under the <strong>writer fence</strong> at the workflow's generation. A missing
+document is a non-retryable failure.</li>
+<li>If the document has a <code>source_key</code> and no cached <code>parsed_markdown</code>, downloads the object
+and parses it. <strong>Docling</strong> handles PDF, Word, PowerPoint, HTML and Markdown; plain text
+is read directly. The parse is cached in <code>documents.parsed_markdown</code> so a retry or a
+later re-index does not repeat the download and the (expensive) parse.
+Unconfigured storage, an empty file or a parser that produces no text are non-retryable.</li>
+<li>Sets <code>status = indexing</code>, then runs ingestion (chunk, contextualize, embed, upsert).</li>
+<li>Writes <code>status = indexed</code>, the number of chunks <strong>actually upserted</strong> and the two counts of
+section 7 (<code>uncontextualized_chunks</code>, <code>truncated_chunks</code>). If Milvus
+reported a partial failure the activity raises, so Temporal retries it (up to three
+attempts) and, failing that, the document is marked <code>failed</code>: a document is never shown
+as indexed when its vectors are missing.</li>
+</ol>
+<h3 id="65-idempotency-summary">6.5 Idempotency summary</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client retries a create</td>
+<td>Same <code>operation_id</code> returns the same document; payload mismatch is a <code>409</code></td>
+</tr>
+<tr>
+<td>Workflow start lost</td>
+<td>Deterministic workflow id plus exact-history verification; never restart</td>
+</tr>
+<tr>
+<td>Activity retried</td>
+<td>Deterministic chunk primary keys make the Milvus upsert overwrite</td>
+</tr>
+<tr>
+<td>Parse repeated</td>
+<td>Cached in <code>parsed_markdown</code></td>
+</tr>
+<tr>
+<td>Stale run after delete or archive</td>
+<td>Generation fence rejects its writes</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="7-chunking-and-contextual-retrieval">7. Chunking and contextual retrieval</h2>
+<p>The indexing strategy is <strong>sentence window (small-to-big)</strong>:</p>
+<ul>
+<li>Text is split into sentences. <strong>Each sentence is a chunk</strong>: it is the unit that is
+embedded and matched, which gives precise retrieval.</li>
+<li>Each chunk also carries a <strong>parent window</strong>: a run of consecutive sentences grouped up to
+<code>chunk_size</code> tokens (default 1000; tokens are estimated at about 4 characters), with an
+overlap of three sentences between windows. The parent window is what the model receives
+when the chunk is retrieved, which gives context. Hits from the same window share it.</li>
+<li>A document produces at most <code>max_chunks_per_document</code> chunks (default 2000); beyond that
+the tail is dropped, because each chunk can cost a model call. The drop is logged
+(<code>rag_document_truncated</code>) and the number of dropped chunks is stored on the document
+(<code>truncated_chunks</code>), so a partly indexed document is visible in the knowledge-base page.</li>
+</ul>
+<p><strong>Contextual retrieval</strong> (optional, <code>contextual_retrieval_enabled</code>, default on): for each
+chunk the worker asks a model for a one- or two-sentence description of where the chunk sits
+in the document (title plus the document's first 1200 characters plus the chunk), at
+temperature 0 and at most 120 output tokens, 10 calls in flight at a time. The description
+is prepended to the chunk, and the <strong>combined text is what is embedded and what feeds the
+BM25 function</strong>, so both retrieval legs benefit. Failure is soft by design: on any error
+the chunk is indexed without context. It is <strong>counted</strong>, not silent: the worker logs
+<code>contextual_retrieval_degraded</code> with the number of affected chunks per document, stores it as
+<code>uncontextualized_chunks</code> and the knowledge-base page shows a notice on the document. This means an air-gapped or unconfigured gateway does
+not break ingestion; look at the per-document counts (and the <code>contextual_retrieval</code> line the
+worker logs at start, which shows whether it is enabled and against which gateway) when recall
+looks poor. The call goes
+to <code>*_LLM_GATEWAY_URL</code> with <code>contextual_model</code>; in the default Compose stack it points at the
+backend's protected endpoint, which the worker has no token for, so contextualization is
+effectively off until a gateway is configured (the gateway overlay does this).</p>
+<p><strong>Embedding.</strong> Chunks are embedded in batches of <code>embed_batch_size</code> (32) by the embedding
+service with a 120 s timeout per call; the dimension must equal <code>embedding_dim</code> or the
+chunk fails validation.</p>
+<p><strong>Heartbeats</strong> are sent during contextualization and between stages so a long document does
+not trip the activity's heartbeat timeout.</p>
+<h2 id="8-retrieval">8. Retrieval</h2>
+<pre class="mermaid">sequenceDiagram
+    participant M as Model (in runner)
+    participant T as Tool worker
+    participant B as Business API
+    participant R as rag-api
+    participant E as Embedding service
+    participant V as Milvus
+    participant P as rag_platform
+    M-&gt;&gt;T: tool call (knowledge_base_id, query, limit)
+    T-&gt;&gt;B: POST /v1/knowledge-bases/{id}/search (session token)
+    B-&gt;&gt;B: live read grant, conversation fence
+    B-&gt;&gt;R: POST /v1/search (org and KB headers)
+    R-&gt;&gt;E: embed query
+    R-&gt;&gt;V: hybrid search (dense + BM25, org and KB filter)
+    V--&gt;&gt;R: RRF-ranked hits
+    R-&gt;&gt;P: KB active? documents still exist?
+    R--&gt;&gt;B: results, warnings
+    B--&gt;&gt;T: results (sanitized warnings)
+    T--&gt;&gt;M: content and relevance_score
+</pre>
+<ol>
+<li><strong>Authorize.</strong> The Business API evaluates the caller's live read grant on the KB (and the
+conversation fence for conversation-owned KBs). Timeouts: tool worker to backend 60 s,
+backend to <code>rag-api</code> 30 s.</li>
+<li><strong>Embed.</strong> <code>rag-api</code> embeds the query with the same model used for indexing, with a read
+timeout of <code>search_embedding_timeout_seconds</code> (default 10 s: a CPU-only model under memory
+pressure may need more on its first query after idling).</li>
+<li><strong>Hybrid search.</strong> One Milvus <code>hybrid_search</code> call with two requests, both filtered by
+<code>org_id == … and knowledge_base_id == …</code>: a dense request (cosine) and a sparse request
+(BM25 over <code>content</code>). Each fetches four times the number of results asked for; they are
+fused with <strong>reciprocal-rank fusion</strong> (<code>k = 60</code>). Without a reranker the number asked for is
+<code>limit</code>; with one it is the candidate pool (<code>rerank_candidates</code>, default 30, never above
+<code>search_max_limit</code>).</li>
+<li><strong>Clamp.</strong> <code>limit</code> is clamped to <code>search_max_limit</code> (50), both in the API handler and
+in the search function, because it is formed by a model from skill arguments.</li>
+<li><strong>Live filter.</strong> Hits are kept only if the KB is <code>active</code> in <code>rag_kb_lifecycle</code> and the
+document id exists in <code>documents</code> for that organization and KB. This closes the window in
+which a delete has removed the row but Milvus still serves a chunk, and the window in which
+a cancelled indexing run lands a few chunks after the delete.</li>
+<li><strong>Rerank (optional).</strong> See 8.1.</li>
+<li><strong>Shape.</strong> At most <code>limit</code> hits are returned (the search function over-fetches, so the
+handler cuts the list; older versions could return up to twice the requested limit). Each hit
+carries the <strong>parent window</strong> as <code>content</code> (falling back to the indexed text), the indexed
+text, a <code>relevance_score</code> and metadata (document, KB, chunk index, title). The score is the
+fused rank score, or the reranker's score when reranking ran (then the fused score is kept as
+<code>fusion_score</code>); either is useful for ordering within one result set and is not a calibrated
+probability.</li>
+</ol>
+<h3 id="81-cross-encoder-reranking">8.1 Cross-encoder reranking</h3>
+<p>Fusion gives a good candidate list; a cross-encoder reads the query and each passage together
+and orders them more accurately. It is <strong>off by default</strong> and turned on by setting
+<code>RAG_API_RERANK_URL</code>; the model is <code>RAG_API_RERANK_MODEL</code> (default <code>BAAI/bge-reranker-v2-m3</code>).
+In Compose, start the <code>rerank</code> profile (service <code>rag-rerank</code>, the same Infinity image as the
+embedding service) and set <code>RAG_API_RERANK_URL=http://rag-rerank:7997</code>.</p>
+<p>What happens, after the live filter (so no time is spent on deleted documents):</p>
+<ol>
+<li>Hits that share a parent window (same document, same text) are collapsed to one passage;
+otherwise the model would read the same window several times.</li>
+<li>At most <code>rerank_candidates</code> passages, each cut to <code>rerank_max_chars</code> (2000) characters, are
+sent to <code>POST {rerank_url}/rerank</code> in a single request with a <code>rerank_timeout_seconds</code> (10 s)
+bound.</li>
+<li>The response must score every passage exactly once; anything else is treated as a failure.</li>
+<li>The passages are ordered by score and the best <code>limit</code> are returned.</li>
+</ol>
+<p><strong>Reranking never makes a search fail.</strong> If the service is down, slow or answers badly, the
+search returns the fusion order (still limited to <code>limit</code>, with duplicates collapsed) and a
+warning; the Business API reduces any warning to a fixed generic string for the caller, and the
+cause is logged as <code>rerank_unavailable</code>. The cost of enabling it is one extra request per
+search (the cross-encoder scores up to 30 passages), so latency rises by the reranker's
+inference time; run it on suitable hardware, and size <code>rerank_candidates</code> against that.</p>
+<p>Failure behaviour: an embedding failure is <code>500 Embedding service unavailable</code>; an unreachable
+RAG service is <code>503</code> at the backend; an empty or missing collection returns no results (and
+initializes the collection). A search never returns content from another organization or
+KB, and never returns a deleted document.</p>
+<h2 id="9-consistency-model-and-failure-handling">9. Consistency model and failure handling</h2>
+<p>PostgreSQL and Milvus cannot be updated atomically, and a Milvus RPC can succeed with its
+reply lost. The design makes that uncertainty explicit and durable.</p>
+<h3 id="91-the-generation-fence">9.1 The generation fence</h3>
+<p><code>rag_writer_fence(org, kb, generation)</code> is called at the start of every write path (API
+create and delete, every worker step, the trigger on <code>documents</code>). It locks the KB's
+lifecycle row and raises <code>rag_frozen</code> (<code>55000</code>) unless the KB is <code>active</code> and, when a
+generation is given, still at that generation. The API maps it to <code>409 rag_frozen_or_unsettled</code>.
+Archive and restore <strong>advance the generation</strong>, so any in-flight indexing workflow or
+retried request carrying the old generation is rejected rather than writing into a KB that
+has moved on.</p>
+<h3 id="92-intents-for-external-effects">9.2 Intents for external effects</h3>
+<p>Before a Milvus write or delete, <code>rag_begin_external</code> records a <code>vector_upsert</code> or
+<code>vector_delete</code> row (refusing if another intent for the same document is unsettled); after
+the RPC returns, <code>rag_settle_external</code> marks it settled. If the process dies, the RPC times
+out or the call is cancelled, the row stays <strong>unsettled</strong>, and from then on:</p>
+<ul>
+<li>further writes to that document are refused (<code>rag_external_uncertain</code>);</li>
+<li>archive of that KB is blocked (<code>external_operation_unsettled</code>).</li>
+</ul>
+<p>The Milvus mutation path itself is hardened to make &quot;exactly one raw RPC&quot; true: it bypasses
+the SDK's retry wrappers, disables gRPC core retries, bounds the RPC (15 s) and asserts the
+exact audited <code>pymilvus</code> version (2.6.17) at call time, refusing to run on any other.
+An unknown or cancelled outcome propagates to the durable intent instead of being retried
+blindly. (This is why <code>pymilvus</code> is pinned and why an upgrade needs a re-audit of
+<code>mutation_transport.py</code>.)</p>
+<h3 id="93-delete-protocol">9.3 Delete protocol</h3>
+<pre><code>verify every open indexing execution of the document is closed (exact history)
+fence → record vector_delete intent → delete chunks in Milvus → settle intent
+fence → delete the document row
+Business API then: delete the stored source and its file metadata (idempotent)
+</code></pre>
+<ul>
+<li>If an indexing execution is not yet terminal, the delete is <code>409 rag_index_execution_unclosed</code>:
+a live run could otherwise upsert chunks after the delete.</li>
+<li>If the Milvus delete's outcome is unknown the response is <code>503 rag_vector_delete_unsettled</code>
+and the unsettled intent blocks later changes until reconciled.</li>
+<li>A retried delete after the document row is already gone is handled: the backend treats a
+<code>404</code> from <code>rag-api</code> as success when it still holds the metadata, so a half-finished delete
+can be completed. The source object is deleted only after ownership of its key is proven
+against <code>documents/{org}/{kb}/</code>.</li>
+</ul>
+<h3 id="94-exact-workflow-identity">9.4 Exact workflow identity</h3>
+<p>Reconciliation never relies on &quot;latest workflow with this id&quot;. <code>verify_execution</code> loads the
+recorded workflow's history (bounded: at most 10 000 events or 8 MiB) and requires that it
+started exactly as the platform would have started it: same namespace and run id, first and
+original run equal, no cron, no retry policy, no parent, no continue-as-new, no child
+workflows, the expected workflow type and task queue, and an input equal to the expected
+document, organization, KB, generation and operation. Anything else raises a blocking,
+content-free code (for example <code>index_provenance_invalid</code>, <code>index_history_unavailable</code>). A
+terminal event closes the execution row; this is what archive and delete wait for.</p>
+<h3 id="95-failure-matrix">9.5 Failure matrix</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Result</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embedding service down at search</td>
+<td><code>500</code>; no results</td>
+<td>Restore the service; searches succeed again</td>
+</tr>
+<tr>
+<td>Embedding service down at ingest</td>
+<td>Activity retries (3), then <code>failed</code></td>
+<td>Fix and re-upload or re-index</td>
+</tr>
+<tr>
+<td>Milvus down at ingest</td>
+<td>Partial result raises, retried, then <code>failed</code></td>
+<td>Same; the intent stays unsettled only if the RPC outcome was unknown</td>
+</tr>
+<tr>
+<td>Milvus outcome unknown (timeout, crash)</td>
+<td>Intent unsettled; document writes and KB archive blocked</td>
+<td>Operator reconciles; no silent retry</td>
+</tr>
+<tr>
+<td>Worker crash mid-index</td>
+<td>Temporal retries the activity; deterministic keys make upsert idempotent</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Lost workflow-start reply</td>
+<td><code>503 rag_index_start_unsettled</code>; retry adopts the exact run</td>
+<td>Retry with the same operation id</td>
+</tr>
+<tr>
+<td>Source stored, <code>rag-api</code> unreachable</td>
+<td>Source kept, no document</td>
+<td>Retry; orphan cleanup is explicit</td>
+</tr>
+<tr>
+<td>KB archived while indexing</td>
+<td>Old generation rejected</td>
+<td>Re-upload after restore</td>
+</tr>
+<tr>
+<td>Collection predates a required field</td>
+<td>Boot error; filtered search returns nothing for old chunks</td>
+<td>Drop the collection, re-index</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-archive-export-and-restore">10. Archive, export and restore</h2>
+<p>Attachment knowledge bases are part of a conversation's archive (see
+<a href="operations/data-archive.html">data archive</a>); the RAG part of that saga runs in a <strong>separate,
+private process</strong> (<code>main_archive.py</code>) that is never mounted in the ordinary API, is called
+only by the data worker with an independent secret, and uses the <code>rag_lifecycle</code> role.</p>
+<p>States of <code>rag_kb_lifecycle</code>: <code>active → archiving → archived → restore_pending → active</code>,
+each transition advancing the generation.</p>
+<ul>
+<li><strong>Claim.</strong> Under a row lock the KB moves <code>active → archiving</code> and a job records a bounded
+<strong>inventory</strong> of its documents (at most 10 000; larger fails with <code>inventory_limit</code>).
+The claim is refused, with a fixed content-free code, if: the generation does not match
+(<code>generation_conflict</code>), provenance is unknown for legacy documents
+(<code>legacy_provenance_unknown</code>, <code>document_provenance_unknown</code>), an external operation is
+unsettled (<code>external_operation_unsettled</code>), or an indexing execution is not closed
+(<code>index_execution_unclosed</code>). An empty hidden KB still gets a durable fence, so a later
+upload cannot slip in.</li>
+<li><strong>Observe.</strong> Before anything is purged the archive observes the terminal state of every
+indexing execution using the exact-history verification of 9.4, so it can prove no worker
+can still write.</li>
+<li><strong>Export.</strong> Document rows and <strong>the original dense vectors</strong> are written to verified,
+checksummed archive parts (16 MiB parts) in the archive bucket; sources are copied as their
+own verified objects. Restore therefore needs <strong>no re-embedding and no re-parsing</strong>, and
+returns bit-identical vectors.</li>
+<li><strong>Purge.</strong> Only after verification, each step recorded as an intent and then <code>done</code>
+(<code>rag_archive_steps</code>) so a crash resumes exactly; Milvus chunks and source objects are
+removed through the same fenced, intent-recording path as an ordinary delete.</li>
+<li><strong>Restore.</strong> <code>dry_run</code> validates; the real restore recreates rows, vectors and sources under
+a <strong>new restore generation</strong>, verifies them (including reading sources back), and only then
+publishes the KB as <code>active</code> (the <code>publish</code> step), so old callbacks and half-restored data are never visible.</li>
+<li><strong>Release.</strong> Aborts an archive that is claimed or verified but not yet purged and returns the KB
+to <code>active</code> (<code>archive_release_unsafe</code> once purging has started), so a failed or cancelled
+archive does not leave a KB frozen.</li>
+</ul>
+<p>The business side calls these through <code>rag_archive_client</code>; an attachment inspection is
+read-only and does not promise that every claim or export check will pass.</p>
+<h2 id="11-operations-and-capacity">11. Operations and capacity</h2>
+<h3 id="111-settings-that-shape-behaviour">11.1 Settings that shape behaviour</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Setting (prefix <code>RAG_API_</code> / <code>RAG_WORKER_</code>)</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>embedding_model</code>, <code>reranker_url</code></td>
+<td><code>Alibaba-NLP/gte-Qwen2-1.5B-instruct</code>, <code>http://reranker:7997</code></td>
+<td>The model and endpoint (the endpoint serves embeddings)</td>
+</tr>
+<tr>
+<td><code>embedding_dim</code></td>
+<td>1536</td>
+<td>Must match the model <strong>and</strong> the Milvus collection</td>
+</tr>
+<tr>
+<td><code>milvus_uri</code>, <code>milvus_collection</code></td>
+<td><code>http://milvus:19530</code>, <code>documents</code></td>
+<td>Vector store</td>
+</tr>
+<tr>
+<td><code>search_max_limit</code></td>
+<td>50</td>
+<td>Hard cap on results</td>
+</tr>
+<tr>
+<td><code>rerank_url</code></td>
+<td>empty (off)</td>
+<td>Base URL of an Infinity-compatible <code>/rerank</code> service</td>
+</tr>
+<tr>
+<td><code>rerank_model</code></td>
+<td><code>BAAI/bge-reranker-v2-m3</code></td>
+<td>Model name sent to the service</td>
+</tr>
+<tr>
+<td><code>rerank_candidates</code></td>
+<td>30</td>
+<td>Passages scored per search (at most <code>search_max_limit</code>)</td>
+</tr>
+<tr>
+<td><code>rerank_timeout_seconds</code></td>
+<td>10</td>
+<td>Bound on the rerank request</td>
+</tr>
+<tr>
+<td><code>rerank_max_chars</code></td>
+<td>2000</td>
+<td>Passage length sent to the reranker</td>
+</tr>
+<tr>
+<td><code>search_embedding_timeout_seconds</code></td>
+<td>10</td>
+<td>Query-embedding read timeout</td>
+</tr>
+<tr>
+<td><code>document_max_content_bytes</code></td>
+<td>2 MiB</td>
+<td>Inline text cap</td>
+</tr>
+<tr>
+<td><code>chunk_size</code></td>
+<td>1000</td>
+<td>Parent window size, in estimated tokens</td>
+</tr>
+<tr>
+<td><code>embed_batch_size</code></td>
+<td>32</td>
+<td>Embedding request size</td>
+</tr>
+<tr>
+<td><code>max_chunks_per_document</code></td>
+<td>2000</td>
+<td>Bounds contextual calls per document</td>
+</tr>
+<tr>
+<td><code>contextual_retrieval_enabled</code>, <code>contextual_model</code>, <code>llm_gateway_url</code></td>
+<td>on, <code>gpt-4o-mini</code>, backend URL</td>
+<td>Contextual retrieval</td>
+</tr>
+<tr>
+<td><code>ingest_task_queue</code></td>
+<td><code>rag-ingest</code></td>
+<td>Worker queue</td>
+</tr>
+<tr>
+<td>Business API <code>DOCUMENT_UPLOAD_MAX_BYTES</code>, <code>DOCUMENT_UPLOAD_ALLOWED_SUFFIXES</code></td>
+<td>25 MB, see 6.1</td>
+<td>Upload admission</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="112-sizing-and-scaling">11.2 Sizing and scaling</h3>
+<ul>
+<li><strong>Search</strong> is one embedding call plus one Milvus hybrid query plus two small PostgreSQL
+reads. Latency is dominated by the embedding service; run it on suitable hardware (a
+1.5B-parameter embedding model on CPU is slow for the first query after idle).</li>
+<li><strong>Ingestion</strong> scales with <code>rag-worker</code> replicas on the <code>rag-ingest</code> queue. The cost drivers
+are Docling parsing (CPU, memory), one contextualization model call per chunk (up to 2000
+per document, 10 in flight) and embedding throughput. Large documents are bounded by the
+chunk cap and the activity timeout.</li>
+<li><strong>Milvus</strong> is single-collection with an <code>org_id</code> partition key; very many small tenants
+and very large tenants both work, but a single huge tenant's filtered searches share
+segments with itself only.</li>
+<li><strong>Connections.</strong> <code>rag-api</code> and <code>rag-worker</code> have their own SQLAlchemy engines against
+<code>rag_platform</code>; count them in the PostgreSQL connection budget of the
+<a href="guides/operations.html#database-connections">operations guide</a>.</li>
+</ul>
+<h3 id="113-changing-the-embedding-model-or-dimension">11.3 Changing the embedding model or dimension</h3>
+<p>Vectors from different models are not comparable, and vectors of different dimensions cannot
+share a collection. After changing <code>embedding_model</code>, <code>embedding_dim</code>, the chunking or the
+parser, rebuild the vectors with the operator tool <code>python -m src.reindex</code>, which runs inside
+the <code>rag-api</code> image and needs the <code>rag_lifecycle</code> database role (the same kind of credential
+as the archive process; it is never part of the ordinary API configuration):</p>
+<pre><code>docker compose run --rm -e RAG_API_REINDEX_DATABASE_URL=postgresql+asyncpg://&lt;lifecycle-role&gt;@postgres:5432/rag_platform \
+  rag-api python -m src.reindex --all --dry-run                 # count first
+docker compose run --rm -e RAG_API_REINDEX_DATABASE_URL=... \
+  rag-api python -m src.reindex --org &lt;org-id&gt; --run-id model-2   # one organization
+</code></pre>
+<p>For every document the tool follows the same protocol as an upload (section 9): it takes the
+writer fence, records a <code>vector_delete</code> intent, removes the document's chunks, resets the document
+to <code>pending</code> (counts back to zero) and starts a <strong>new</strong> <code>IndexDocumentWorkflow</code> for the same
+document, with its own receipt in <code>rag_index_executions</code>. The worker reuses the cached
+<code>parsed_markdown</code>, so Docling does not run again unless you pass <code>--reparse</code>; contextualization and
+embedding do run again, so the cost is the same as the original ingestion. Searches keep working
+throughout: a document has no vectors only between its delete and the end of its new run, and
+reaches status <code>indexed</code> when done.</p>
+<ul>
+<li><strong>Safe to repeat.</strong> A document's operation id is derived from <code>--run-id</code> and its id. Running
+again with the same <code>--run-id</code> starts nothing twice, and adopts a run whose start reply was
+lost (after verifying the exact workflow history). A new <code>--run-id</code> starts a new rebuild.</li>
+<li><strong>It never forces.</strong> A document is skipped, and reported, while one of its indexing runs is
+still open, while a Milvus write or delete is unsettled, or while its knowledge base is
+archiving, archived or restoring. A failed vector delete leaves its intent unsettled and the
+document untouched, exactly as in a normal delete; reconcile it before running again.</li>
+<li><strong>Scope.</strong> <code>--all</code>, or <code>--org</code> with an optional <code>--kb</code>; <code>--limit N</code> stops after N documents for
+a staged rollout; <code>--dry-run</code> only counts. The exit status is non-zero when any document failed.</li>
+<li><strong>Same dimension, new model.</strong> Run it as above. While it runs the collection holds a mix of old
+and new vectors, so relevance is degraded until it finishes; do it in a quiet period.</li>
+<li><strong>Different dimension.</strong> The collection must be recreated: add <code>--recreate-collection --yes</code> to
+an <code>--all</code> run. This <strong>drops every vector first</strong> and refuses unless every knowledge base is
+<code>active</code>; knowledge search returns no results until documents are re-indexed, so plan a
+maintenance window and set the new <code>embedding_dim</code> and model on <code>rag-api</code> and <code>rag-worker</code>
+before starting.</li>
+<li><strong>Monitoring.</strong> Documents move <code>pending</code> → <code>indexing</code> → <code>indexed</code> (or <code>failed</code> with an error).
+<code>SELECT status, count(*) FROM documents GROUP BY 1</code> shows progress; the per-document counts of
+section 7 show whether contextualization worked in the new run.</li>
+</ul>
+<p>The tool does not re-chunk by itself: chunk size and caps are worker settings, applied when the
+new run executes.</p>
+<h3 id="114-backup-and-recovery">11.4 Backup and recovery</h3>
+<p>PostgreSQL <code>rag_platform</code> and <code>aurum_ai</code> and the MinIO business bucket are the sources of
+truth; Milvus is derived. After a restore, a missing or empty collection is rebuilt by
+re-indexing from the stored sources. See
+<a href="operations/backup-recovery.html">backup and recovery</a>.</p>
+<h3 id="115-networks-and-air-gapped-installs">11.5 Networks and air-gapped installs</h3>
+<p><code>rag-api</code>, the worker and Milvus sit on <code>rag-net</code> and <code>rag-control-net</code>; no RAG database or
+HTTP port is published for browser convenience. The embedding service downloads its model
+weights from a model hub on first start, and Docling can need substantial model artifacts;
+an <a href="AIR_GAPPED.html">air-gapped</a> install must provide them from prepared artifacts and should
+treat contextual retrieval as off unless a local gateway is configured.</p>
+<h3 id="116-observability">11.6 Observability</h3>
+<p><code>rag-api</code> exposes Prometheus metrics at <code>/metrics</code> and <code>/health</code>; traces use OpenTelemetry;
+the Business API's audit and request metrics cover the public calls. Useful signals:
+documents stuck in <code>pending</code> or <code>indexing</code> (workflow not running or worker down), <code>failed</code>
+documents with an <code>error</code>, <code>rag_index_start_unsettled</code> and <code>rag_vector_delete_unsettled</code>
+responses (unsettled intents), <code>rerank_unavailable</code> and <code>contextual_retrieval_degraded</code> warnings in the logs.</p>
+<h2 id="12-design-notes-and-known-limits">12. Design notes and known limits</h2>
+<ul>
+<li><strong>Reranking is optional and single-model.</strong> Off by default; when on, one cross-encoder scores
+a candidate pool in one request. The service named <code>reranker</code> in Compose serves embeddings
+only; the cross-encoder is <code>rag-rerank</code>. There is no quality evaluation harness in the
+repository: compare results on your own documents before and after enabling it.</li>
+<li><strong>No per-document ACL.</strong> Access is inherited from the knowledge base's live grants and is
+KB-wide by design (section 4.4).</li>
+<li><strong>Soft contextual degradation.</strong> Chunks are indexed without context if the model call
+fails and ingestion still succeeds, but the per-document counts make it visible.</li>
+<li><strong>Sentence-granular chunks are many.</strong> Because every sentence is a chunk, a long document
+produces many small vectors; the 2000-chunk cap truncates the tail of very large documents
+with a log warning and a stored count.</li>
+<li><strong>Re-indexing is manual.</strong> There is no incremental re-embedding job for model changes and
+no automatic repair of a collection that predates a field.</li>
+<li><strong>Single Milvus collection.</strong> Tenant isolation inside Milvus relies on the partition key
+and the mandatory filter in the one search function; every new query path must apply both
+filters, which is why search lives in one place.</li>
+<li><strong>Upload buffering.</strong> Files are read into memory (bounded at 25 MB) rather than streamed
+to storage.</li>
+<li><strong>Archive scope.</strong> The RAG archive saga covers conversation-attached knowledge bases; the
+size and provenance limits of section 10 apply.</li>
+<li><strong>Quality is configuration.</strong> Retrieval quality depends on the configured embedding model,
+the contextual model and the parser; the repository ships none of them.</li>
+</ul>
+<h2 id="13-source-map">13. Source map</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Public document and search routes</td>
+<td><code>business-backend/src/routers/documents.py</code>, <code>knowledge_bases.py</code></td>
+</tr>
+<tr>
+<td>Upload, cleanup, attachment KBs</td>
+<td><code>services/document_upload.py</code>, <code>document_cleanup.py</code>, <code>conversation_attachments.py</code></td>
+</tr>
+<tr>
+<td>RAG HTTP client and archive client</td>
+<td><code>services/rag_client.py</code>, <code>services/rag_archive_client.py</code></td>
+</tr>
+<tr>
+<td>KB models and grants</td>
+<td><code>models/knowledge_base.py</code>, <code>models/access_grant.py</code>, <code>models/file_metadata.py</code></td>
+</tr>
+<tr>
+<td>Internal API</td>
+<td><code>rag-api/src/main.py</code>, <code>db.py</code>, <code>config.py</code></td>
+</tr>
+<tr>
+<td>Fences, intents, exact-workflow verification</td>
+<td><code>rag-api/src/lifecycle.py</code>, <code>index_execution.py</code>; migrations <code>0005_archive_fence.py</code>, <code>0006_source_ownership.py</code></td>
+</tr>
+<tr>
+<td>Milvus schema, search, mutation transport</td>
+<td><code>rag-api/src/milvus_store.py</code>, <code>mutation_transport.py</code> (and the worker's copies)</td>
+</tr>
+<tr>
+<td>Ingestion workflow and activities</td>
+<td><code>rag-worker/src/workflows/index_document.py</code>, <code>activities.py</code>, <code>lifecycle.py</code></td>
+</tr>
+<tr>
+<td>Parsing, chunking, contextualization, embedding</td>
+<td><code>rag-worker/src/indexing/</code></td>
+</tr>
+<tr>
+<td>Tool worker search</td>
+<td><code>tool-worker/src/activities.py</code> (<code>execute_hybrid_search</code>), <code>rag_client.py</code></td>
+</tr>
+<tr>
+<td>Archive process</td>
+<td><code>rag-api/src/main_archive.py</code>, <code>archive/</code></td>
+</tr>
+</tbody>
+</table></div>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"default"});</script>
+</body>
+</html>

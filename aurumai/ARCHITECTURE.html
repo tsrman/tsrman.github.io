@@ -47,6 +47,9 @@ pre.mermaid{background:none;text-align:center}
 durable execution; PostgreSQL holds application state and permissions; a separate
 conversation runner executes each conversation's workflow tree. The public source
 retains established technical identifiers for deployment/replay compatibility.</p>
+<p>This page is the short list of rules to preserve. For the full technical description
+(trust zones, data architecture, the chat turn, Temporal, scaling and failure modes) see
+<a href="TECHNICAL_ARCHITECTURE.html">technical architecture</a>.</p>
 <h2 id="components-and-data-flow">Components and data flow</h2>
 <pre class="mermaid">flowchart LR
     Chat[Chat UI] --&gt; Business[Business API]
@@ -285,7 +288,9 @@ into the sandbox through skill-executor, and the sandbox gains no network for it
 <p>Uploads go through the backend into MinIO, with explicit file/knowledge-base metadata
 and direct conversation ownership. The RAG worker downloads/parses source files,
 chunks and embeds them, and records index receipt/generation. Hybrid retrieval
-combines Milvus search with the configured reranker. No RAG database/HTTP ports are
+combines Milvus dense and BM25 search by reciprocal-rank fusion, optionally followed by a
+cross-encoder rerank (<code>RAG_API_RERANK_URL</code>; the <code>reranker</code> service only serves embeddings; see
+the <a href="RAG_ARCHITECTURE.html">RAG architecture</a>). No RAG database/HTTP ports are
 published by the ordinary profile solely for browser convenience.</p>
 <p>Chat attachments create their own conversation-scoped KB/search skill. Knowledge
 base deletion, upload, indexing and archive lifecycle admission share fences so

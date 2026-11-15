@@ -84,6 +84,16 @@ Hermes and tool workflows. Behind the proxy it sits behind basic auth.</li>
 model against the monthly limits (see the <a href="admin-guide.html#usage-and-quotas">administrator guide</a>).</li>
 </ul>
 <p>Never publish a complete environment dump or a browser trace that contains tokens.</p>
+<h3 id="audit-and-usage-durability">Audit and usage durability</h3>
+<p>Mutating API requests wait for their audit write before returning the HTTP response.
+Audit records are not left in detached process tasks. A database failure is logged as
+<code>audit_log_write_failed</code>; it does not change the outcome of a business mutation that may
+already have committed. Audit and business writes are separate transactions, so audit-storage
+failures still need operator attention.</p>
+<p>Quota reservations, acceptance, completion and cancellation preserve PostgreSQL's configured
+commit durability. Keep <code>synchronous_commit=on</code> for durable usage acknowledgement; the application
+does not override it for faster counters. Atomic quota updates still minimize the aggregate
+row's lock scope, and repeated request identities are counted once.</p>
 <h2 id="upgrades">Upgrades</h2>
 <ol>
 <li>Read the release notes and the <a href="https://github.com/tsrman/AurumAI/blob/main/CHANGELOG.md">changelog</a> for migrations and new
@@ -149,6 +159,13 @@ uv run python -m src.cli.archive_data run --org-id &lt;ORG_UUID&gt; --audit     
 </code></pre>
 <p>The runbook has roles, bounds, export and recovery: <a href="../operations/data-archive.html">data archive</a>.
 An ambiguous deletion is not a successful cleanup: keep the recovery evidence.</p>
+<h2 id="rebuilding-knowledge-vectors">Rebuilding knowledge vectors</h2>
+<p>After changing the embedding model or its dimension, the chunking or the parser, rebuild the
+vectors with the operator tool <code>python -m src.reindex</code> (it needs a <code>rag_lifecycle</code> login in
+<code>RAG_API_REINDEX_DATABASE_URL</code>). It is safe to repeat, never forces a document that is being
+indexed, and has a <code>--dry-run</code>. The procedure, including the dimension-change case that drops the
+Milvus collection, is in the
+<a href="../RAG_ARCHITECTURE.html#113-changing-the-embedding-model-or-dimension">RAG architecture</a>.</p>
 <h2 id="identity-synchronization">Identity synchronization</h2>
 <p>An optional worker (profile <code>maintenance</code>) synchronises Keycloak users and groups in the
 background. Enable it with admission off, verify the groups mapper on both clients and
@@ -191,10 +208,18 @@ groups when they log in.</p>
 </table></div>
 <p>The <a href="../CONFIGURATION.html">configuration reference</a> has every setting.</p>
 <h2 id="database-connections">Database connections</h2>
-<p>Every API process may hold <code>APP_DB_POOL_SIZE + APP_DB_MAX_OVERFLOW</code> connections (20 + 40 by
-default), and PostgreSQL refuses new ones beyond <code>max_connections</code> (100 by default). The budget
-is the sum over everything that connects:</p>
-<pre><code>replicas x processes x (pool size + overflow)  +  RAG services  +  Temporal  +  Keycloak  +  Langfuse  &lt;=  max_connections
+<p>Compose passes <code>APP_DB_POOL_SIZE</code>, <code>APP_DB_MAX_OVERFLOW</code> and <code>APP_DB_POOL_TIMEOUT</code> from the
+root <code>.env</code> into both API containers. Recreate the APIs after changing them; if Hermes is enabled,
+follow its <a href="hermes-agent.html#troubleshooting">guard restart procedure</a> after recreating the backend.
+Helm configures each API independently with <code>backend.databasePool</code> and <code>backendAdmin.databasePool</code>:
+<code>size</code> (20), <code>maxOverflow</code> (40, including zero) and <code>timeout</code> (30 seconds). Every worker and replica
+multiplies these values in the connection budget below.</p>
+<p>Every API process may hold <code>APP_DB_POOL_SIZE + APP_DB_MAX_OVERFLOW</code> request connections (20 + 40
+by default), plus one dedicated audit connection. Audit persistence does not compete with
+connections held by request dependencies. Its pool has no overflow and uses <code>APP_DB_POOL_TIMEOUT</code>.
+PostgreSQL refuses new connections beyond <code>max_connections</code> (100 by default). The budget is
+the sum over everything that connects:</p>
+<pre><code>replicas x processes x (pool size + overflow + 1 audit)  +  RAG services  +  Temporal  +  Keycloak  +  Langfuse  &lt;=  max_connections
 </code></pre>
 <p>On the Compose stack Temporal alone holds about 30, so the stack starts PostgreSQL with
 <code>max_connections=200</code>, <code>shared_buffers=256MB</code> and <code>effective_cache_size=1GB</code> (PostgreSQL's own

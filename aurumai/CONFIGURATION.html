@@ -70,7 +70,7 @@ uses its own settings prefix. Do not copy every root variable into a service dot
 </tr>
 <tr>
 <td><code>APP_DB_POOL_SIZE</code>, <code>APP_DB_MAX_OVERFLOW</code>, <code>APP_DB_POOL_TIMEOUT</code></td>
-<td>Connections one API process keeps (20), may add under load (40), and how many seconds a request waits for one (30); see <a href="guides/operations.html#database-connections">database connections</a></td>
+<td>Connections one API process keeps (20), may add under load (40), and how many seconds a request waits for one (30). Compose passes root <code>.env</code> overrides to both APIs; Helm uses <code>backend.databasePool</code> and <code>backendAdmin.databasePool</code>. See <a href="guides/operations.html#database-connections">database connections</a></td>
 </tr>
 <tr>
 <td><code>POSTGRES_MAX_CONNECTIONS</code>, <code>POSTGRES_SHARED_BUFFERS</code>, <code>POSTGRES_EFFECTIVE_CACHE_SIZE</code></td>
@@ -152,6 +152,16 @@ Real-provider E2E requires <code>E2E_USE_REAL_LLM=true</code> and <code>E2E_LLM_
 search waits for the query embedding. A CPU-only embedding model under memory
 pressure can exceed it on the first query after idling, which surfaces as a failed
 search; raise it on such hosts.</p>
+<p><code>RAG_API_REINDEX_DATABASE_URL</code> is read only by the operator tool <code>python -m src.reindex</code> (see the
+<a href="RAG_ARCHITECTURE.html#113-changing-the-embedding-model-or-dimension">RAG architecture</a>): the
+connection URL of a <code>rag_lifecycle</code> login role. Do not set it on the running <code>rag-api</code>.</p>
+<p>Cross-encoder reranking of knowledge search is off until <code>RAG_API_RERANK_URL</code> is set (for the
+Compose service: start the <code>rerank</code> profile and use <code>http://rag-rerank:7997</code>). <code>RAG_RERANK_MODEL</code>
+(default <code>BAAI/bge-reranker-v2-m3</code>) picks the model for both the service and rag-api;
+<code>RAG_API_RERANK_CANDIDATES</code> (30, at most the search limit of 50) is how many hits are scored and
+<code>RAG_API_RERANK_TIMEOUT_SECONDS</code> (10) bounds the request. A reranker that is down or slow never
+fails a search: results fall back to the fusion order. See the
+<a href="RAG_ARCHITECTURE.html#81-cross-encoder-reranking">RAG architecture</a>.</p>
 <h2 id="frontend-runtime-values">Frontend runtime values</h2>
 <p>Both UIs read <code>RUNTIME_*</code> on the server for each request:</p>
 <ul>

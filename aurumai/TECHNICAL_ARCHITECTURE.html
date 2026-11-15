@@ -1,0 +1,1574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AurumAI technical architecture · AurumAI</title>
+<meta name="description" content="AurumAI documentation: self-hosted AI chat and agent platform.">
+<style>
+:root{--bg:#fff;--fg:#1b1f27;--muted:#5d6675;--line:#e3e6ec;--soft:#f5f6f9;--accent:#b97a05;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161b;--fg:#e6e8ee;--muted:#98a1b3;--line:#2a2f3a;--soft:#1b1e25;--accent:#f0b441;--code:#1f232b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{border-bottom:1px solid var(--line);background:var(--soft)}
+.bar{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.bar a{color:var(--fg);text-decoration:none;font-size:14px}
+.bar a.brand{font-weight:700;font-size:16px;color:var(--accent)}
+.bar a:hover{text-decoration:underline}
+.bar a[aria-current]{color:var(--accent);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:8px 16px 56px}
+h1,h2,h3{line-height:1.25} h1{margin-top:28px} h2{margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:6px}
+a{color:var(--accent)}
+img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block;margin:12px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto} pre code{background:none;padding:0}
+.tw{overflow-x:auto} table{border-collapse:collapse;margin:14px 0;width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;font-size:15px} th{background:var(--soft)}
+blockquote{margin:12px 0;padding:2px 14px;border-left:4px solid var(--accent);background:var(--soft);color:var(--muted)}
+footer{max-width:980px;margin:0 auto;padding:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+pre.mermaid{background:none;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<a class="brand" href="index.html">AurumAI docs</a>
+<a href="guides/user-guide.html">User guide</a>
+<a href="guides/admin-guide.html">Administrator</a>
+<a href="guides/hermes-agent.html">Hermes Agent</a>
+<a href="guides/deployment.html">Installation</a>
+<a href="guides/operations.html">Operations</a>
+<a href="reference/api.html">API</a>
+<a href="reference/security.html">Security</a>
+<a href="https://github.com/tsrman/AurumAI">Source</a>
+</div></header>
+<main>
+<h1 id="aurumai-technical-architecture">AurumAI technical architecture</h1>
+<p>This document is for architects and reviewers who need to understand how AurumAI is
+built, why it is built that way, where its boundaries are and how it behaves under load
+and failure. It complements the shorter <a href="ARCHITECTURE.html">architecture overview</a> (which
+lists the rules contributors must preserve), the <a href="HERMES_AGENT.html">Hermes Agent design</a>
+and the <a href="reference/security.html">security model</a>. It describes the code as it is on
+<code>main</code>; where behaviour is configurable the setting is named, and the
+<a href="CONFIGURATION.html">configuration reference</a> has the details.</p>
+<p>Contents:</p>
+<ol>
+<li><a href="#1-goals-and-design-principles">Goals and design principles</a></li>
+<li><a href="#2-system-overview">System overview</a></li>
+<li><a href="#3-deployment-topologies-and-trust-zones">Deployment topologies and trust zones</a></li>
+<li><a href="#4-backend-architecture">Backend architecture</a></li>
+<li><a href="#5-identity-and-authorization">Identity and authorization</a></li>
+<li><a href="#6-data-architecture">Data architecture</a></li>
+<li><a href="#7-the-chat-turn-end-to-end">The chat turn, end to end</a></li>
+<li><a href="#8-durable-execution-with-temporal">Durable execution with Temporal</a></li>
+<li><a href="#9-conversation-runners">Conversation runners</a></li>
+<li><a href="#10-multi-agent-workflows">Multi-agent workflows</a></li>
+<li><a href="#11-tools-skills-and-code-execution">Tools, skills and code execution</a></li>
+<li><a href="#12-durable-questions">Durable questions</a></li>
+<li><a href="#13-knowledge-the-rag-pipeline">Knowledge: the RAG pipeline</a></li>
+<li><a href="#14-web-tools-and-network-egress">Web tools and network egress</a></li>
+<li><a href="#15-hermes-agent">Hermes Agent</a></li>
+<li><a href="#16-model-access-quota-and-usage">Model access, quota and usage</a></li>
+<li><a href="#17-data-lifecycle-partitions-archive-restore">Data lifecycle: partitions, archive, restore</a></li>
+<li><a href="#18-frontends">Frontends</a></li>
+<li><a href="#19-observability">Observability</a></li>
+<li><a href="#20-scalability-and-capacity">Scalability and capacity</a></li>
+<li><a href="#21-failure-modes-and-recovery">Failure modes and recovery</a></li>
+<li><a href="#22-compatibility-and-evolution-rules">Compatibility and evolution rules</a></li>
+<li><a href="#23-known-limits-and-non-goals">Known limits and non-goals</a></li>
+<li><a href="#24-source-map">Source map</a></li>
+</ol>
+<h2 id="1-goals-and-design-principles">1. Goals and design principles</h2>
+<p>AurumAI is a self-hosted, multi-tenant platform for chat with models and agents,
+knowledge bases, skills and tools, multi-agent workflows and an optional sandboxed
+coding agent. Organizations are the tenants. The design follows from five commitments,
+and most of the structure below is a consequence of them.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>What it means in the architecture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tenant isolation is enforced by the database, not only by code</strong></td>
+<td>Every tenant table has PostgreSQL <code>FORCE ROW LEVEL SECURITY</code>; the tenant is set per transaction (<code>SET LOCAL</code>), so a pooled connection cannot carry one organization's context into another's request. Object keys, vector filters and Redis channels carry the organization as well.</td>
+</tr>
+<tr>
+<td><strong>Authorization is live and default-deny</strong></td>
+<td>Tokens carry identity only. Capabilities and resource grants are read on each request and between workflow steps, so a revoked grant stops a turn that is already running. There is no permission snapshot in any token, workflow input or template.</td>
+</tr>
+<tr>
+<td><strong>Long work is durable, short work is stateless</strong></td>
+<td>Anything that outlives a request (a conversation, a multi-agent run, indexing, a Hermes session) is a Temporal workflow. The API processes are stateless and can be restarted or scaled freely.</td>
+</tr>
+<tr>
+<td><strong>Untrusted execution has one way out</strong></td>
+<td>Tenant code, model-chosen shell commands and web fetching run in separate, resource-bounded environments with no general network. Each has exactly one enforced egress component.</td>
+</tr>
+<tr>
+<td><strong>Fail closed and keep evidence</strong></td>
+<td>Ambiguity (an unknown child workflow, a missing receipt, an unreadable archive part) blocks destructive steps instead of guessing; terminal states are written before streams are closed.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The system is deliberately split into small trust zones with explicit contracts between
+them (section 3). The price is more moving parts than a monolith; the benefit is that a
+compromise or a bug in one zone (a code skill, a model-driven terminal, a parser) cannot
+reach tenant data in another.</p>
+<h2 id="2-system-overview">2. System overview</h2>
+<pre class="mermaid">flowchart LR
+    subgraph Browser
+        Chat[Chat UI]
+        Admin[Admin UI]
+    end
+    KC[Keycloak]
+    subgraph Control["Control plane (stateless)"]
+        BAPI["Business API :8000"]
+        AAPI["Admin API :8001"]
+    end
+    PG[(PostgreSQL)]
+    RD[(Redis)]
+    TMP[Temporal]
+    subgraph Exec["Execution plane"]
+        RUN["Conversation runner (one per conversation)"]
+        TW[Tool worker]
+        SE[Skill executor]
+        SB[Sandboxes]
+    end
+    GW[LLM gateway]
+    subgraph Know["Knowledge"]
+        RAG[RAG API]
+        RW[RAG worker]
+        MV[(Milvus)]
+        S3[(MinIO)]
+    end
+    WT[Web tools]
+    Chat --&gt; BAPI
+    Admin --&gt; AAPI
+    Chat -. OIDC .-&gt; KC
+    Admin -. OIDC .-&gt; KC
+    BAPI --&gt; PG
+    AAPI --&gt; PG
+    BAPI --&gt; RD
+    BAPI --&gt; TMP
+    TMP --&gt; RUN
+    TMP --&gt; TW
+    TMP --&gt; RW
+    RUN --&gt;|session token| BAPI
+    RUN --&gt; RD
+    BAPI --&gt; GW
+    TW --&gt; SE
+    SE --&gt; SB
+    TW --&gt; RAG
+    RAG --&gt; MV
+    RAG --&gt; PG
+    RW --&gt; MV
+    RW --&gt; S3
+    BAPI --&gt; WT
+    BAPI --&gt; S3
+</pre>
+<h3 id="21-component-inventory">2.1 Component inventory</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+<th>State</th>
+<th>Scales by</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>business-backend</code> (Business API)</td>
+<td>FastAPI, SQLAlchemy 2 async, Gunicorn + Uvicorn workers</td>
+<td>none (stateless)</td>
+<td>replicas and workers</td>
+<td>Entry point <code>main_business.py</code>, port 8000: chat, conversations, settings, knowledge, workflows, internal service routes.</td>
+</tr>
+<tr>
+<td><code>business-backend</code> (Admin API)</td>
+<td>same image, <code>main_admin.py</code></td>
+<td>none</td>
+<td>replicas</td>
+<td>Port 8001: skills, grants, groups, models, agents, workflow authoring, analytics. Separate Keycloak audience.</td>
+</tr>
+<tr>
+<td><code>business-ui</code>, <code>admin-ui</code></td>
+<td>Next.js 16, React 19, TanStack Query, <code>keycloak-js</code></td>
+<td>none</td>
+<td>replicas</td>
+<td>Two independent browser applications; runtime configuration is injected per request.</td>
+</tr>
+<tr>
+<td><code>conversation-runner</code></td>
+<td>Python, Temporal worker</td>
+<td>one Temporal task queue per conversation</td>
+<td>one container or Pod per active conversation</td>
+<td>Executes <code>ConversationWorkflow</code> and its child workflows; has no database access.</td>
+</tr>
+<tr>
+<td><code>tool-worker</code></td>
+<td>Python, Temporal worker on the <code>tools</code> queue</td>
+<td>none</td>
+<td>replicas</td>
+<td>Executes skills (HTTP, MCP, code) and the Hermes session workflows.</td>
+</tr>
+<tr>
+<td><code>skill-executor</code></td>
+<td>Python, Docker or Kubernetes API client</td>
+<td>in-memory sessions plus durable Hermes records</td>
+<td>one logical instance</td>
+<td>Creates and controls sandboxes; the only component allowed to do so.</td>
+</tr>
+<tr>
+<td><code>rag-api</code>, <code>rag-worker</code></td>
+<td>FastAPI; Temporal worker on <code>rag-ingest</code></td>
+<td>PostgreSQL <code>rag_platform</code>, Milvus</td>
+<td>replicas</td>
+<td>Own database and role, separate from the application database.</td>
+</tr>
+<tr>
+<td><code>web-tools</code></td>
+<td>FastAPI</td>
+<td>none</td>
+<td>replicas</td>
+<td>Authenticated search/read adapter with its own URL and address policy.</td>
+</tr>
+<tr>
+<td><code>hermes-egress</code>, <code>hermes-preview</code></td>
+<td>nftables guard + proxy; preview proxy</td>
+<td>none</td>
+<td>per runtime</td>
+<td>Only way out of a Hermes sandbox; only way a browser reaches a preview.</td>
+</tr>
+<tr>
+<td><code>identity-worker</code>, <code>data-worker</code></td>
+<td>Backend image, <code>maintenance_worker.py</code></td>
+<td>PostgreSQL inbox/jobs</td>
+<td>one each</td>
+<td>Optional: durable identity synchronization and archive lifecycle.</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>pg_partman 5.5, pgvector extension available</td>
+<td>all application state</td>
+<td>vertically; pooler</td>
+<td>One database per concern: <code>aurum_ai</code>, <code>rag_platform</code>, <code>langfuse</code>, <code>temporal</code>.</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Redis 7</td>
+<td>ephemeral: runner records, event bus, rate counters</td>
+<td>n/a</td>
+<td>Nothing in Redis is a system of record.</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>server 1.32</td>
+<td>workflow histories</td>
+<td>n/a</td>
+<td>The durable-execution substrate.</td>
+</tr>
+<tr>
+<td>Keycloak</td>
+<td>26</td>
+<td>identities</td>
+<td>n/a</td>
+<td>OIDC provider; owns membership and the <code>org_admin</code> role.</td>
+</tr>
+<tr>
+<td>MinIO / S3</td>
+<td>S3 API</td>
+<td>files, uploads, snapshots, archives</td>
+<td>n/a</td>
+<td>Business bucket, plus an archive bucket with narrower rights.</td>
+</tr>
+<tr>
+<td>Milvus (+ etcd)</td>
+<td>2.5</td>
+<td>vectors</td>
+<td>n/a</td>
+<td>Dense and sparse vectors per knowledge base chunk.</td>
+</tr>
+<tr>
+<td>LLM gateway</td>
+<td>any OpenAI-compatible endpoint; Bifrost overlay for local use</td>
+<td>none</td>
+<td>n/a</td>
+<td>Holds provider credentials; the platform never exposes them to runners.</td>
+</tr>
+<tr>
+<td>Langfuse (+ ClickHouse)</td>
+<td>3.x</td>
+<td>traces and scores</td>
+<td>n/a</td>
+<td>Optional.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two properties are worth stating up front. First, <strong>the runner has no database
+connection</strong>: it talks to the backend over HTTP with a short-lived identity-only token,
+so every read and write a runner makes goes through the same authorization code as a
+browser. Second, <strong>no component other than the Business API writes the conversation
+tables</strong>; workers report results (persist a message, register an execution) through
+internal API routes.</p>
+<h2 id="3-deployment-topologies-and-trust-zones">3. Deployment topologies and trust zones</h2>
+<p>Two supported topologies share the same images and configuration surface.</p>
+<p><strong>Docker Compose</strong> (<code>docker-compose.yml</code> plus overlays) is the development and
+single-host topology. Profiles select optional parts (<code>rag</code>, <code>skills-exec</code>, <code>mcp</code>,
+<code>maintenance</code>, <code>archive</code>); overlays add the proxy and TLS, the Hermes runtime, the real LLM
+gateway and the end-to-end test fixtures. The backend is given Docker-socket authority to
+create runner containers, which is root-equivalent on the host; the security model says
+to use Compose only on a trusted host.</p>
+<p><strong>Kubernetes</strong> (the Helm chart in <code>charts/aurum-ai</code>) replaces the Docker socket with
+namespace-scoped RBAC. The chart separates concerns into namespaces: the release
+namespace (APIs, UIs, workers, executors), a runners namespace (one Pod per
+conversation), a sandboxes namespace (code-skill sandboxes), and optional Hermes and web
+namespaces, each with default-deny <code>NetworkPolicy</code> objects. The APIs and UIs have
+<code>HorizontalPodAutoscaler</code> templates; the backend defaults to three replicas.</p>
+<h3 id="31-network-zones-compose">3.1 Network zones (Compose)</h3>
+<pre class="mermaid">flowchart TB
+    subgraph znet["default network"]
+        PGn[(PostgreSQL)]
+        APIs["Business and Admin API"]
+        TWn[Tool worker]
+        KCn[Keycloak]
+        MIn[(MinIO)]
+    end
+    subgraph zrun["runner-net"]
+        RUNn[Runners]
+        RDn[(Redis)]
+        TMn[Temporal]
+    end
+    subgraph zskl["skills-net"]
+        SEn[Skill executor]
+        SBn[Skill sandboxes]
+    end
+    subgraph zrag["rag-net"]
+        MVn[(Milvus)]
+        RWn[RAG worker]
+        RAn[RAG API]
+    end
+    subgraph zctl["rag-control-net"]
+        RAc[RAG API]
+        PGc[(PostgreSQL)]
+        TMc[Temporal]
+    end
+    APIs --- RUNn
+    APIs --- ctl
+    TWn --- SEn
+    RAn --- MVn
+</pre>
+<p>The point of the zoning is what each zone cannot reach. Runners reach Temporal, Redis and
+the backend (and Langfuse when tracing is on); they cannot reach PostgreSQL, MinIO or Milvus. Sandboxes
+reach nothing. Milvus has no route from the application networks except through the RAG
+API. The exact map and its negative tests are in
+<a href="operations/network-enforcement.html">network enforcement</a>.</p>
+<h3 id="32-trust-levels">3.2 Trust levels</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Zone</th>
+<th>Trusted with</th>
+<th>Not trusted with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Control plane (APIs, UIs, workers' orchestration code)</td>
+<td>Authorization decisions, secrets, database roles</td>
+<td>Tenant-supplied code or markup</td>
+</tr>
+<tr>
+<td>Runners</td>
+<td>One conversation's history and model calls, via the backend</td>
+<td>Any data store, provider credentials, other conversations</td>
+</tr>
+<tr>
+<td>Tool worker</td>
+<td>Calling skills on behalf of a turn</td>
+<td>Running tenant code itself</td>
+</tr>
+<tr>
+<td>Skill sandboxes</td>
+<td>Executing a code skill</td>
+<td>Network, secrets, anything outside the session</td>
+</tr>
+<tr>
+<td>Hermes sandbox</td>
+<td>A workspace and a terminal</td>
+<td>Everything except two platform endpoints and the egress mode the organization chose</td>
+</tr>
+<tr>
+<td>Web tools</td>
+<td>Fetching public pages under policy</td>
+<td>Private ranges, credentials, arbitrary redirects</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="4-backend-architecture">4. Backend architecture</h2>
+<h3 id="41-process-model">4.1 Process model</h3>
+<p>The Business and Admin APIs are two FastAPI applications built by one factory
+(<code>app_factory.create_app</code>): the same CORS, error-handling, rate-limit, metrics and audit
+middleware, different router lists and lifespans. Each runs under Gunicorn with Uvicorn
+workers (<code>APP_WORKERS</code>, default <code>2 × CPU + 1</code>). Every worker owns its own database
+pool, so replicas × workers × pool size is the connection budget (section 20.1).</p>
+<p>The Business API lifespan starts the background loops that coordinate with the runtime:
+the runner reaper and (on Docker) pool maintainer, the interaction-outbox dispatcher, the
+interaction-maintenance loop, the retention reaper for workflow runs, the web-result
+scrubber and the Hermes idle-session closer. These are in-process asyncio tasks designed to
+run in every replica: they claim work through leased database functions (for example
+<code>claim_interaction_outbox</code>), row locks or Redis records rather than assuming a single instance.</p>
+<h3 id="42-layering">4.2 Layering</h3>
+<pre><code>routers/        HTTP surface, request validation, dependency wiring
+  ↓
+services/       use cases and policies (authorization, quota, interaction, runners…)
+  ↓
+repositories/   persistence queries, one aggregate each
+  ↓
+models/         SQLAlchemy mappings; schemas/ holds the Pydantic wire types
+</code></pre>
+<p>Cross-cutting pieces live in <code>core/</code> (config, auth, database, Temporal client, event bus,
+telemetry) and <code>middleware/</code>. Routers never talk to Temporal, Redis or the executors
+directly when a service exists for it; services never import routers.</p>
+<h3 id="43-request-pipeline">4.3 Request pipeline</h3>
+<p>Middleware order is deliberate. From outermost to innermost: audit, metrics, rate limit,
+then the router. Audit and metrics wrap the rate limiter so they also observe rejected
+(<code>429</code>) mutations.</p>
+<ul>
+<li><strong>Rate limiting</strong> is a Redis counter per <code>(organization, user, bucket, minute)</code>. The
+identity is read from whichever token the caller presented (Keycloak, runner session or
+Hermes); unauthenticated callers fall back to the client address. Chat streams have their
+own, smaller budget (30 per minute against 300) so browsing cannot exhaust the allowance
+to start a turn.</li>
+<li><strong>Audit</strong> writes one <code>audit_logs</code> row per mutating request (<code>POST</code>, <code>PUT</code>, <code>PATCH</code>,
+<code>DELETE</code>), keyed by route template rather than object URL so resource IDs do not leak
+into the journal. The write completes before the response is returned, on a dedicated
+single-connection pool that request-scoped dependencies cannot starve; a storage failure
+is logged and does not change the outcome of a mutation that may already have committed.
+Service-to-service decision routes that have their own journals (Hermes egress and
+preview checks) are skipped.</li>
+<li><strong>Metrics</strong> records a request counter and duration histogram per route template.</li>
+</ul>
+<h3 id="44-three-api-audiences">4.4 Three API audiences</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Audience</th>
+<th>Authenticates with</th>
+<th>Database dependency</th>
+<th>Typical routes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser, business plane</td>
+<td>Keycloak JWT, audience <code>business-ui</code></td>
+<td><code>get_org_db_session</code></td>
+<td>chat, conversations, settings, knowledge</td>
+</tr>
+<tr>
+<td>Browser, admin plane</td>
+<td>Keycloak JWT, audience <code>admin-ui</code></td>
+<td><code>get_org_db_session</code></td>
+<td><code>/v1/admin/*</code>, skills, grants</td>
+</tr>
+<tr>
+<td>Services (runner, tool worker)</td>
+<td>Runner session token (<code>type: session</code>)</td>
+<td><code>get_service_db_session</code></td>
+<td><code>/v1/chat/completions</code>, <code>/v1/internal/*</code>, message persistence</td>
+</tr>
+<tr>
+<td>Hermes sandbox</td>
+<td>Hermes session token (own audience)</td>
+<td><code>hermes_db_session</code></td>
+<td>the model proxy and the MCP bridge only</td>
+</tr>
+</tbody>
+</table></div>
+<p>Routers consumed by runners must use <code>get_current_user_or_session</code> and
+<code>get_service_db_session</code>; the browser-only dependencies reject session tokens. This is
+the single most common integration mistake and is called out as a rule in the overview.</p>
+<h2 id="5-identity-and-authorization">5. Identity and authorization</h2>
+<h3 id="51-identity">5.1 Identity</h3>
+<p>Keycloak authenticates people through OpenID Connect; the platform stores no passwords.
+The backend validates issuer, signature (JWKS) and audience. Two audiences keep the planes
+apart: a token minted for the chat application does not open the Admin API. Group
+membership comes from the signed <code>groups</code> claim plus people an administrator adds by hand
+(<code>user_groups.source</code> distinguishes them; the sign-in sync never touches manual rows).</p>
+<p>On each authenticated request <code>_set_org_and_sync</code> places the organization on the session
+(<code>session.info[&quot;org_id&quot;]</code>) and reconciles the user and groups from the claims. The sync is
+designed to be a no-op for a signed-in person: it refreshes <code>last_login_at</code> and a group's
+<code>last_synced_at</code> at most every 15 minutes and does not commit when nothing changed, which
+matters because it runs on every request and every member of a group shares the group row.</p>
+<p>Optional <strong>identity synchronization</strong> (<code>IDENTITY_SYNC_ENABLED</code>) moves this reconciliation
+to a durable inbox processed by <code>identity-worker</code>, with generation fencing. A signed
+<code>platform_groups_complete</code> claim distinguishes &quot;explicitly no groups&quot; from &quot;claim missing&quot;.
+If the worker is down, changed identities are admitted for a bounded time as
+<code>identity_sync_pending</code> rather than accepting stale privilege indefinitely. Tokens are not
+copied into the inbox or into Temporal history.</p>
+<h3 id="52-service-tokens">5.2 Service tokens</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Issued by</th>
+<th>Claims</th>
+<th>Lifetime</th>
+<th>Accepted by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runner session token</td>
+<td><code>SessionManager</code>, refreshed by the runner</td>
+<td><code>sub</code>, <code>org_id</code>, <code>conversation_id</code>, <code>generation</code>, <code>type=session</code></td>
+<td>30 minutes; the runtime refreshes after 20</td>
+<td>internal and service routes</td>
+</tr>
+<tr>
+<td>Hermes session token</td>
+<td>Hermes session service</td>
+<td>adds <code>sid</code>, <code>tv</code> (token version), audience <code>hermes-session</code></td>
+<td>the session's expiry</td>
+<td>only the model proxy and the MCP bridge</td>
+</tr>
+</tbody>
+</table></div>
+<p>Both are HS256 JWTs signed with the stack secret and contain identity only. What a token
+may do <strong>right now</strong> is decided per request: the Hermes token additionally has to match an
+open session row on the same token version and a turn bound to it; the runner token's
+<code>generation</code> is checked against the conversation fence (below). Leaving permissions out
+of tokens is what makes revocation immediate.</p>
+<h3 id="53-capabilities-and-grants">5.3 Capabilities and grants</h3>
+<p>Two orthogonal mechanisms, both evaluated live from the database:</p>
+<ul>
+<li><strong>Capabilities</strong> answer &quot;may this person do this kind of thing&quot;: <code>chat.send</code>,
+<code>web.access</code>, <code>images.generate</code>, <code>agents.hermes</code>, <code>workspace.skills.create</code>,
+<code>workspace.knowledge.create</code>, <code>workspace.agents.create</code>, <code>sharing.manage</code>,
+<code>admin.users.read</code>, <code>admin.users.write</code>. They are granted to an organization and to
+groups (<code>organization_capabilities</code>, <code>group_capabilities</code>); a person's effective set is the
+union. Organization administrators (<code>org_admin</code> in Keycloak) hold all of them.</li>
+<li><strong>Resource grants</strong> (<code>access_grants</code>) answer &quot;may this person use this specific
+thing&quot;: a resource (<code>model</code>, <code>skill</code>, <code>knowledge_base</code>, <code>agent_definition</code>, <code>workflow</code>),
+a principal (<code>organization</code>, <code>group</code>, <code>user</code>) and a permission (<code>read</code>, <code>write</code>).</li>
+</ul>
+<p>Access is default-deny. A new organization is provisioned on first verified login with
+<code>chat.send</code> and grants for global skills and models only; everything else is switched on by
+an administrator. <code>AuthorizationService</code> is the single evaluation point:
+<code>has_capability</code>, <code>can_access</code>, <code>accessible_resource_ids</code> (the last pushes the visibility
+filter into list queries). An administrator's bypass is limited to their own organization
+and never bypasses row-level security or runtime-owner rules.</p>
+<h3 id="54-conversation-generation-fence">5.4 Conversation generation fence</h3>
+<p>A conversation has a lifecycle generation. Runner tokens carry the generation they were
+issued under; <code>fence_session_conversation</code> locks the live conversation, checks that its
+registry row is active and that the generation matches, and re-applies that fence at the
+start of every later transaction in the request (<code>after_begin</code>). When a conversation is
+archived, restored or deleted, the generation advances and callbacks from an old runner
+fail with <code>ConversationFrozen</code>. This is the mechanism that makes archive and restore safe
+against in-flight work.</p>
+<h2 id="6-data-architecture">6. Data architecture</h2>
+<h3 id="61-stores-and-what-each-is-authoritative-for">6.1 Stores and what each is authoritative for</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Store</th>
+<th>Authoritative for</th>
+<th>Loss impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL <code>aurum_ai</code></td>
+<td>Users, groups, grants, conversations, messages, turns, workflow definitions and runs, skills, agents, knowledge-base metadata, quota ledger, audit, Hermes session records</td>
+<td>Platform down; restore from backup (see <a href="operations/backup-recovery.html">backup and recovery</a>)</td>
+</tr>
+<tr>
+<td>PostgreSQL <code>rag_platform</code></td>
+<td>RAG document metadata, ingestion state, knowledge-base lifecycle</td>
+<td>Documents unsearchable until restored or re-indexed</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>In-flight workflow state</td>
+<td>In-flight turns lost; persisted history is unaffected</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Runner records and pool, event bus, rate counters</td>
+<td>Runners are re-created, live streams reconnect from snapshots; no data loss</td>
+</tr>
+<tr>
+<td>Milvus</td>
+<td>Chunk vectors (derived from MinIO and PostgreSQL)</td>
+<td>Re-indexable</td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td>Uploaded source files, images, Hermes snapshots, archives</td>
+<td>Files lost; backup separately</td>
+</tr>
+<tr>
+<td>Langfuse / ClickHouse</td>
+<td>Traces and scores</td>
+<td>Observability only</td>
+</tr>
+</tbody>
+</table></div>
+<p>The rule of thumb: <strong>PostgreSQL holds the truth, everything else is a cache, a queue or a
+derivation.</strong> Redis in particular never holds anything that cannot be rebuilt: it has no
+volume in the default stack, and a reboot is handled by the startup sweeps (section 9.3).</p>
+<h3 id="62-postgresql-roles-and-row-level-security">6.2 PostgreSQL roles and row-level security</h3>
+<p>Four database roles separate privileges:</p>
+<ul>
+<li>a <strong>migration/owner</strong> role used by Alembic only;</li>
+<li><code>aurum_ai_app</code>, the runtime role of the APIs: <code>SELECT/INSERT/UPDATE/DELETE</code> on
+application tables, no schema ownership, no <code>BYPASSRLS</code>;</li>
+<li><code>aurum_ai_lifecycle</code> (<code>NOLOGIN</code>), whose privileges are granted to a separate login role
+for the data worker, so archive and purge rights never sit on the API role;</li>
+<li><code>rag_app</code>/<code>rag_lifecycle</code> for the RAG database.</li>
+</ul>
+<p>Every tenant table has <code>ENABLE</code> and <code>FORCE ROW LEVEL SECURITY</code> with a policy keyed on the
+<code>app.current_org_id</code> setting. The setting is applied by a SQLAlchemy <code>after_begin</code> hook on
+the application's session class, using <code>set_config(..., true)</code> (transaction-local). This
+matters because an async session can be handed a different physical connection after each
+commit; re-issuing the context at every transaction start, rather than once per request,
+removes the whole class of &quot;connection kept the previous tenant&quot; bugs and cannot leak
+into the next request that reuses the connection. The same hook re-applies the conversation
+generation fence for service sessions.</p>
+<p>Security-definer functions (partition maintenance, archive discovery, the web-result
+scrubber, identity dispatch) run as isolated <code>NOLOGIN</code> owners, so privileged operations are
+a short, reviewable list of functions rather than broader grants.</p>
+<h3 id="63-partitioned-payload-and-identity-registries">6.3 Partitioned payload and identity registries</h3>
+<p><code>conversations</code>, <code>messages</code> and <code>audit_logs</code> are range-partitioned by <code>created_at</code> in
+monthly UTC partitions managed with <code>pg_partman</code> (three months pre-made; automatic
+maintenance runs through the vetted <code>platform_maintain_partitions()</code> routine; retention is
+left to the archive worker). Partitioning serves two goals: bounded index and vacuum cost
+for tables that only grow, and cheap removal of old payload.</p>
+<p>Because a partitioned table cannot be referenced by a foreign key from rows that must
+survive payload movement, <strong>permanent UUID identity registries</strong>
+(<code>conversation_identities</code>, <code>message_identities</code>) hold the identity of each conversation
+and message independently of where the payload lives. Foreign keys, unique and idempotency
+keys and RLS reference the registries, so they stay valid when a payload partition is
+archived and later restored.</p>
+<p>Two rules follow for anyone writing queries against these tables:</p>
+<ul>
+<li>A <code>messages</code> query must bound <code>created_at</code>; the history read uses the conversation's
+creation time (minus a day of slack) as the lower bound and joins on the whole primary key
+<code>(id, created_at)</code>. Without the bound the planner probes every monthly partition and
+planning time grows with every month of history.</li>
+<li>A foreign key with <code>ON DELETE CASCADE</code> or <code>RESTRICT</code> needs an index that <em>starts with the
+referencing columns</em>, or deleting the parent scans the child. The <code>20261111</code> migration
+added the missing ones and removed <code>org_id</code>-only indexes that another index already
+covered.</li>
+</ul>
+<h3 id="64-key-aggregates">6.4 Key aggregates</h3>
+<pre class="mermaid">erDiagram
+    ORGANIZATION ||--o{ USER : has
+    ORGANIZATION ||--o{ GROUP : has
+    USER }o--o{ GROUP : "user_groups (source)"
+    ORGANIZATION ||--o{ ACCESS_GRANT : has
+    ORGANIZATION ||--o{ CONVERSATION_IDENTITY : has
+    CONVERSATION_IDENTITY ||--o{ INTERACTION_TURN : has
+    INTERACTION_TURN ||--o{ INTERACTION_EXECUTION : "runs as"
+    INTERACTION_TURN ||--o{ USER_QUESTION : asks
+    CONVERSATION_IDENTITY ||--o{ MESSAGE_IDENTITY : has
+    ORGANIZATION ||--o{ WORKFLOW_DEFINITION : has
+    WORKFLOW_DEFINITION ||--o{ WORKFLOW_RUN : "executed as"
+    ORGANIZATION ||--o{ LLM_USAGE_EVENT : bills
+    ORGANIZATION ||--o{ ORGANIZATION_USAGE_MONTHLY : "counts per month"
+</pre>
+<p>The interaction tables carry the turn-level state machine:</p>
+<ul>
+<li><code>interaction_turns</code> has a partial unique index on <code>(org_id, conversation_id) WHERE status = 'active'</code>. That index <strong>is</strong> the &quot;one running turn per conversation&quot; rule;
+a second concurrent send fails with a conflict that the API maps to <code>409</code>, with no
+application-level lock.</li>
+<li><code>interaction_executions</code> records the exact Temporal address (workflow id, run id, task
+queue, parent link) a turn executes under, so cancellation, question delivery and cleanup
+target the right run and never a successor.</li>
+<li><code>user_questions</code> and <code>interaction_outbox</code> implement durable questions (section 12).</li>
+<li><code>tool_operations</code> gives each web or image operation a reservation, attempt count and
+deadline.</li>
+</ul>
+<h3 id="65-migrations">6.5 Migrations</h3>
+<p>Alembic migrations are linear and reversible, and run as a Helm pre-install/upgrade Job or
+through the backend entrypoint on Compose. Notable migration disciplines:</p>
+<ul>
+<li>Index creation on partitioned tables takes a write lock while it builds; the changelog
+flags such migrations so a large installation upgrades in a quiet period.</li>
+<li>The runtime role is created by the first migration with a password taken from the
+environment; the migration refuses placeholder secrets outside debug mode.</li>
+<li>Existing-table conversion to partitions requires a backup and a writer-free window.</li>
+</ul>
+<h3 id="66-redis-usage">6.6 Redis usage</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Key space</th>
+<th>Purpose</th>
+<th>Loss handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{org}:session:{conversation}:events</code> (pub/sub)</td>
+<td>Live event stream from the runner to the API's SSE relay</td>
+<td>A lost message is recovered from durable turn/question snapshots on reconnect</td>
+</tr>
+<tr>
+<td><code>session_containers</code> hash, field <code>{org}:{conversation}</code></td>
+<td>Which runner serves which conversation</td>
+<td>Rebuilt by <code>cleanup_stale</code> and <code>sweep_orphans</code> at startup</td>
+</tr>
+<tr>
+<td><code>runner_pool</code></td>
+<td>Warm, unbound runner containers (Docker only)</td>
+<td>Topped up by the pool maintainer</td>
+</tr>
+<tr>
+<td><code>rate_limit:{org}:{user}:{bucket}:{minute}</code></td>
+<td>Rate counters, 60 s TTL</td>
+<td>Self-healing</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="7-the-chat-turn-end-to-end">7. The chat turn, end to end</h2>
+<p>This is the central path; most of the platform's guarantees are visible in it.</p>
+<pre class="mermaid">sequenceDiagram
+    participant B as Browser
+    participant A as Business API
+    participant P as PostgreSQL
+    participant R as Redis
+    participant T as Temporal
+    participant N as Runner
+    participant G as LLM gateway
+    B-&gt;&gt;A: POST /v1/chat/stream
+    A-&gt;&gt;P: authorize (chat.send, model, agent, uploads)
+    A-&gt;&gt;P: admit turn (unique active turn), persist user message, commit
+    A-&gt;&gt;R: subscribe events channel (before anything can publish)
+    A-&gt;&gt;A: acquire runner (Redis record, container or Pod)
+    A-&gt;&gt;T: signal or start ConversationWorkflow (user_message)
+    A-&gt;&gt;P: record execution, settle operation, commit
+    A--&gt;&gt;B: SSE stream opens
+    T-&gt;&gt;N: workflow task on session queue
+    N-&gt;&gt;A: GET history pages (session token)
+    loop model and tool rounds
+        N-&gt;&gt;A: POST /v1/chat/completions (stream)
+        A-&gt;&gt;P: authorize and reserve quota
+        A-&gt;&gt;G: stream completion
+        G--&gt;&gt;A: chunks
+        A--&gt;&gt;N: chunks
+        N-&gt;&gt;R: publish events (text, tools)
+        R--&gt;&gt;A: events
+        A--&gt;&gt;B: SSE events
+    end
+    N-&gt;&gt;A: POST message (assistant)
+    N-&gt;&gt;R: publish done
+    A--&gt;&gt;B: done, stream closes
+</pre>
+<h3 id="71-admission-synchronous-in-the-request">7.1 Admission (synchronous, in the request)</h3>
+<ol>
+<li><strong>Authenticate and authorize.</strong> <code>chat.send</code> capability, then live checks on the model,
+the selected agent or workflow (resource grants), attachments and uploads. Hermes turns
+check <code>agents.hermes</code> and the agent's own model.</li>
+<li><strong>Admit the turn.</strong> An <code>interaction_turns</code> row is inserted <code>active</code>. The partial unique
+index makes a concurrent send fail cleanly. Uploaded images and files are claimed for the
+turn (single-use, owner-checked) and the user message is persisted with its <code>turn_id</code>;
+the transaction commits before any slow I/O.</li>
+<li><strong>Subscribe before signalling.</strong> The API subscribes to the conversation's Redis channel
+<em>before</em> the runner can publish, because Redis pub/sub does not buffer for late joiners;
+the first events (message start, thinking deltas) are emitted within milliseconds of the
+signal.</li>
+<li><strong>Acquire a runner and signal.</strong> <code>SessionManager.get_or_create</code> returns the owned runner
+for the conversation (section 9); then the API signals <code>ConversationWorkflow</code>
+(<code>user_message</code>), starting it if needed with an exactly-recorded run id. Lifecycle
+operations (<code>begin_operation</code>/<code>settle_operation</code>) record the signal so archive cannot
+race it.</li>
+<li>If the runtime or Temporal is unavailable the turn is marked failed (<code>503</code>), the
+subscription is released and the user sees a retryable error instead of a hung stream.</li>
+</ol>
+<p>The request then returns a <code>StreamingResponse</code> that relays events from the channel. The
+event generator stops on <code>done</code> (or on <code>message-score</code> when a background evaluation was
+pending) and has an overall timeout (<code>EVENT_SUBSCRIBE_TIMEOUT</code>); a lost wake-up is
+recovered by the UI reading the durable turn snapshot, not by replaying Redis.</p>
+<h3 id="72-execution-asynchronous-in-the-runner">7.2 Execution (asynchronous, in the runner)</h3>
+<p><code>ConversationWorkflow</code> is a long-lived workflow per conversation. It loads the complete
+persisted history (paginated, with cursors validated so a missing or repeated cursor cannot
+silently publish a partial conversation), then waits for messages. For each turn it runs
+the tool loop: build the system prompt from the user's <em>currently accessible</em> skills, call
+the model (<code>llm_call</code> activity, streaming), parse <code>&lt;tool_call&gt;</code> blocks, execute tools as
+activities or child workflows, feed results back, and stop when the model answers without a
+tool call. It persists the assistant message, publishes the terminal events and, if
+configured, starts a background evaluator.</p>
+<p>Two behaviours are intentional:</p>
+<ul>
+<li><strong>A failed turn still closes the stream.</strong> <code>_fail_turn</code> persists the terminal state first,
+then publishes <code>message-end</code> with the reason and <code>done</code>. An escaping exception would kill
+the long-lived workflow and every later message with it, so turn failures are contained
+inside the loop; Temporal cancellation is not (it is a <code>BaseException</code>).</li>
+<li><strong>The model is always called with <code>stream: true</code>.</strong> The proxy endpoint has no buffered
+path; a non-streaming request upstream would return an empty body without an error.</li>
+</ul>
+<h3 id="73-the-model-call-path">7.3 The model call path</h3>
+<p>The runner never sees a provider credential. It calls the backend's
+<code>/v1/chat/completions</code> (OpenAI-compatible, always streaming) with its session token. The
+backend authorizes the capability and model again with live data, resolves vision images,
+<strong>commits to release its database connection before any provider I/O</strong>, reserves quota
+(section 16), and proxies the gateway stream while accounting usage. Because the proxy runs
+inside the request that the runner awaits, quota, authorization and audit apply uniformly to
+every model call a platform feature makes, whether it came from a chat turn, a workflow
+node, a classifier or an evaluator.</p>
+<h2 id="8-durable-execution-with-temporal">8. Durable execution with Temporal</h2>
+<h3 id="81-namespaces-queues-and-workers">8.1 Namespaces, queues and workers</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Task queue</th>
+<th>Worker</th>
+<th>Workflows</th>
+<th>Activities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session-{conversation_id}</code></td>
+<td>the conversation's runner</td>
+<td><code>ConversationWorkflow</code>, <code>MultiAgentWorkflow</code>, <code>AgentWorkflow</code>, <code>CodeSkillSessionWorkflow</code>, <code>EvaluationWorkflow</code></td>
+<td>model call, history load, message persistence, event publish, scoring, question operations, web and image tool calls, workflow-run transitions, Hermes hand-off</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>tool worker</td>
+<td><code>HermesSessionWorkflow</code>, <code>HermesSkillCallWorkflow</code>, <code>HermesFileAttachWorkflow</code>, <code>HermesConversationPurgeWorkflow</code></td>
+<td><code>execute_skill</code>, code-skill session open/exec/close, the Hermes sandbox activities</td>
+</tr>
+<tr>
+<td><code>rag-ingest</code></td>
+<td>RAG worker</td>
+<td><code>IndexDocumentWorkflow</code></td>
+<td>register execution, <code>index_document</code>, <code>mark_document_failed</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>One task queue per conversation is the isolation device: the runner container that owns a
+conversation is the only worker polling its queue, so its workflow code runs only inside
+that conversation's container (and its resource limits), and tenant boundaries on the
+execution plane follow container boundaries. Workflow ids are deterministic
+(<code>conversation-{conversation_id}</code>).</p>
+<h3 id="82-workflow-tree">8.2 Workflow tree</h3>
+<pre class="mermaid">flowchart TB
+    CW["ConversationWorkflow (long-lived, per conversation)"]
+    MW[MultiAgentWorkflow]
+    AW["AgentWorkflow (one per node)"]
+    CS[CodeSkillSessionWorkflow]
+    EV[EvaluationWorkflow]
+    HS["HermesSessionWorkflow (tools queue)"]
+    CW --&gt; MW
+    MW --&gt; AW
+    CW --&gt; CS
+    AW --&gt; CS
+    CW --&gt; EV
+    CW -. update .-&gt; HS
+    AW -. update .-&gt; HS
+</pre>
+<p>The backend contains <code>ConversationWorkflow</code> only as a <strong>typed client stub</strong>, so it can
+signal and start the real workflow that lives in <code>conversation-runner</code>. Signal names and
+payloads must be kept in sync between the two; the signals are <code>user_message</code>,
+<code>cancel_generation</code>, <code>cancel_turn</code>, <code>cancel_workflow_run</code>, <code>question_available</code>,
+<code>hermes_turn_result</code>, <code>hermes_question</code> and <code>hermes_question_settled</code>. Agent nodes do not
+create runners: the whole tree executes inside the one conversation runner.</p>
+<h3 id="83-determinism-and-replay-compatibility">8.3 Determinism and replay compatibility</h3>
+<p>Workflow code is replayed from history after any worker restart, so it must be
+deterministic and <strong>old histories must keep replaying after upgrades</strong>. The repository
+enforces this with named <code>workflow.patched(...)</code> markers, one per behaviour change
+(<code>user-questions-v1</code>, <code>web-tools-v1</code>, <code>image-tools-v1</code>, <code>chat-agent-v1</code>,
+<code>conversation-lifecycle-v1</code>, <code>failed-turn-terminal-v1</code>, <code>loop-iteration-context-v1</code>,
+<code>evaluator-explicit-model-v1</code>, <code>hermes-v1</code> and the Hermes family, <code>rag-lifecycle-v1</code>,
+<code>conversation-temperature-v1</code>, <code>hitl-progress-heartbeats-v1</code>) and replay tests built from
+recorded histories. Rules that follow:</p>
+<ul>
+<li>never remove or rename a marker that an old history may contain;</li>
+<li>never read mutable settings inside workflow code; the backend sends flags such as
+<code>user_questions_enabled</code> with each turn, and mutable configuration is read inside
+activities, which are outside the replay sandbox;</li>
+<li>a new behaviour is introduced behind a new marker, with a replay test for histories from
+before and after.</li>
+</ul>
+<h3 id="84-retries-and-timeouts">8.4 Retries and timeouts</h3>
+<p>Activity retries are bounded (<code>maximum_attempts=3</code> for runner activities) because the
+default unlimited retry would turn a persistent 4xx into a conversation that never
+recovers. Genuine client errors are raised as non-retryable <code>ApplicationError</code> at the
+activity so they fail on the first attempt. Activity timeouts are short for control calls
+(30 s) and explicit for long ones (10 minutes with a heartbeat for indexing; the turn
+deadline for Hermes).</p>
+<h2 id="9-conversation-runners">9. Conversation runners</h2>
+<h3 id="91-runtime-abstraction">9.1 Runtime abstraction</h3>
+<p><code>SessionManager</code> binds a conversation to a runner through an abstract runtime with two
+implementations: Docker (<code>aiodocker</code>, containers on the runner network, memory and CPU
+quotas) and Kubernetes (Pods in the runners namespace, labelled with release and
+conversation, with CPU/memory requests and limits). Helm selects Kubernetes and requires a
+pool size of zero because there is no warm pool on Kubernetes.</p>
+<h3 id="92-binding-pooling-and-tokens">9.2 Binding, pooling and tokens</h3>
+<ul>
+<li><strong>Ownership record.</strong> A Redis hash entry <code>{org}:{conversation}</code> records the resource id,
+its UID and creation data. A runner is reused only if the record matches the live runtime
+object (id, UID, labels); a mismatch is treated as a different resource and never adopted
+or deleted blindly.</li>
+<li><strong>Warm pool (Docker).</strong> Unbound containers wait in <code>runner_pool</code>; claiming one calls its
+<code>/bind</code> endpoint with the conversation identity and token, which removes the cold-start
+cost (container creation plus imports, a few seconds). The runner connects to Temporal
+while waiting for the bind.</li>
+<li><strong>Token refresh.</strong> Runner tokens last 30 minutes and are refreshed after 20; long waits
+(confirmation nodes, questions) refresh the runner's activity so reapers do not race them.</li>
+</ul>
+<h3 id="93-reaping-and-recovery">9.3 Reaping and recovery</h3>
+<ul>
+<li><strong>Idle reaping.</strong> Runners idle for <code>RUNNER_IDLE_REAP_SECONDS</code> (30 minutes) are removed,
+except those a durable wait protects (a pending question or confirmation).</li>
+<li><strong>Startup sweeps.</strong> <code>cleanup_stale</code> removes records whose runtime is gone;
+<code>sweep_orphans</code> removes labelled runtime objects whose Redis record is gone, which is
+every runner after a host reboot because Redis has no volume.</li>
+<li><strong>Kubernetes safety.</strong> Deletion verifies release and conversation labels and the Pod UID
+first, under a Redis lease sized to the full reconciliation budget, so a slow reconcile
+cannot be overtaken and an unrelated Pod is never deleted.</li>
+<li>The workflow itself also ends after <code>idle_ttl_seconds</code> (default 600) without messages; the
+next message starts a fresh run and reloads history from PostgreSQL. <strong>A runner crash
+loses no history</strong>, because PostgreSQL is the only history store.</li>
+</ul>
+<h2 id="10-multi-agent-workflows">10. Multi-agent workflows</h2>
+<p>A workflow definition is a versioned graph of agent nodes plus a supervisor. Definitions
+and templates are administrative resources with their own grants.</p>
+<ul>
+<li><strong>Admission</strong> creates an immutable <strong>execution snapshot</strong> of the definition and its model
+dependencies (<code>workflow_runs</code>). The snapshot fixes <em>configuration</em>, not <em>access</em>: the
+preparation step, every node and the synthesis step re-check live grants through
+<code>authorize_workflow_step</code>, so a revoked model or skill stops the next node.</li>
+<li><strong>Scheduler.</strong> Fixed graphs of up to 20 nodes with concurrency up to 4; ready nodes run
+in lexical order; edges can be conditional (<code>on_success</code>, <code>on_failure</code>); joins are AND;
+a failure with no handler cascades a skip. Only a successful supervisor synthesis is
+exposed as the final answer; an unhandled failure never produces a false success.</li>
+<li><strong>Loops.</strong> Loop-back edges (<code>is_loop_back</code>, <code>max_iterations</code> 2–20) keep the structural
+graph acyclic. A loop body is the intersection of the target's descendants and the tail's
+ancestors; nested or overlapping bodies, confirmation nodes inside a body and fan-out from
+a non-tail node are rejected at validation. On a loop-back the body is reset and iteration
+N+1 receives <code>previous_iteration</code> with every terminal result of iteration N (64 KiB per
+node, 512 KiB total); older passes are never accumulated.</li>
+<li><strong>Human confirmation</strong> is a durable owner-controlled signal with a bounded wait (1800 s in
+production), renewing the runner's activity so the reaper does not take the container.
+Rejection, timeout and exact-run cancellation end only that run.</li>
+<li><strong>Routing.</strong> An explicit picker selection wins; opt-in classification routes an ordinary
+turn only among accessible, auto-routable definitions and falls back safely on any
+failure.</li>
+<li><strong>Observability.</strong> Run and node diagnostics are organization-scoped; progress events carry
+an allowlist of metadata only, never node briefs, internal outputs or raw tool payloads.</li>
+<li><strong>Billing.</strong> Every node's model call goes through the same quota ledger with the run, phase
+and node key recorded.</li>
+</ul>
+<h2 id="11-tools-skills-and-code-execution">11. Tools, skills and code execution</h2>
+<p>Skills are the unit of extension. There are three kinds, all granted like any resource:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Execution</th>
+<th>Isolation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Built-in tool</td>
+<td><code>execute_skill</code> activity on the tool worker (for example the knowledge-base hybrid search, which calls the RAG API with the caller's session token)</td>
+<td>The tool worker's own network policy; no tenant code</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>MCP client in the tool worker; <strong>SSE</strong> transport for tenant skills, stdio only for operator-global skills (<code>org_id</code> null)</td>
+<td>A saved token never follows a changed endpoint; the unrestricted fetch server in the repository is a development fixture</td>
+</tr>
+<tr>
+<td>Code</td>
+<td>Source ZIP bundle with <code>SKILL.md</code>; runs in an ephemeral sandbox opened by <code>skill-executor</code></td>
+<td>Separate namespace and RBAC, resource limits, no network by default, bounded rounds and per-command timeouts</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The tool-call protocol</strong> is plain text: the model emits
+<code>&lt;tool_call&gt;{&quot;skill_id&quot;: &quot;...&quot;, &quot;args&quot;: {...}}&lt;/tool_call&gt;</code>, parsed by one shared parser
+in the runner. This keeps the platform provider-agnostic (it does not depend on a provider's
+native function-calling format) and is why the system prompt forbids native tool markup.
+The backend serves camelCase JSON; the tool worker normalizes to snake_case.</p>
+<p><strong>Code skills</strong> run as <code>CodeSkillSessionWorkflow</code>: open a sandbox, let the model issue
+several commands (default at most 8 rounds, 60 s per command), return each result to the next
+round, close. The skill executor enforces its own session TTL independently of the workflow,
+so a stuck workflow cannot leak a sandbox. Tenant code never runs in the tool worker's
+environment; and because <code>pods/exec</code> cannot be constrained by labels, sandboxes live in a
+dedicated namespace with their own RBAC.</p>
+<h2 id="12-durable-questions">12. Durable questions</h2>
+<p>A model can ask the person a question mid-turn (<code>ask_user</code>). It is server-owned and
+default-off; the backend sends the enabling flag with every turn so workflow code never
+reads a mutable flag.</p>
+<p>State lives in PostgreSQL: a <code>user_questions</code> row per question, an operation reservation for
+idempotency and an <code>interaction_outbox</code> row that the <strong>outbox dispatcher</strong> (a background
+loop that leases batches through the <code>claim_interaction_outbox</code> function) turns into a Temporal
+signal to the exact execution. This yields
+at-least-once delivery with an explicit consume identity, so retries cannot double-deliver.
+Limits: one pending question per execution, four concurrent and ten created per turn, and a
+real 3600-second deadline. Answer, revoke, cancel, late answer and next-turn lock release are
+separate, individually tested paths. A lost SSE wake-up is recovered because the UI reads
+the durable snapshot; the stream is a hint, not the record.</p>
+<h2 id="13-knowledge-the-rag-pipeline">13. Knowledge: the RAG pipeline</h2>
+<p>This section is a summary; the full design (data model, ingestion protocol, fences and intents,
+retrieval, archive) is in the <a href="RAG_ARCHITECTURE.html">RAG architecture</a>.</p>
+<h3 id="131-ingestion">13.1 Ingestion</h3>
+<pre class="mermaid">flowchart LR
+    U[Upload via Business API] --&gt; M[(MinIO source object)]
+    U --&gt; D[(rag_platform documents)]
+    D --&gt; W[IndexDocumentWorkflow]
+    W --&gt; P["Parse (Docling, plain-text fallback)"]
+    P --&gt; C["Chunk (sentence window / small-to-big)"]
+    C --&gt; X["Contextualize (optional LLM prefix)"]
+    X --&gt; E["Embed (dense) and BM25 (sparse)"]
+    E --&gt; V[(Milvus)]
+    W --&gt; D
+</pre>
+<p>Uploads pass through the backend into MinIO with explicit file and knowledge-base metadata.
+The RAG worker downloads and parses the source, splits it into small search chunks with larger
+parent windows (the model sees the parent, retrieval matches the small chunk), optionally asks
+a model for a short document-level context line per chunk (contextual retrieval), embeds the
+chunks and writes dense and sparse vectors. Each Milvus record carries <code>org_id</code> and
+<code>knowledge_base_id</code>; the embedding dimension is configuration (1536 by default) and is
+validated on every chunk. Indexing is idempotent and <strong>generation-fenced</strong> so a retried or
+cancelled run cannot leave chunks behind a deleted document, and a Milvus partial failure
+fails the activity (retried up to three times) rather than marking the document indexed.</p>
+<h3 id="132-query">13.2 Query</h3>
+<p><code>rag-api</code> is an internal trust boundary: the public backend validates the caller's live
+knowledge-base grant and passes the canonical organization and knowledge-base ids; RAG then
+applies both to every SQL and Milvus lookup. Search embeds the query, runs a <strong>hybrid</strong>
+search (dense cosine and BM25 sparse in one Milvus call, fused with reciprocal-rank fusion,
+<code>k = 60</code>), caps the fetch size, filters hits to documents that still exist and whose
+knowledge base is <code>active</code> in PostgreSQL (closing the delete race), optionally re-orders the
+candidates with a cross-encoder reranker (off by default; failure falls back to the fusion
+order), and returns the parent windows. Result size is clamped server-side because skill arguments are model-formed.</p>
+<h3 id="133-ownership">13.3 Ownership</h3>
+<p>Chat attachments create a conversation-scoped knowledge base and a hidden search skill bound
+to that exact conversation and the caller's session. Knowledge-base deletion, upload,
+indexing and archive admission share fences so an unresolved external write cannot become an
+orphan. A legacy ambiguous owner blocks an operation instead of being guessed.</p>
+<h2 id="14-web-tools-and-network-egress">14. Web tools and network egress</h2>
+<p><code>web.search</code> and <code>web.read</code> are platform tools gated by the <code>web.access</code> capability and a
+global switch, implemented by the separate <code>web-tools</code> service. Three layers make &quot;the
+agent can browse&quot; safe:</p>
+<ol>
+<li><strong>Policy before every connection.</strong> A frozen list of forbidden address ranges (private,
+loopback, link-local, carrier-grade NAT, documentation, 6to4 and others, IPv4 and IPv6) plus
+the operator's <code>WEB_EGRESS_FORBIDDEN_CIDRS</code>; IDNA-normalized host handling; the resolved
+address is checked and pinned, and redirects are re-validated hop by hop.</li>
+<li><strong>Bounded parsing.</strong> Fetched content is parsed in a sandboxed worker with size and time
+limits; the reader returns sources the platform owns.</li>
+<li><strong>Network enforcement underneath.</strong> A kernel/CNI-level egress guard (nftables for Docker,
+<code>NetworkPolicy</code> for Kubernetes) repeats the deny ranges, so a bug in the adapter is not
+the only barrier. The deny ranges are kept in sync across the adapter, the Docker guard and
+Helm.</li>
+</ol>
+<p>Operations are durable: each has a reservation, bounded attempts and shared deadlines;
+authorization is re-checked before I/O and before persisting; non-retryable results stay
+non-retryable across service boundaries; a late result after cancellation or revocation is
+discarded. Sources are conversation- and execution-owned and are validated as they propagate
+through workflow synthesis. Image generation and editing follow the same operation pattern
+(<code>tool_operations</code>) through the image API client.</p>
+<h2 id="15-hermes-agent">15. Hermes Agent</h2>
+<p>Hermes Agent is an opt-in system agent with a terminal, run inside a per-conversation
+sandbox. <a href="HERMES_AGENT.html">HERMES_AGENT.md</a> is the full design; the architectural summary:</p>
+<ul>
+<li><strong>Execution model.</strong> One long-lived <code>HermesSessionWorkflow</code> per conversation on the <code>tools</code>
+queue; the runner hands each turn to it as a Temporal Update and awaits the result. The
+sandbox belongs to the conversation, lives across turns, is snapshotted to object storage
+when idle and restored on demand. A turn's <code>run_hermes_turn</code> activity is idempotent (keyed by
+turn) and heartbeats, so a lost worker reattaches to the same run rather than starting a
+second.</li>
+<li><strong>Durable ownership.</strong> Sandboxes are recorded in <code>hermes_sessions</code> and labelled in the
+runtime; after a restart <code>skill-executor</code> re-adopts live sandboxes and reaps only those past
+their limits or without a row. Limits (turn deadline, idle TTL, absolute lifetime, snapshot
+retention, per-organization and global capacity) are operator settings.</li>
+<li><strong>Network path.</strong> The sandbox has no route of its own. <code>hermes-egress</code> is the only exit:
+a reverse proxy to exactly two backend paths (the model proxy and the MCP bridge of platform
+tools) and a <code>CONNECT</code> forward proxy governed by an egress mode (<code>none</code>, <code>packages</code>,
+<code>public</code>) chosen by the organization within the operator's maximum. Every new connection is
+authorized against the backend live (session open, token version, active turn, current mode,
+<code>web.access</code> for <code>public</code>), so closing a session or revoking a capability stops new
+connections within seconds.</li>
+<li><strong>Credentials.</strong> The runner's token never enters the sandbox; Hermes has its own token type
+with its own audience, accepted by two routes only. Provider keys never enter it either:
+the model call goes through the backend proxy like any other, with quota and audit.</li>
+<li><strong>Previews.</strong> <code>hermes-preview</code> is the one component browsers reach at a preview origin; it
+streams into the sandbox through the executor and the sandbox gains no network for it.</li>
+<li><strong>Authority over history.</strong> PostgreSQL stays authoritative: each run receives the complete
+persisted history; Hermes's own state database is a rebuildable cache.</li>
+</ul>
+<h2 id="16-model-access-quota-and-usage">16. Model access, quota and usage</h2>
+<h3 id="161-model-access">16.1 Model access</h3>
+<p>A model is usable when it is in the organization's catalog, <strong>granted</strong> to the person
+(<code>access_grants</code>, resource type <code>model</code>), and, for features that need it, capable (vision,
+image generation). The organization's default model and temperature are configuration, not
+grants. Agent definitions may pin their own model; access to that actual model is still
+required. The gateway is addressed by a single configured URL and credential held by the
+backend; model identifiers are forwarded unchanged.</p>
+<h3 id="162-the-quota-ledger">16.2 The quota ledger</h3>
+<p>Each model request is a row in <code>llm_usage_events</code> with a status machine
+<code>reserved → accepted → completed</code> (or the reservation is cancelled). A per-organization,
+per-month counter row (<code>organization_usage_monthly</code>) holds requests and tokens used.</p>
+<ul>
+<li><strong>Reserve</strong> inserts the event (the request id is a unique identity that arbitrates
+retries; a duplicate with the same attribution counts once, a conflicting attribution is
+rejected without disclosing another tenant's event) and then touches the counter last, with
+<strong>one conditional <code>UPDATE</code></strong> that both checks the limits and counts the request. The limit
+is exact. Only when that statement matches nothing does the code fall back to locking the
+counter row and deciding under the lock.</li>
+<li><strong>Accept</strong> flips the event when the provider's response headers arrive; from then on the
+reservation cannot be reclaimed, however long the generation takes.</li>
+<li><strong>Complete</strong> records exact provider token usage; <strong>cancel</strong> returns an unaccepted
+reservation.</li>
+<li><strong>Stale reservations</strong> (<code>reserved</code> longer than 15 minutes, for instance after a backend
+crash) are deleted and the counter decremented by the next preflight or reserve for that
+organization, in a separate transaction taken before the counter lock.</li>
+<li>Usage transactions keep PostgreSQL's configured commit durability; the usage counts are
+therefore as durable as the rest of the database.</li>
+</ul>
+<p>Period accounting is by UTC month. Analytics over arbitrary periods are derived from events
+and are not the same number as monthly quota consumption.</p>
+<h3 id="163-why-a-counter-row">16.3 Why a counter row</h3>
+<p>A single hot row per organization serializes that organization's model-request admissions;
+the lock order is always event row then counter row, and the counter is held for one
+statement. That makes the limit exact and the design simple, at the cost of a per-tenant
+admission ceiling (section 20.3). Tenants do not contend with each other: each has its own
+row.</p>
+<h2 id="17-data-lifecycle-partitions-archive-restore">17. Data lifecycle: partitions, archive, restore</h2>
+<ul>
+<li><strong>Retention.</strong> Archiving is default-off. When enabled, a conversation becomes eligible after
+<code>APP_ARCHIVE_RETENTION_DAYS</code> (180) without activity (creation, update, message or restore),
+and is not eligible while an unexpired Hermes session is open. Discovery works in bounded
+batches ordered by retention reach so blocked candidates cannot starve new ones.</li>
+<li><strong>Archive.</strong> Payload is written to private, verified Parquet objects in a separate archive
+bucket before the source is purged; images and agent files are copied as their own checksummed
+objects. Independent checks must pass before purge. Billing and usage registries and the UUID
+identity registries stay in PostgreSQL.</li>
+<li><strong>Restore</strong> is an operator procedure that preserves UUIDs, grants, typed payload, file
+checksums and original dense vectors (no replay of workflows and no re-embedding), advances a
+restore generation so old callbacks are fenced, and makes the conversation visible only after
+the bytes are read back.</li>
+<li><strong>Observers</strong> preserve exact terminal receipts of Temporal executions before the history's own
+retention expires. Missing established history, unknown children, incomplete provenance or an
+ambiguous external-operation reply <strong>block</strong> purge.</li>
+<li><strong>Roles.</strong> The data worker uses its own login role in the lifecycle group and an archive
+bucket account that can read and create but not delete.</li>
+</ul>
+<p>See <a href="operations/data-archive.html">data archive</a> for the procedures.</p>
+<h2 id="18-frontends">18. Frontends</h2>
+<p>Two Next.js applications (App Router, React 19, TypeScript, Tailwind, TanStack Query) and
+<code>keycloak-js</code> in the browser. They are separate deployables with separate Keycloak clients and
+audiences. Design decisions with architectural weight:</p>
+<ul>
+<li><strong>Runtime configuration, not build-time.</strong> The server reads <code>RUNTIME_*</code> values on each
+request and serializes them into <code>window.__RUNTIME_CONFIG__</code>, so one image serves any
+deployment origin without a rebuild.</li>
+<li><strong>Streaming model.</strong> Chat consumes SSE; tool-call cards merge by call id (not by replacing the
+previous batch); the composer is blocked while a turn is active, matching the server's
+unique-active-turn rule. Durable question reconnects use bounded backoff and stop on permanent
+authorization denial.</li>
+<li><strong>History loading.</strong> The UI loads all history pages before replacing its local view; a missing
+or repeated cursor must surface as an error, never as a silently shorter conversation.</li>
+</ul>
+<h2 id="19-observability">19. Observability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metrics</td>
+<td>Prometheus counters and histograms per route template (<code>/metrics</code>); skill-executor and RAG expose their own</td>
+</tr>
+<tr>
+<td>Traces</td>
+<td>OpenTelemetry (OTLP) across the APIs and workers, with HTTP and SQLAlchemy instrumentation</td>
+</tr>
+<tr>
+<td>LLM traces and scores</td>
+<td>Langfuse (optional): one trace per conversation, generations per model call, faithfulness scores from the background evaluator; full-content capture is a deliberate setting because prompts and documents can be sensitive</td>
+</tr>
+<tr>
+<td>Audit</td>
+<td><code>audit_logs</code> (mutating requests), <code>authorization_audit_event</code>, Hermes egress decision journal, preview journal</td>
+</tr>
+<tr>
+<td>Health</td>
+<td><code>/health</code> is liveness; <code>/ready</code> checks required dependencies</td>
+</tr>
+</tbody>
+</table></div>
+<p>Security-sensitive status streams (turn and question status) are metadata-only by
+construction: the publisher projects them onto an allowlist so a future caller cannot put a
+prompt or an answer on a browser-facing channel.</p>
+<h2 id="20-scalability-and-capacity">20. Scalability and capacity</h2>
+<h3 id="201-connection-budget">20.1 Connection budget</h3>
+<p>The APIs are stateless; what bounds them is PostgreSQL connections. Every worker process
+holds up to <code>APP_DB_POOL_SIZE + APP_DB_MAX_OVERFLOW</code> request connections (20 + 40 by default)
+plus one dedicated audit connection, so:</p>
+<pre><code>replicas × workers × (pool + overflow + 1)  +  RAG  +  Temporal  +  Keycloak  +  Langfuse  ≤  max_connections
+</code></pre>
+<p>The Compose stack starts PostgreSQL with <code>max_connections=200</code>; production sizing is the
+operator's. A connection pooler is the standard answer beyond a few replicas; transaction-mode
+pooling suits the per-transaction tenant context but is untested here (prepared statements and
+driver settings need checking first).</p>
+<p>Two design points keep the budget honest: request-scoped sessions release their connection
+before slow I/O (<code>commit</code> before the model call; the turn event stream ends its transaction
+before streaming and reads each snapshot with a short-lived session), so an open chat does not
+pin a pooled connection &quot;idle in transaction&quot;; and the audit pool is separate so audit writes do
+not compete with request connections held until the response ends.</p>
+<h3 id="202-scaling-by-component">20.2 Scaling by component</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Scale lever</th>
+<th>Limiting resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Business / Admin API</td>
+<td>replicas, workers</td>
+<td>database connections; CPU for SSE relay</td>
+</tr>
+<tr>
+<td>Runners</td>
+<td>one per <em>active</em> conversation; idle reaping</td>
+<td>memory (default 512 MiB each), container/Pod creation rate; warm pool on Docker</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>server sizing, history shards</td>
+<td>workflow task latency; keep histories bounded</td>
+</tr>
+<tr>
+<td>Tool worker</td>
+<td>replicas</td>
+<td>concurrent skill and sandbox activities</td>
+</tr>
+<tr>
+<td>Skill executor</td>
+<td>single logical instance today</td>
+<td>sandbox creation rate; kept stateless for non-Hermes sessions by TTL reaping</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>API replicas; worker replicas</td>
+<td>embedding service throughput, Milvus</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>vertical, pooler, partition pruning</td>
+<td>connections, write IOPS on the audit and message partitions</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="203-measured-and-structural-limits">20.3 Measured and structural limits</h3>
+<ul>
+<li>
+<p><strong>Reading a conversation list</strong> is index-only on <code>(org_id, user_id, activity)</code>:
+with 300 000 conversations it dropped from about 34 ms (scanning every partition) to about
+0.4 ms and no longer grows with table size.</p>
+</li>
+<li>
+<p><strong>History reads</strong> prune partitions by <code>created_at</code>: planning cost went from about 8 ms at 46
+partitions (growing monthly) to about 0.2 ms.</p>
+</li>
+<li>
+<p><strong>The per-organization quota counter</strong> is the structural ceiling of model-request admission
+for one tenant, because every request of an organization updates the same monthly counter
+row, twice (when it is reserved and when it completes). Measured with <code>pgbench</code> against the
+current schema and queries, 24 concurrent clients, each running a full request lifecycle
+(reserve, accept, complete; three short transactions), PostgreSQL 16 in a local
+container on a development laptop (WSL2):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Full lifecycles per second</th>
+<th>Average latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One organization, durable commit (the shipped setting)</td>
+<td>about 320</td>
+<td>75 ms</td>
+</tr>
+<tr>
+<td>24 organizations, durable commit</td>
+<td>about 930</td>
+<td>26 ms</td>
+</tr>
+<tr>
+<td>One organization, <code>synchronous_commit = off</code> (not used)</td>
+<td>about 610</td>
+<td>40 ms</td>
+</tr>
+</tbody>
+</table></div>
+<p>So a single tenant is limited to a few hundred model requests per second on this hardware,
+independent tenants do not slow each other down, and relaxing commit durability would have
+roughly doubled the single-tenant ceiling at the cost of losing the last moments of usage
+counts after a database crash; the platform does not do that. This measures the database
+work only; the application adds its own overhead (a stale-reservation sweep and the
+provider round trip, which is far longer than any of this). Disk flush latency dominates
+the durable figures, so measure on your own storage before capacity planning.</p>
+</li>
+<li>
+<p><strong>Sessions per host (Docker).</strong> Each runner reserves memory; size hosts by
+<code>concurrent active conversations × runner memory</code> plus Hermes sandboxes.</p>
+</li>
+<li>
+<p><strong>Sign-in cost</strong> is one indexed lookup and, in the common case, no write.</p>
+</li>
+</ul>
+<h2 id="21-failure-modes-and-recovery">21. Failure modes and recovery</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What happens</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API replica dies mid-stream</td>
+<td>Browser SSE drops; the turn keeps running in the runner and persists its answer</td>
+<td>UI reopens and reads the durable turn snapshot and history</td>
+</tr>
+<tr>
+<td>Runner container dies</td>
+<td>Workflow stalls until its queue has a worker again; no history loss</td>
+<td>Next send re-creates the runner (new Pod/container), workflow replays; stale records are swept</td>
+</tr>
+<tr>
+<td>Redis lost</td>
+<td>Live events and runner records vanish</td>
+<td>Records rebuilt by startup sweeps; streams reconnect from snapshots</td>
+</tr>
+<tr>
+<td>Temporal unavailable</td>
+<td>Admission returns <code>503</code> for new turns, the turn is marked failed, subscriptions released</td>
+<td>Retry after recovery; histories are durable</td>
+</tr>
+<tr>
+<td>LLM gateway error or slow</td>
+<td>Quota reservation cancelled or reclaimed; the turn fails with the reason and still closes the stream</td>
+<td>User retries; stale reservations expire after 15 minutes</td>
+</tr>
+<tr>
+<td>PostgreSQL unavailable</td>
+<td>APIs fail readiness; workers retry activities within bounds</td>
+<td>Restore service; no partial writes visible (transactions)</td>
+</tr>
+<tr>
+<td>Backend crash between reserve and accept</td>
+<td>Reservation stays <code>reserved</code></td>
+<td>Reclaimed by the next preflight/reserve for that organization</td>
+</tr>
+<tr>
+<td>Worker outage with identity sync on</td>
+<td>Changed identities admitted as <code>identity_sync_pending</code> for a bounded time</td>
+<td>Restart the identity worker; admission tightens after the bound</td>
+</tr>
+<tr>
+<td>Milvus partial failure on indexing</td>
+<td>Activity fails and retries up to 3 times, then the document is marked failed</td>
+<td>Re-index; search never serves a document the database says is gone</td>
+</tr>
+<tr>
+<td>Archive ambiguity (unknown child, missing receipt, unreadable part)</td>
+<td>Purge is blocked</td>
+<td>Operator resolves; evidence is retained</td>
+</tr>
+<tr>
+<td>Acceptance cleanup cannot prove exact ownership</td>
+<td>Cleanup refuses and keeps the recovery journal</td>
+<td>Operator inspects; broad prefix deletes are not a fallback</td>
+</tr>
+</tbody>
+</table></div>
+<p>General recovery stance: retry bounded, then fail with a stored reason; never guess identity.</p>
+<h2 id="22-compatibility-and-evolution-rules">22. Compatibility and evolution rules</h2>
+<p>These are the rules an architect should enforce in review; each exists because the opposite
+caused a real defect.</p>
+<ol>
+<li><strong>Replay safety.</strong> New workflow behaviour goes behind a new <code>workflow.patched</code> marker; old
+markers stay forever; replay tests for histories recorded before and after.</li>
+<li><strong>Signal and activity contracts.</strong> The backend's <code>ConversationWorkflow</code> stub and the
+runner's workflow must keep signal names and payloads identical.</li>
+<li><strong>Identity-only tokens.</strong> Never put permissions, grants or capability snapshots into any
+token, workflow input or template.</li>
+<li><strong>Service routes</strong> use the session-aware dependencies; browser-only dependencies must not
+replace them.</li>
+<li><strong>Tenant scope in every new table</strong>: an <code>org_id</code>, <code>FORCE ROW LEVEL SECURITY</code>, a policy on
+the transaction setting, and grants to the runtime role only. Foreign keys that cascade
+need a leading-column index; partitioned tables need bounded <code>created_at</code> access.</li>
+<li><strong>Streaming stays streaming.</strong> The model call is always a stream; do not substitute a
+buffered call or add unsupported response formats in the <code>llm_call</code> path.</li>
+<li><strong>Runtime configuration is runtime.</strong> Do not replace <code>RUNTIME_*</code> with build-time
+<code>NEXT_PUBLIC_*</code> URLs.</li>
+<li><strong>Network changes are three-place changes.</strong> Deny ranges and egress allowances are kept in
+sync between the adapter, the Docker guard and the Helm policies, and verified with positive
+controls (an unavailable IPv6 path is incomplete coverage, not a passed negative).</li>
+<li><strong>Documentation and migrations.</strong> Migrations are reversible and flag blocking index builds;
+source, comments and documentation are English, with Russian only in <code>messages/ru.json</code>.</li>
+</ol>
+<h3 id="221-where-to-add-things">22.1 Where to add things</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>To add</th>
+<th>Touch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A capability</td>
+<td><code>core/capability_catalog.py</code> (enum, definition, SQL values list), a migration extending the check constraint, admin UI strings; decide explicitly whether new organizations receive it (they do not by default)</td>
+</tr>
+<tr>
+<td>A resource type with grants</td>
+<td><code>authorization_types</code>, the <code>access_grants</code> check constraint (migration), <code>AuthorizationService</code> filters, a grant-administration path</td>
+</tr>
+<tr>
+<td>A runner activity</td>
+<td><code>conversation-runner/src/workflows/activities.py</code>, register in <code>worker.py</code>, call from a workflow behind a patch marker</td>
+</tr>
+<tr>
+<td>An internal API a worker calls</td>
+<td>a router under <code>/v1/internal</code> using the service dependencies; a client in the worker; a test that both session and browser tokens behave as intended</td>
+</tr>
+<tr>
+<td>A background loop</td>
+<td>an asyncio task in the lifespan that claims work through a leased database function or row locks, safe under multiple replicas</td>
+</tr>
+<tr>
+<td>A tenant table</td>
+<td>model on <code>OrgScopedModel</code> (or <code>OrgScopedLeadingIndexModel</code> when composite indexes already lead with <code>org_id</code>), migration with RLS policy and runtime grants</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="23-known-limits-and-non-goals">23. Known limits and non-goals</h2>
+<ul>
+<li><strong>Compose is not a hard boundary.</strong> It gives the backend Docker-socket authority
+(root-equivalent). Production isolation is the Kubernetes topology.</li>
+<li><strong>No warm runner pool on Kubernetes.</strong> First-token latency after idle includes Pod start.</li>
+<li><strong>One skill-executor logical instance.</strong> Sandboxes for non-Hermes sessions are short-lived and
+reaped by TTL; Hermes sandboxes are durable and re-adopted, but executor capacity is not
+horizontally partitioned.</li>
+<li><strong>Per-tenant admission ceiling.</strong> A single organization's model-request rate is bounded by
+its counter row (section 20.3).</li>
+<li><strong>PgBouncer-style pooling is untested.</strong></li>
+<li><strong>Workflow limits.</strong> No wall-clock loop budget; nested or overlapping loops are not
+supported; fixed graphs only (20 nodes, concurrency 4).</li>
+<li><strong>Docker egress segment.</strong> Docker bridges let containers on one network reach each other; the
+Hermes Docker runtime uses a separate internal network per sandbox, and the shared-segment
+concern is closed by Kubernetes <code>NetworkPolicy</code>.</li>
+<li><strong>Search quality is configuration.</strong> Hybrid retrieval quality depends on the configured
+embedding model and (optional) contextual-retrieval model; the repository does not ship a model.</li>
+<li><strong>Real provider behaviour is out of scope</strong> for controlled acceptance tests: gateway, search
+and provider availability are tested separately from policy and workflow behaviour.</li>
+</ul>
+<h2 id="24-source-map">24. Source map</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API wiring, middleware</td>
+<td><code>business-backend/src/app_factory.py</code>, <code>middleware/</code>, <code>main_business.py</code>, <code>main_admin.py</code></td>
+</tr>
+<tr>
+<td>Auth dependencies, tokens</td>
+<td><code>core/auth.py</code>, <code>core/dependencies.py</code>, <code>services/session_token.py</code>, <code>services/hermes_session_token.py</code>, <code>core/hermes_auth.py</code></td>
+</tr>
+<tr>
+<td>Authorization</td>
+<td><code>services/authorization.py</code>, <code>core/capability_catalog.py</code>, <code>repositories/access_grant_repository.py</code></td>
+</tr>
+<tr>
+<td>Database, RLS</td>
+<td><code>core/database.py</code>, <code>alembic/versions/</code>, <code>models/base.py</code></td>
+</tr>
+<tr>
+<td>Chat path</td>
+<td><code>routers/chat.py</code>, <code>routers/turns.py</code>, <code>services/interaction.py</code>, <code>core/events.py</code></td>
+</tr>
+<tr>
+<td>Quota</td>
+<td><code>services/quota.py</code>, <code>services/completion_stream.py</code>, <code>services/llm_client.py</code></td>
+</tr>
+<tr>
+<td>Runner management</td>
+<td><code>services/session_manager.py</code>, <code>services/runner_runtime/</code></td>
+</tr>
+<tr>
+<td>Runner workflows</td>
+<td><code>conversation-runner/src/workflows/</code> (<code>conversation.py</code>, <code>multi_agent.py</code>, <code>agent.py</code>, <code>code_skill_session.py</code>), <code>worker.py</code></td>
+</tr>
+<tr>
+<td>Tool worker</td>
+<td><code>tool-worker/src/</code> (<code>activities.py</code>, <code>mcp_client.py</code>, <code>hermes_*</code>)</td>
+</tr>
+<tr>
+<td>Sandboxes</td>
+<td><code>skill-executor/src/</code> (<code>sandbox_runtime/</code>, <code>hermes_*</code>)</td>
+</tr>
+<tr>
+<td>RAG (see <a href="RAG_ARCHITECTURE.html">RAG architecture</a>)</td>
+<td><code>rag-api/src/</code>, <code>rag-worker/src/</code> (<code>indexing/</code>, <code>workflows/</code>)</td>
+</tr>
+<tr>
+<td>Web tools</td>
+<td><code>web-tools/src/</code> (<code>policy.py</code>, <code>reader.py</code>, <code>parser_sandbox.py</code>)</td>
+</tr>
+<tr>
+<td>Egress and previews</td>
+<td><code>infra/web-egress/</code>, <code>hermes-preview/</code>, <code>charts/aurum-ai/templates/*network-polic*</code></td>
+</tr>
+<tr>
+<td>Archive and lifecycle</td>
+<td><code>services/archive/</code>, <code>services/data_partitions.py</code>, <code>maintenance_worker.py</code></td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td><code>docker-compose*.yml</code>, <code>charts/aurum-ai/</code></td>
+</tr>
+<tr>
+<td>Frontends</td>
+<td><code>business-ui/</code>, <code>admin-ui/</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Related documents: <a href="ARCHITECTURE.html">architecture overview</a>, <a href="RAG_ARCHITECTURE.html">RAG architecture</a>, <a href="HERMES_AGENT.html">Hermes Agent design</a>,
+<a href="reference/security.html">security model</a>, <a href="operations/network-enforcement.html">network enforcement</a>,
+<a href="operations/data-archive.html">data archive</a>, <a href="guides/operations.html">operations guide</a>,
+<a href="CONFIGURATION.html">configuration reference</a>, <a href="TESTING.html">testing</a>, <a href="reference/api.html">API reference</a>.</p>
+
+</main>
+<footer>AurumAI is free software under AGPL-3.0-only. <a href="https://github.com/tsrman/AurumAI">Source code</a> · <a href="https://github.com/tsrman/AurumAI/blob/main/LICENSE">License</a></footer>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"default"});</script>
+</body>
+</html>

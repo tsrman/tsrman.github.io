@@ -164,6 +164,10 @@ session token, so authorization and quota apply.</p>
 <td><code>docker compose --profile rag up -d --build</code>; the first model download can take minutes</td>
 </tr>
 <tr>
+<td>Reranking of knowledge search</td>
+<td>Optional: add profile <code>rerank</code> and set <code>RAG_API_RERANK_URL=http://rag-rerank:7997</code>; see <a href="../RAG_ARCHITECTURE.html#81-cross-encoder-reranking">the RAG architecture</a></td>
+</tr>
+<tr>
 <td>Questions</td>
 <td><code>USER_QUESTIONS_ENABLED=true</code></td>
 </tr>

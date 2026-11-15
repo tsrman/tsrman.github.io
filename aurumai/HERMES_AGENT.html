@@ -425,7 +425,8 @@ not check it; the first Hermes turn fails clearly if the gateway rejects <code>t
 the AurumAI tools the user may use for this turn. Hermes's <code>mcp_servers</code> config
 points at it with <code>tools.include</code>.</p>
 <ul>
-<li><strong>Tools exposed.</strong> Knowledge search, <code>web.search</code> and <code>web.read</code>, image generation
+<li><strong>Tools exposed.</strong> Knowledge search (the conversation's attachments, and the knowledge
+bases of the session's agent by id, each authorized for the person live), <code>web.search</code> and <code>web.read</code>, image generation
 and editing, granted MCP skills and code skills, model questions to the user, and
 <code>attach_file</code> for the files and charts it makes (see Files and charts).</li>
 <li><strong>Live authorization.</strong> Every call re-authorizes. Revoking a grant during a turn
@@ -727,9 +728,9 @@ no <code>Mcp-Session-Id</code>, so the client never opens the server stream that
 hermes-egress would refuse. Calls the bridge denies or cannot complete
 are tool errors with bounded codes, not HTTP errors, which Hermes counts
 towards pausing the server; the ordinary rate limit still answers 429;</li>
-<li>knowledge search covers only the files attached to the conversation, as
-for an ordinary chat agent; the Hermes agent definition's knowledge bases
-follow with phase 4;</li>
+<li>knowledge search covers the files attached to the conversation and, by
+<code>knowledgeBaseId</code>, the knowledge bases of the session's Hermes agent
+definition (implemented with phase 4; any other id is refused);</li>
 <li>questions to the user move to phase 4: they wait in Hermes's <code>clarify</code>
 state, answered through the durable <code>user_questions</code> flow by the session
 workflow, not over a tool call bounded by its timeout;</li>
