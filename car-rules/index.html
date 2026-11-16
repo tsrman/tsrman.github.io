@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.53</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.54</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.53/CarRulesVoice-1.53-ru-release.apk">CarRulesVoice-1.53-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.53/CarRulesVoice-1.53-en-release.apk">CarRulesVoice-1.53-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.53/CarRulesVoice-1.53-fa-release.apk">CarRulesVoice-1.53-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-ru-release.apk">CarRulesVoice-1.54-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-en-release.apk">CarRulesVoice-1.54-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-fa-release.apk">CarRulesVoice-1.54-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -366,6 +366,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.54</strong> — громкость медиа теперь видна в карточке «Состояние автомобиля»; исправлена кнопка ▶ у действия «Громкость» в редакторе — она трогала только системный звук и ничего не меняла на машине.</li>
 <li><strong>v1.53</strong> — новый параметр «Громкость медиа (текущая)» — реальная громкость машины (та же, что меняют кнопки на руле), доступна как триггер и условие; возвращено в список действие «Громкость» (было случайно недоступно для новых правил).</li>
 <li><strong>v1.52</strong> — новая галочка у правила «Игнорировать повторное срабатывание, пока не истёк таймер автовыключения» — защита от дребезга датчика (например, под сиденьем): пока действует предыдущий автовыключающий таймер, повторные срабатывания триггера игнорируются вместо перезапуска таймера.</li>
 <li><strong>v1.51</strong> — исправлено действие «Громкость»: раньше оно писало через AudioManager, а для стороннего приложения на этой платформе это ничего не меняет (настоящая громкость защищена сигнатурным правом). Теперь пишется настоящий ключ громкости — так же, как её меняют кнопки на руле.</li>
@@ -651,6 +652,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.54</strong> — the live media volume now shows in the "Vehicle state" card; fixed the ▶ test button on the "Volume" action in the rule editor — it only touched the system sound and changed nothing in the car.</li>
 <li><strong>v1.53</strong> — new "Media volume (live)" parameter — the car's real volume (the one the steering-wheel buttons change), available as a trigger and condition; the "Volume" action is back in the picker (it had been accidentally unavailable for new rules).</li>
 <li><strong>v1.52</strong> — new per-rule checkbox “Ignore repeated triggering while the auto-off timer is still running” — debounces a noisy sensor (e.g. a seat occupancy sensor): while the rule's previous auto-off timer is still pending, a fresh trigger is ignored instead of restarting the timer.</li>
 <li><strong>v1.51</strong> — fixed the “Volume” action: it used to write through AudioManager, which does nothing for a 3rd-party app on this platform (the real volume is behind a signature permission). It now writes the real volume key — the same one the steering-wheel buttons change.</li>
@@ -932,6 +934,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.54</strong> — بلندی صدای رسانه اکنون در کارت «وضعیت خودرو» دیده می‌شود؛ دکمهٔ ▶ عمل «صدا» در ویرایشگر قانون اصلاح شد — فقط صدای سیستم را تغییر می‌داد و چیزی در خودرو عوض نمی‌کرد.</li>
 <li><strong>v1.53</strong> — پارامتر جدید «بلندی صدای رسانه (فعلی)» — صدای واقعی خودرو (همان که دکمه‌های روی فرمان تغییر می‌دهند)، به‌عنوان محرک و شرط در دسترس است؛ عمل «صدا» دوباره در فهرست قرار گرفت (به‌اشتباه برای قوانین جدید در دسترس نبود).</li>
 <li><strong>v1.52</strong> — گزینهٔ جدید در هر قانون «در حالی که تایمر خاموشی خودکار هنوز فعال است، اجرای دوباره نادیده گرفته شود» — برای نویز حسگر (مثلاً زیر صندلی): تا وقتی تایمر خاموشی خودکار قبلی فعال است، محرک جدید به‌جای ری‌استارت تایمر نادیده گرفته می‌شود.</li>
 <li><strong>v1.51</strong> — عمل «صدا» اصلاح شد: پیش‌تر از طریق AudioManager می‌نوشت که برای یک برنامهٔ ثالث در این سیستم‌عامل هیچ اثری ندارد (صدای واقعی پشت یک مجوز امضایی محافظت می‌شود). اکنون کلید واقعی صدا نوشته می‌شود — همان که دکمه‌های روی فرمان تغییرش می‌دهند.</li>
