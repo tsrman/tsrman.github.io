@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.54</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.55</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-ru-release.apk">CarRulesVoice-1.54-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-en-release.apk">CarRulesVoice-1.54-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.54/CarRulesVoice-1.54-fa-release.apk">CarRulesVoice-1.54-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-ru-release.apk">CarRulesVoice-1.55-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-en-release.apk">CarRulesVoice-1.55-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-fa-release.apk">CarRulesVoice-1.55-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -238,7 +238,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 Для работы в фоне нужен фоновый доступ к геолокации.</p>
 
 <h3>Уведомление при срабатывании</h3>
-<p>У правила есть галочка «Показывать всплывающее уведомление и звук при срабатывании» — снимите её для «тихих» правил (в списке они помечены 🔕).</p>
+<p>У правила есть две независимые галочки — «Показывать всплывающее уведомление» и «Воспроизводить звук» при срабатывании; снимите одну или обе для «тихих» правил (в списке они помечены 🔕, с уточнением, что именно отключено).</p>
 <h3>Защита от дребезга датчика</h3>
 <p>Галочка «Игнорировать повторное срабатывание, пока не истёк таймер автовыключения» — для правил с действием на время
 («Минут»), запущенных от шумного датчика (классика — под сиденьем: он может мигать 0/1/0/1, пока человек шевелится).
@@ -366,6 +366,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.55</strong> — галочка «Показывать всплывающее уведомление и звук при срабатывании» разделена на две независимые: отдельно тост, отдельно звук (по умолчанию обе включены).</li>
 <li><strong>v1.54</strong> — громкость медиа теперь видна в карточке «Состояние автомобиля»; исправлена кнопка ▶ у действия «Громкость» в редакторе — она трогала только системный звук и ничего не меняла на машине.</li>
 <li><strong>v1.53</strong> — новый параметр «Громкость медиа (текущая)» — реальная громкость машины (та же, что меняют кнопки на руле), доступна как триггер и условие; возвращено в список действие «Громкость» (было случайно недоступно для новых правил).</li>
 <li><strong>v1.52</strong> — новая галочка у правила «Игнорировать повторное срабатывание, пока не истёк таймер автовыключения» — защита от дребезга датчика (например, под сиденьем): пока действует предыдущий автовыключающий таймер, повторные срабатывания триггера игнорируются вместо перезапуска таймера.</li>
@@ -524,7 +525,7 @@ Empty trigger → fires on <strong>entering</strong>; a set trigger → the geof
 condition. Background location access is needed to fire while the app is closed.</p>
 
 <h3>Notification on fire</h3>
-<p>Each rule has a “Show a toast + sound when this rule fires” checkbox — clear it for “silent” rules (they are marked 🔕 in the list).</p>
+<p>Each rule has two independent checkboxes — “Show a toast” and “Play a sound” when it fires; clear one or both for “silent” rules (they are marked 🔕 in the list, noting which one is off).</p>
 <h3>Debouncing a noisy sensor</h3>
 <p>The “Ignore repeated triggering while the auto-off timer is still running” checkbox is for rules with a timed action
 (“Minutes”) started by a noisy sensor (classically a seat occupancy sensor, which can flicker 0/1/0/1 as someone
@@ -652,6 +653,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.55</strong> — the "Show a toast + sound when this rule fires" checkbox is now two independent ones: a toast switch and a sound switch (both on by default).</li>
 <li><strong>v1.54</strong> — the live media volume now shows in the "Vehicle state" card; fixed the ▶ test button on the "Volume" action in the rule editor — it only touched the system sound and changed nothing in the car.</li>
 <li><strong>v1.53</strong> — new "Media volume (live)" parameter — the car's real volume (the one the steering-wheel buttons change), available as a trigger and condition; the "Volume" action is back in the picker (it had been accidentally unavailable for new rules).</li>
 <li><strong>v1.52</strong> — new per-rule checkbox “Ignore repeated triggering while the auto-off timer is still running” — debounces a noisy sensor (e.g. a seat occupancy sensor): while the rule's previous auto-off timer is still pending, a fresh trigger is ignored instead of restarting the timer.</li>
@@ -807,7 +809,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 پس‌زمینه دسترسی موقعیت در پس‌زمینه لازم است.</p>
 
 <h3>اعلان هنگام اجرا</h3>
-<p>هر قانون گزینهٔ «هنگام اجرای این قانون، پیام و صدا نمایش داده شود» دارد — برای قوانین «بی‌صدا» آن را بردارید (در فهرست با 🔕 مشخص می‌شوند).</p>
+<p>هر قانون دو گزینهٔ مستقل دارد — «نمایش پیام» و «پخش صدا» هنگام اجرا؛ یکی یا هر دو را برای قوانین «بی‌صدا» بردارید (در فهرست با 🔕 مشخص می‌شوند و مشخص می‌کند کدام خاموش است).</p>
 <h3>کاهش نویز حسگر</h3>
 <p>گزینهٔ «در حالی که تایمر خاموشی خودکار هنوز فعال است، اجرای دوباره نادیده گرفته شود» برای قوانینی است که عملی با زمان
 («دقیقه») دارند و با یک حسگر نویزی اجرا می‌شوند (نمونهٔ کلاسیک: حسگر زیر صندلی که ممکن است هنگام جابه‌جایی وزن
@@ -934,6 +936,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.55</strong> — گزینهٔ «هنگام اجرای این قانون، پیام و صدا نمایش داده شود» به دو گزینهٔ مستقل تبدیل شد: یکی برای پیام، یکی برای صدا (هر دو به‌طور پیش‌فرض روشن).</li>
 <li><strong>v1.54</strong> — بلندی صدای رسانه اکنون در کارت «وضعیت خودرو» دیده می‌شود؛ دکمهٔ ▶ عمل «صدا» در ویرایشگر قانون اصلاح شد — فقط صدای سیستم را تغییر می‌داد و چیزی در خودرو عوض نمی‌کرد.</li>
 <li><strong>v1.53</strong> — پارامتر جدید «بلندی صدای رسانه (فعلی)» — صدای واقعی خودرو (همان که دکمه‌های روی فرمان تغییر می‌دهند)، به‌عنوان محرک و شرط در دسترس است؛ عمل «صدا» دوباره در فهرست قرار گرفت (به‌اشتباه برای قوانین جدید در دسترس نبود).</li>
 <li><strong>v1.52</strong> — گزینهٔ جدید در هر قانون «در حالی که تایمر خاموشی خودکار هنوز فعال است، اجرای دوباره نادیده گرفته شود» — برای نویز حسگر (مثلاً زیر صندلی): تا وقتی تایمر خاموشی خودکار قبلی فعال است، محرک جدید به‌جای ری‌استارت تایمر نادیده گرفته می‌شود.</li>
