@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.56</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.57</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-ru-release.apk">CarRulesVoice-1.56-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-en-release.apk">CarRulesVoice-1.56-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-fa-release.apk">CarRulesVoice-1.56-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.57/CarRulesVoice-1.57-ru-release.apk">CarRulesVoice-1.57-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.57/CarRulesVoice-1.57-en-release.apk">CarRulesVoice-1.57-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.57/CarRulesVoice-1.57-fa-release.apk">CarRulesVoice-1.57-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -264,7 +264,10 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 <li><strong>Экспорт правил (новый файл)</strong> — сохраняет правила, голосовые команды и все настройки (плавающая панель, настройки программы, настройки голоса, тема; лицензия голоса не сохраняется) в
   <code>Download/CarRulesVoice/</code>.</li>
 <li><strong>Импорт правил…</strong> — выберите файл из этой папки; текущие правила (и голосовые команды, если они
-  есть в файле) будут заменены — приложение спросит подтверждение.</li>
+  есть в файле) будут заменены — приложение спросит подтверждение. После удаления и повторной установки программы
+  Android скрывает от неё старые экспорты — нажмите <strong>«Все файлы в папке…»</strong>: программа прочитает всю
+  папку через собственный ADB (при первом запуске подтвердите «Разрешить отладку?»). Если есть файловый менеджер,
+  экспорт можно открыть и из него: «Открыть с помощью» / «Поделиться» → Car Rules Voice.</li>
 <li><strong>Импорт из Car Rules</strong> — переносит правила из обычного приложения Car Rules (оба приложения подписаны
   одним ключом); при первом запуске приложение само предложит это сделать.</li>
 <li><strong>Тема оформления</strong> — «Как в системе» / «Светлая» / «Тёмная».</li>
@@ -367,6 +370,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.57</strong> — импорт видит бэкапы, сделанные до переустановки программы: кнопка «Все файлы в папке…» в окне импорта читает всю папку через собственный ADB; экспорт можно также открыть из файлового менеджера через «Открыть с помощью» / «Поделиться» → Car Rules Voice.</li>
 <li><strong>v1.56</strong> — новая настройка плавающей панели «Показывать громкость поверх панели при её изменении» (например, кнопками руля, на 2 секунды); строка громкости убрана из карточки «Состояние автомобиля».</li>
 <li><strong>v1.55</strong> — галочка «Показывать всплывающее уведомление и звук при срабатывании» разделена на две независимые: отдельно тост, отдельно звук (по умолчанию обе включены).</li>
 <li><strong>v1.54</strong> — громкость медиа теперь видна в карточке «Состояние автомобиля»; исправлена кнопка ▶ у действия «Громкость» в редакторе — она трогала только системный звук и ничего не меняла на машине.</li>
@@ -553,7 +557,10 @@ restarting the timer; once the timer applies, the next genuine trigger fires nor
 <li><strong>Export rules (new file)</strong> — saves rules, voice commands and all settings (floating panel, app settings, voice settings, theme; the voice license is not saved) to
   <code>Download/CarRulesVoice/</code>.</li>
 <li><strong>Import rules…</strong> — pick a file from that folder; the current rules (and voice commands, if the
-  file has them) are replaced — the app asks for confirmation first.</li>
+  file has them) are replaced — the app asks for confirmation first. After the app is uninstalled and installed
+  again, Android hides the older exports from it — tap <strong>“All files in the folder…”</strong>: the app reads the
+  whole folder through its own ADB (on first use confirm “Allow debugging?”). With a file manager you can also open an
+  export from there: “Open with” / “Share” → Car Rules Voice.</li>
 <li><strong>Import from Car Rules</strong> — copies the rules over from the plain Car Rules app (both apps share one signing
   key); the app also offers this by itself on first launch.</li>
 <li><strong>Theme</strong> — “Follow system” / “Light” / “Dark”.</li>
@@ -656,6 +663,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.57</strong> — import now sees backups made before the app was reinstalled: the “All files in the folder…” button in the import dialog reads the whole folder through the app’s own ADB; an export can also be opened from a file manager via “Open with” / “Share” → Car Rules Voice.</li>
 <li><strong>v1.56</strong> — new floating-panel option “Show the volume on the panel when it changes” (e.g. from the steering-wheel buttons, for 2 seconds); the volume row was removed from the “Vehicle state” card.</li>
 <li><strong>v1.55</strong> — the "Show a toast + sound when this rule fires" checkbox is now two independent ones: a toast switch and a sound switch (both on by default).</li>
 <li><strong>v1.54</strong> — the live media volume now shows in the "Vehicle state" card; fixed the ▶ test button on the "Volume" action in the rule editor — it only touched the system sound and changed nothing in the car.</li>
@@ -838,7 +846,10 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 <li><strong>برون‌بری قوانین (فایل جدید)</strong> — قوانین، فرمان‌های صوتی و همهٔ تنظیمات (پنل شناور، تنظیمات برنامه، تنظیمات صدا، پوسته؛ لایسنس صدا ذخیره نمی‌شود) را در
   <code>Download/CarRulesVoice/</code> ذخیره می‌کند.</li>
 <li><strong>درون‌ریزی قوانین…</strong> — فایلی از همان پوشه را انتخاب کنید؛ قوانین فعلی (و فرمان‌های صوتی، اگر در فایل
-  باشند) جایگزین می‌شوند — برنامه ابتدا تأیید می‌گیرد.</li>
+  باشند) جایگزین می‌شوند — برنامه ابتدا تأیید می‌گیرد. پس از حذف و نصب مجدد برنامه، اندروید خروجی‌های قدیمی را از آن
+  پنهان می‌کند — روی <strong>«همهٔ فایل‌های پوشه…»</strong> بزنید: برنامه کل پوشه را از طریق ADB خودش می‌خواند (در اولین
+  بار «اجازهٔ اشکال‌زدایی؟» را تأیید کنید). اگر مدیر فایل دارید، می‌توانید خروجی را از آن هم باز کنید: «باز کردن با» /
+  «اشتراک‌گذاری» → Car Rules Voice.</li>
 <li><strong>درون‌ریزی از Car Rules</strong> — قوانین را از برنامهٔ ساده Car Rules منتقل می‌کند (هر دو برنامه با یک کلید
   امضا شده‌اند)؛ برنامه در اولین اجرا هم خودش این کار را پیشنهاد می‌دهد.</li>
 <li><strong>پوسته</strong> — «پیروی از سیستم» / «روشن» / «تیره».</li>
@@ -941,6 +952,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.57</strong> — درون‌ریزی اکنون پشتیبان‌های ساخته‌شده پیش از نصب مجدد برنامه را هم می‌بیند: دکمهٔ «همهٔ فایل‌های پوشه…» در پنجرهٔ درون‌ریزی کل پوشه را از طریق ADB خود برنامه می‌خواند؛ خروجی را می‌توان از مدیر فایل هم با «باز کردن با» / «اشتراک‌گذاری» → Car Rules Voice باز کرد.</li>
 <li><strong>v1.56</strong> — گزینهٔ جدید پنل شناور «هنگام تغییر صدا، مقدار آن روی پنل نمایش داده شود» (مثلاً با دکمه‌های روی فرمان، به مدت ۲ ثانیه)؛ ردیف صدا از کارت «وضعیت خودرو» حذف شد.</li>
 <li><strong>v1.55</strong> — گزینهٔ «هنگام اجرای این قانون، پیام و صدا نمایش داده شود» به دو گزینهٔ مستقل تبدیل شد: یکی برای پیام، یکی برای صدا (هر دو به‌طور پیش‌فرض روشن).</li>
 <li><strong>v1.54</strong> — بلندی صدای رسانه اکنون در کارت «وضعیت خودرو» دیده می‌شود؛ دکمهٔ ▶ عمل «صدا» در ویرایشگر قانون اصلاح شد — فقط صدای سیستم را تغییر می‌داد و چیزی در خودرو عوض نمی‌کرد.</li>
