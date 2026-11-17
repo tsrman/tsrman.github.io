@@ -71,11 +71,11 @@
 
 <!-- ================= DOWNLOAD (shared) ================= -->
 <div class="download">
-  <strong>Скачать / Download / دانلود — Car Rules Voice v1.55</strong>
+  <strong>Скачать / Download / دانلود — Car Rules Voice v1.56</strong>
   <ul>
-    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-ru-release.apk">CarRulesVoice-1.55-ru-release.apk</a> — русский голос / Russian voice</li>
-    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-en-release.apk">CarRulesVoice-1.55-en-release.apk</a> — English voice</li>
-    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.55/CarRulesVoice-1.55-fa-release.apk">CarRulesVoice-1.55-fa-release.apk</a> — فارسی / Persian voice</li>
+    <li>🇷🇺 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-ru-release.apk">CarRulesVoice-1.56-ru-release.apk</a> — русский голос / Russian voice</li>
+    <li>🇬🇧 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-en-release.apk">CarRulesVoice-1.56-en-release.apk</a> — English voice</li>
+    <li>🇮🇷 <a href="https://github.com/tsrman/car-rules-voice-releases/releases/download/v1.56/CarRulesVoice-1.56-fa-release.apk">CarRulesVoice-1.56-fa-release.apk</a> — فارسی / Persian voice</li>
   </ul>
   <small>Выберите APK того языка, на котором будете произносить голосовые команды. · Choose the APK matching the language you will speak voice commands in. · APK را متناسب با زبانی که فرمان صوتی می‌گویید انتخاب کنید. · Android 10+ (Seres M5).</small>
   <p style="margin:.9rem 0 .2rem;"><strong>Car Rules v0.71</strong> — версия без голоса (лёгкая, только правила) / no-voice edition (lightweight, rules only) / نسخهٔ بدون صدا (سبک، فقط قوانین):<br>
@@ -178,6 +178,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 <li>Выберите <strong>количество кнопок</strong> (2, 4, 6 или 8) и <strong>форму панели</strong>
   (вертикальная или горизонтальная), при необходимости включите «Уменьшить панель в 2 раза» и назначьте правило на каждую кнопку.</li>
 <li>Панель можно перетащить за верхнюю полоску в удобное место — позиция запоминается.</li>
+<li>Настройка «Показывать громкость поверх панели при её изменении» — при изменении громкости (например, кнопками руля) поверх кнопок панели на 2 секунды крупно показывается её значение.</li>
 </ol>
 <h3>Как получить разрешение «Отображение поверх других окон»</h3>
 <p>Откройте <strong>«Панель»</strong> и нажмите <strong>«Включить ADB и выдать права»</strong> (кнопка
@@ -366,6 +367,7 @@ SHA-256 <code>22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e47c9ab45</
 
 <h2>История изменений</h2>
 <ul>
+<li><strong>v1.56</strong> — новая настройка плавающей панели «Показывать громкость поверх панели при её изменении» (например, кнопками руля, на 2 секунды); строка громкости убрана из карточки «Состояние автомобиля».</li>
 <li><strong>v1.55</strong> — галочка «Показывать всплывающее уведомление и звук при срабатывании» разделена на две независимые: отдельно тост, отдельно звук (по умолчанию обе включены).</li>
 <li><strong>v1.54</strong> — громкость медиа теперь видна в карточке «Состояние автомобиля»; исправлена кнопка ▶ у действия «Громкость» в редакторе — она трогала только системный звук и ничего не меняла на машине.</li>
 <li><strong>v1.53</strong> — новый параметр «Громкость медиа (текущая)» — реальная громкость машины (та же, что меняют кнопки на руле), доступна как триггер и условие; возвращено в список действие «Громкость» (было случайно недоступно для новых правил).</li>
@@ -466,6 +468,7 @@ switching to the app itself. Same paid license as voice control — one code act
 <li>Choose the <strong>number of buttons</strong> (2, 4, 6, or 8) and the <strong>panel shape</strong>
   (vertical or horizontal), optionally turn on “Half-size panel”, then assign a rule to each button.</li>
 <li>Drag the panel by its top strip to reposition it — the position is remembered.</li>
+<li>“Show the volume on the panel when it changes” — when the volume changes (e.g. from the steering-wheel buttons), its value is shown in large type over the panel’s buttons for 2 seconds.</li>
 </ol>
 <h3>How to get the “Display over other apps” permission</h3>
 <p>Open <strong>“Panel”</strong> and tap <strong>“Enable ADB &amp; grant permissions”</strong> (the button is
@@ -653,6 +656,7 @@ trigger fires after a 0.4 s delay (waiting for a second press). So “1 click = 
 
 <h2>Changelog</h2>
 <ul>
+<li><strong>v1.56</strong> — new floating-panel option “Show the volume on the panel when it changes” (e.g. from the steering-wheel buttons, for 2 seconds); the volume row was removed from the “Vehicle state” card.</li>
 <li><strong>v1.55</strong> — the "Show a toast + sound when this rule fires" checkbox is now two independent ones: a toast switch and a sound switch (both on by default).</li>
 <li><strong>v1.54</strong> — the live media volume now shows in the "Vehicle state" card; fixed the ▶ test button on the "Volume" action in the rule editor — it only touched the system sound and changed nothing in the car.</li>
 <li><strong>v1.53</strong> — new "Media volume (live)" parameter — the car's real volume (the one the steering-wheel buttons change), available as a trigger and condition; the "Volume" action is back in the picker (it had been accidentally unavailable for new rules).</li>
@@ -749,6 +753,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 <li><strong>تعداد دکمه‌ها</strong> (۲، ۴، ۶ یا ۸) و <strong>شکل پنل</strong> (عمودی یا افقی) را انتخاب کنید، در صورت
   نیاز «پنل نصف‌اندازه» را روشن کنید و یک قانون به هر دکمه اختصاص دهید.</li>
 <li>پنل را از نوار بالایی‌اش می‌توانید به هر جای دلخواه بکشید — موقعیت آن ذخیره می‌شود.</li>
+<li>گزینهٔ «هنگام تغییر صدا، مقدار آن روی پنل نمایش داده شود» — هنگام تغییر صدا (مثلاً با دکمه‌های روی فرمان)، مقدار آن به مدت ۲ ثانیه با اندازهٔ بزرگ روی دکمه‌های پنل نمایش داده می‌شود.</li>
 </ol>
 <h3>چگونه مجوز «نمایش روی سایر برنامه‌ها» را بگیریم</h3>
 <p>روی این هد‌یونیت ممکن است دکمهٔ «باز کردن تنظیمات سیستم» کار نکند (صفحهٔ لازم در دسترس نیست)؛
@@ -936,6 +941,7 @@ SHA-256 <code dir="ltr">22d9cb8f383beeed496f2acd642e5e23278fa214c512dde848b6501e
 
 <h2>تاریخچهٔ تغییرات</h2>
 <ul>
+<li><strong>v1.56</strong> — گزینهٔ جدید پنل شناور «هنگام تغییر صدا، مقدار آن روی پنل نمایش داده شود» (مثلاً با دکمه‌های روی فرمان، به مدت ۲ ثانیه)؛ ردیف صدا از کارت «وضعیت خودرو» حذف شد.</li>
 <li><strong>v1.55</strong> — گزینهٔ «هنگام اجرای این قانون، پیام و صدا نمایش داده شود» به دو گزینهٔ مستقل تبدیل شد: یکی برای پیام، یکی برای صدا (هر دو به‌طور پیش‌فرض روشن).</li>
 <li><strong>v1.54</strong> — بلندی صدای رسانه اکنون در کارت «وضعیت خودرو» دیده می‌شود؛ دکمهٔ ▶ عمل «صدا» در ویرایشگر قانون اصلاح شد — فقط صدای سیستم را تغییر می‌داد و چیزی در خودرو عوض نمی‌کرد.</li>
 <li><strong>v1.53</strong> — پارامتر جدید «بلندی صدای رسانه (فعلی)» — صدای واقعی خودرو (همان که دکمه‌های روی فرمان تغییر می‌دهند)، به‌عنوان محرک و شرط در دسترس است؛ عمل «صدا» دوباره در فهرست قرار گرفت (به‌اشتباه برای قوانین جدید در دسترس نبود).</li>
